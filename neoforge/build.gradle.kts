@@ -42,7 +42,6 @@ repositories {
 
 dependencies {
     minecraft("com.mojang:minecraft:${commonMod.mc}")
-
     mappings(loom.layered {
         officialMojangMappings()
         commonMod.depOrNull("parchment")?.let { parchmentVersion ->
@@ -50,11 +49,7 @@ dependencies {
         }
     })
 
-//     "neoForge"("net.neoforged:neoforge:${commonMod.dep("neoforge")}")
-//     "io.github.llamalad7:mixinextras-neoforge:${mod.dep("mixin_extras")}".let {
-//         implementation(it)
-//         include(it)
-//     }
+    "neoForge"("net.neoforged:neoforge:${commonMod.dep("neoforge")}")
 }
 
 loom {
@@ -69,28 +64,4 @@ loom {
         runDir = "../../../run"
         vmArgs("-Dmixin.debug.export=true")
     }
-}
-
-
-sourceSets.main {
-	resources.srcDir("src/generated/resources")
-}
-
-tasks {
-	processResources {
-		exclude("${mod.id}.accesswidener")
-	}
-}
-
-tasks.build {
-    group = "versioned"
-    description = "Must run through 'chiseledBuild'"
-}
-
-tasks.register<Copy>("buildAndCollect") {
-    group = "versioned"
-    description = "Must run through 'chiseledBuild'"
-    from(tasks.remapJar.get().archiveFile, tasks.remapSourcesJar.get().archiveFile)
-    into(rootProject.layout.buildDirectory.file("libs/${mod.version}/$loader"))
-    dependsOn("build")
 }

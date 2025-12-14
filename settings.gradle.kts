@@ -41,4 +41,4 @@ stonecutter {
     }
 }
 
-rootProject.name = "interactivemc"
+rootProject.name = "InteractiveMC"
