@@ -1,0 +1,65 @@
+{
+	"schemaVersion": 1,
+	"id": "${modId}",
+	"version": "${modVersion}",
+	"name": "${modName}",
+	"description": "${modDescription}",
+	"authors": [
+		"${modAuthor}"
+	],
+	"contact": {
+		"homepage": "${modGitHub}",
+		"sources": "${modGitHub}",
+		"issues": "${modGitHub}/issues",
+		"wiki": "${modWiki}"
+	},
+	"license": "${modLicense}",
+	"icon": "icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"net.timtaran.interactivemc.fabric.ExampleModFabric"
+		],
+		"client": [
+			"net.timtaran.interactivemc.fabric.client.ExampleModFabricClient"
+		],
+		"preLaunch": [
+			"com.llamalad7.mixinextras.MixinExtrasBootstrap::init"
+		]
+	},
+	"mixins": [
+		"${modId}-common.mixins.json",
+		"${modId}-fabric.mixins.json"
+	],
+	"accessWidener": "${modId}.accesswidener",
+	"depends": {
+		"minecraft": ">=${minMinecraftVersion}",
+		"fabricloader": "*",
+		"fabric": "*",
+		"yet_another_config_lib_v3": ">=${yaclVersion}"
+	},
+	"custom": {
+		"modmenu": {
+			"links": {
+				"Wiki": "${modWiki}",
+				"CurseForge": "${modCurseForge}",
+				"Modrinth": "${modModrinth}"
+			}
+		},
+		"catalogue": {
+			"configFactory": "com.faboslav.friendsandfoes.fabric.modcompat.CatalogueCompat",
+			"icon": {
+				"image": "catalogue_icon.png"
+			},
+			"banner": "catalogue_logo.png",
+			"background": "catalogue_background.png"
+		},
+		"mc-publish": {
+			"dependencies": [
+				"fabric-api(required){curseforge:306612}{modrinth:P7dR8mSH}",
+				"yet_another_config_lib_v3(required){curseforge:667299}{modrinth:1eAoo2KR}",
+				"modmenu(optional){curseforge:308702}{modrinth:mOgUt4GM}"
+			]
+		}
+	}
+}
