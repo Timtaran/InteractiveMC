@@ -10,7 +10,8 @@
       systems = import inputs.systems;
 
       perSystem = { config, self', pkgs, lib, system, ... }: let
-        java = pkgs.jetbrains.jdk-no-jcef;
+        # java = pkgs.jetbrains.jdk-no-jcef;
+        java = pkgs.jdk24;
 
         nativeBuildInputs = with pkgs; [
           java
