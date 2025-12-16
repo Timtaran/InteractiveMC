@@ -4,6 +4,11 @@ plugins {
 	id("dev.kikugie.fletching-table.fabric") version "0.1.0-alpha.22"
 }
 
+architectury.common(stonecutter.tree.branches.mapNotNull {
+    if (stonecutter.current.project !in it) null
+    else it.project.prop("loom.platform")
+})
+
 loom {
 	accessWidenerPath = common.project.file("../../src/main/resources/accesswideners/${commonMod.mc}-${mod.id}.accesswidener")
 

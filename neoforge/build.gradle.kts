@@ -16,6 +16,10 @@ fletchingTable {
 }
 
 architectury {
+    common(stonecutter.tree.branches.mapNotNull {
+        if (stonecutter.current.project !in it) null
+        else it.project.prop("loom.platform")
+    })
     platformSetupLoomIde()
     neoForge()
 }
@@ -75,8 +79,4 @@ tasks {
     processResources {
         exclude("${mod.id}.accesswidener")
     }
-}
-
-tasks.named("createMinecraftArtifacts") {
-    dependsOn(":neoforge:${commonMod.propOrNull("minecraft_version")}:processResources")
 }
