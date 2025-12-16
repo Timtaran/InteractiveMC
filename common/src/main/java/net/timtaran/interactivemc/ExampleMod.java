@@ -1,4 +1,4 @@
-package net.timtaran.interactivemc.common;
+package net.timtaran.interactivemc;
 
 public final class ExampleMod {
     public static final String MOD_ID = "interactivemc";

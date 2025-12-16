@@ -36,6 +36,7 @@ tasks {
 			"fabricApiVersion" to commonMod.depOrNull("fabric-api"),
 			"neoForgeVersion" to commonMod.depOrNull("neoforge"),
 			"yaclVersion" to commonMod.depOrNull("yacl"),
+            "architecturyApiVersion" to commonMod.depOrNull("architectury_api"),
 		).filterValues { it?.isNotEmpty() == true }.mapValues { (_, v) -> v!! }
 
 		val jsonExpandProps = expandProps.mapValues { (_, v) -> v.replace("\n", "\\\\n") }

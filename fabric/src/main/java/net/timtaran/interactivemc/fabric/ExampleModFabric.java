@@ -2,7 +2,7 @@ package net.timtaran.interactivemc.fabric;
 
 import net.fabricmc.api.ModInitializer;
 
-import net.timtaran.interactivemc.common.ExampleMod;
+import net.timtaran.interactivemc.ExampleMod;
 
 public final class ExampleModFabric implements ModInitializer {
     @Override

@@ -1,36 +1,36 @@
 modLoader = "javafml"
 loaderVersion = "[4,)"
 #issueTrackerURL = ""
-license = "Insert License Here"
+license = "${modLicense}"
 
 [[mods]]
-modId = "interactivemc"
-version = "${version}"
+modId = "${modId}"
+version = "${modVersion}"
 displayName = "InteractiveMC"
-authors = "Me!"
+authors = "${modAuthor}"
 description = '''
-This is an example description! Tell everyone what your mod is about!
+${modDescription}
 '''
 #logoFile = ""
 
-[[dependencies.interactivemc]]
+[[dependencies.${modId}]]
 modId = "neoforge"
 type = "required"
-versionRange = "[${neoforge},)"
+versionRange = "[${neoForgeVersion},)"
 ordering = "NONE"
 side = "BOTH"
 
-[[dependencies.interactivemc]]
+[[dependencies.${modId}]]
 modId = "minecraft"
 type = "required"
-versionRange = "[${min_minecraft},${mineraft}]"
+versionRange = "[${minMinecraftVersion},${minecraftVersion}]"
 ordering = "NONE"
 side = "BOTH"
 
-[[dependencies.interactivemc]]
+[[dependencies.${modId}]]
 modId = "architectury"
 type = "required"
-versionRange = "[${architectury_api},)"
+versionRange = "[${architecturyApiVersion},)"
 ordering = "AFTER"
 side = "BOTH"
 

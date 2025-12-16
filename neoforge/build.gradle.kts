@@ -65,3 +65,18 @@ loom {
         vmArgs("-Dmixin.debug.export=true")
     }
 }
+
+
+sourceSets.main {
+    resources.srcDir("src/generated/resources")
+}
+
+tasks {
+    processResources {
+        exclude("${mod.id}.accesswidener")
+    }
+}
+
+tasks.named("createMinecraftArtifacts") {
+    dependsOn(":neoforge:${commonMod.propOrNull("minecraft_version")}:processResources")
+}

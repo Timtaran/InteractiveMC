@@ -55,11 +55,28 @@ loom {
 }
 
 tasks.named<ProcessResources>("processResources") {
-	val awFile = project(":common").file("src/main/resources/accesswideners/${commonMod.mc}-${mod.id}.accesswidener")
+    val awFile = project(":common").file("src/main/resources/accesswideners/${commonMod.mc}-${mod.id}.accesswidener")
 
-	from(awFile.parentFile) {
-		include(awFile.name)
-		rename(awFile.name, "${mod.id}.accesswidener")
-		into("")
-	}
+    from(awFile.parentFile) {
+        include(awFile.name)
+        rename(awFile.name, "${mod.id}.accesswidener")
+        into("")
+    }
+}
+
+tasks.jar {
+    archiveClassifier = "dev"
+}
+
+tasks.build {
+    group = "versioned"
+    description = "Must run through 'chiseledBuild'"
+}
+
+tasks.register<Copy>("buildAndCollect") {
+    group = "versioned"
+    description = "Must run through 'chiseledBuild'"
+    from(tasks.remapJar.get().archiveFile, tasks.remapSourcesJar.get().archiveFile)
+    into(rootProject.layout.buildDirectory.file("libs/${mod.version}/$loader"))
+    dependsOn("build")
 }
