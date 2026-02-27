@@ -1,0 +1,25 @@
+architectury {
+    common project.mod_enabled_platforms.split(',')
+}
+
+dependencies {
+    // We depend on Fabric Loader here to use the Fabric @Environment annotations,
+    // which get remapped to the correct annotations on each platform.
+    // Do NOT use other classes from Fabric Loader.
+    modImplementation "net.fabricmc:fabric-loader:$rootProject.fabric_loader_version"
+
+    // Architectury API. This is optional, and you can comment it out if you don't need it.
+    modImplementation "dev.architectury:architectury:$rootProject.architectury_api_version"
+
+    // Required dependencies
+    include(implementation(annotationProcessor("io.github.llamalad7:mixinextras-fabric:$rootProject.mixinextras_version")))
+
+    // Using my fork to pin version and be able to apply fixes/changes I need
+    modImplementation "com.github.ttrndev.Velthoric:velthoric-fabric:$rootProject.velthoric_version"
+
+    modApi "maven.modrinth:vivecraft:$rootProject.vivecraft_version-fabric"
+
+    runtimeOnly "com.electronwill.night-config:toml:3.6.6"
+    runtimeOnly "com.electronwill.night-config:core:3.6.6"
+    runtimeOnly "com.illposed.osc:javaosc-core:0.9"
+}
