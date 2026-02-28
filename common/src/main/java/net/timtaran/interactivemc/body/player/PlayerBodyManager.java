@@ -8,6 +8,7 @@ import com.github.stephengold.joltjni.*;
 import com.github.stephengold.joltjni.enumerate.EActivation;
 import com.github.stephengold.joltjni.enumerate.EAxis;
 import com.github.stephengold.joltjni.enumerate.EConstraintSpace;
+import com.github.stephengold.joltjni.enumerate.EMotionType;
 import com.github.stephengold.joltjni.operator.Op;
 import com.github.stephengold.joltjni.readonly.RVec3Arg;
 import net.minecraft.world.InteractionHand;
@@ -97,6 +98,8 @@ public class PlayerBodyManager {
                     body.setServerData(PlayerBodyPartRigidBody.DATA_BODY_PART, partType);
                 }
         );
+        VxJoltBridge.INSTANCE.getJoltBody(world, bodyPartGhost).setMotionType(EMotionType.Kinematic);
+        // Workaround until https://github.com/xI-Mx-Ix/Velthoric/issues/31 will be resolved
 
 
         try (SixDofConstraintSettings settings = new SixDofConstraintSettings()) {

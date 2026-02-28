@@ -10,6 +10,7 @@ package net.timtaran.interactivemc.network;
 
 import dev.architectury.networking.NetworkManager;
 import dev.architectury.platform.Platform;
+import dev.architectury.utils.Env;
 import dev.architectury.utils.GameInstance;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -27,7 +28,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-// todo I have shit-coded my "fixes" but I will change it later
 /**
  * Central networking controller for InteractiveMC.
  * <p>
@@ -38,7 +38,7 @@ import java.util.function.Function;
  * <p>
  * <b>Architecture:</b>
  * <ul>
- *     <li>All packets are serialized into a single {@link C2SRawPayload} or {@link S2CRawPayload}.</li>
+ *     <li>All packets are serialized into a single {@link RawPayload}.</li>
  *     <li>The first byte of the payload determines the Packet ID.</li>
  *     <li>The ID is resolved based on the receiving side (Env.SERVER = C2S, Env.CLIENT = S2C).</li>
  *     <li>The payload is wrapped in a {@link VxByteBuf} for convenient reading of custom types.</li>
@@ -47,7 +47,6 @@ import java.util.function.Function;
  * @author xI-Mx-Ix
  */
 public class Networking {
-
     /**
      * Maps a byte ID to a specific packet decoder function for packets received by the Server (C2S).
      */
@@ -67,24 +66,23 @@ public class Networking {
     /**
      * Initializes the networking system.
      * <p>
-     * This method registers the single {@link C2SRawPayload} or {@link S2CRawPayload} type with the Architectury
+     * This method registers the single {@link RawPayload} type with the Architectury
      * NetworkManager. It must be called during the mod's initialization phase (common init).
      * </p>
      */
     public static void init() {
         // Register the raw payload receiver for the client side (S2C)
         if (Platform.getEnv() == EnvType.CLIENT) {
-            NetworkManager.registerReceiver(NetworkManager.Side.S2C, S2CRawPayload.TYPE, S2CRawPayload.CODEC, Networking::handlePacket);
-            System.out.println("sdfsdfsd");
+            NetworkManager.registerReceiver(NetworkManager.Side.S2C, RawPayload.TYPE_S2C, RawPayload.CODEC_S2C, Networking::handlePacket);
         }
 
         // Register the raw payload receiver for the server side (C2S)
-        NetworkManager.registerReceiver(NetworkManager.Side.C2S, C2SRawPayload.TYPE, C2SRawPayload.CODEC, Networking::handlePacket);
+        NetworkManager.registerReceiver(NetworkManager.Side.C2S, RawPayload.TYPE_C2S, RawPayload.CODEC_C2S, Networking::handlePacket);
 
         // For dedicated servers (or general compliance), we must register the S2C payload type
         // so that the server knows it is capable of sending this payload type to clients.
         if (Platform.getEnv() == EnvType.SERVER) {
-            NetworkManager.registerS2CPayloadType(S2CRawPayload.TYPE, S2CRawPayload.CODEC);
+            NetworkManager.registerS2CPayloadType(RawPayload.TYPE_S2C, RawPayload.CODEC_S2C);
         }
     }
 
@@ -127,7 +125,7 @@ public class Networking {
      * @param payload The raw payload container from Minecraft.
      * @param context The execution context (containing player, level, thread executor).
      */
-    private static void handlePacket(S2CRawPayload payload, NetworkManager.PacketContext context) {
+    private static void handlePacket(RawPayload payload, NetworkManager.PacketContext context) {
         ByteBuf rawData = payload.data();
         try {
             // Ensure there is data to read
@@ -135,71 +133,25 @@ public class Networking {
                 return;
             }
 
-            // 1. Read Packet ID
+            // 1. Identify Map by Environment
+            // If environment is SERVER, we received a C2S packet.
+            // If environment is CLIENT, we received an S2C packet.
+            Byte2ObjectMap<Function<VxByteBuf, IVxNetPacket>> targetMap = (context.getEnvironment() == Env.SERVER) ? C2S_DECODERS : S2C_DECODERS;
+
+            // 2. Read Packet ID
             byte id = rawData.readByte();
 
-            // 2. Lookup Decoder
-            Function<VxByteBuf, IVxNetPacket> decoder = S2C_DECODERS.get(id);
+            // 3. Lookup Decoder
+            Function<VxByteBuf, IVxNetPacket> decoder = targetMap.get(id);
 
             if (decoder == null) {
                 return;
             }
 
-            // 3. Wrap Buffer
+            // 4. Wrap Buffer
             VxByteBuf buf = new VxByteBuf(rawData);
 
-            // 4. Decode & Handle
-            IVxNetPacket packet = decoder.apply(buf);
-            packet.handle(context);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            // 6. Cleanup
-            if (rawData.refCnt() > 0) {
-                rawData.release();
-            }
-        }
-    }
-
-    /**
-     * The central handler for all incoming raw payloads.
-     * <p>
-     * This method:
-     * <ol>
-     *     <li>Extracts the raw Netty buffer.</li>
-     *     <li>Identifies the receiving map by checking the environment (Server = C2S, Client = S2C).</li>
-     *     <li>Reads the first byte (Packet ID).</li>
-     *     <li>Finds the corresponding decoder.</li>
-     *     <li>Wraps the buffer in {@link VxByteBuf}.</li>
-     *     <li>Decodes the packet and delegates execution to {@link IVxNetPacket#handle}.</li>
-     * </ol>
-     *
-     * @param payload The raw payload container from Minecraft.
-     * @param context The execution context (containing player, level, thread executor).
-     */
-    private static void handlePacket(C2SRawPayload payload, NetworkManager.PacketContext context) {
-        ByteBuf rawData = payload.data();
-        try {
-            // Ensure there is data to read
-            if (!rawData.isReadable()) {
-                return;
-            }
-
-            // 1. Read Packet ID
-            byte id = rawData.readByte();
-
-            // 2. Lookup Decoder
-            Function<VxByteBuf, IVxNetPacket> decoder = S2C_DECODERS.get(id);
-
-            if (decoder == null) {
-                return;
-            }
-
-            // 3. Wrap Buffer
-            VxByteBuf buf = new VxByteBuf(rawData);
-
-            // 4. Decode & Handle
+            // 5. Decode & Handle
             IVxNetPacket packet = decoder.apply(buf);
             packet.handle(context);
 
@@ -250,8 +202,8 @@ public class Networking {
      */
     public static void sendToServer(IVxNetPacket packet) {
         ByteBuf buf = createBuffer(packet);
-        if (NetworkManager.canServerReceive(C2SRawPayload.TYPE)) {
-            NetworkManager.sendToServer(new C2SRawPayload(buf));
+        if (NetworkManager.canServerReceive(RawPayload.TYPE_C2S)) {
+            NetworkManager.sendToServer(new RawPayload(buf, RawPayload.TYPE_C2S));
         } else {
             // Prevent memory leaks if the packet cannot be sent
             buf.release();
@@ -266,8 +218,8 @@ public class Networking {
      */
     public static void sendToPlayer(ServerPlayer player, IVxNetPacket packet) {
         ByteBuf buf = createBuffer(packet);
-        if (NetworkManager.canPlayerReceive(player, S2CRawPayload.TYPE)) {
-            NetworkManager.sendToPlayer(player, new S2CRawPayload(buf));
+        if (NetworkManager.canPlayerReceive(player, RawPayload.TYPE_S2C)) {
+            NetworkManager.sendToPlayer(player, new RawPayload(buf, RawPayload.TYPE_S2C));
         } else {
             buf.release();
         }
@@ -286,7 +238,7 @@ public class Networking {
         // but since we wrap a raw buffer in a record, the record creation is cheap.
         NetworkManager.sendToPlayers(
                 GameInstance.getServer().getPlayerList().getPlayers(),
-                new S2CRawPayload(buf)
+                new RawPayload(buf, RawPayload.TYPE_S2C)
         );
     }
 
@@ -302,7 +254,7 @@ public class Networking {
         ServerLevel level = GameInstance.getServer().getLevel(dimension);
         if (level != null) {
             ByteBuf buf = createBuffer(packet);
-            NetworkManager.sendToPlayers(level.players(), new S2CRawPayload(buf));
+            NetworkManager.sendToPlayers(level.players(), new RawPayload(buf, RawPayload.TYPE_S2C));
         }
     }
 }
