@@ -12,14 +12,10 @@ dependencies {
     modImplementation "dev.architectury:architectury:$rootProject.architectury_api_version"
 
     // Required dependencies
-    include(implementation(annotationProcessor("io.github.llamalad7:mixinextras-fabric:$rootProject.mixinextras_version")))
+    implementation(annotationProcessor("io.github.llamalad7:mixinextras-fabric:$rootProject.mixinextras_version"))
 
     // Using my fork to pin version and be able to apply fixes/changes I need
     modImplementation "com.github.ttrndev.Velthoric:velthoric-fabric:$rootProject.velthoric_version"
 
     modApi "maven.modrinth:vivecraft:$rootProject.vivecraft_version-fabric"
-
-    runtimeOnly "com.electronwill.night-config:toml:3.6.6"
-    runtimeOnly "com.electronwill.night-config:core:3.6.6"
-    runtimeOnly "com.illposed.osc:javaosc-core:0.9"
 }
