@@ -28,12 +28,12 @@ It enhances VR gameplay by adding real collision and interaction systems, making
 ## Current features
 - Physical interactions via Velthoric
 - Player head and body collisions
-- Bodies grabbing
+- Body grabbing
 
 ## Planned features
 The main goals for future development include:
 - More supported versions
-- Make every minecraft item physical
+- Make every item physical
 - Advanced APIs and features for addon developers
 - Advanced interactions for weapons and other specific items
 - Interaction support for large mods such as [Create](https://modrinth.com/mod/create)
