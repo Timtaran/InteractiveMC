@@ -12,6 +12,7 @@ import dev.architectury.networking.NetworkManager;
 import net.timtaran.interactivemc.network.sync.packet.C2SFrameVRPosePacket;
 import net.timtaran.interactivemc.network.sync.packet.C2SGrabPacket;
 import net.timtaran.interactivemc.network.sync.packet.C2SReleasePacket;
+import net.timtaran.interactivemc.network.sync.packet.S2CGrabResultPacket;
 import net.xmx.velthoric.network.IVxNetPacket;
 import net.xmx.velthoric.network.VxByteBuf;
 
@@ -66,6 +67,11 @@ public class PacketRegistry {
 
         // --- Server to Client Packets (S2C) ---
         // These packets are sent by the server and handled on the client.
+
+        registerS2C(
+                S2CGrabResultPacket.class,
+                S2CGrabResultPacket::decode
+        );
     }
 
     /**

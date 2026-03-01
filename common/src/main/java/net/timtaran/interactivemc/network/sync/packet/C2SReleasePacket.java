@@ -13,7 +13,7 @@ import net.xmx.velthoric.network.VxByteBuf;
 /**
  * @author timtaran
  */
-public class C2SReleasePacket extends C2SHandInteractionPacket {
+public class C2SReleasePacket extends HandInteractionPacket {
     public C2SReleasePacket(InteractionHand interactionHand) {
         super(interactionHand);
     }

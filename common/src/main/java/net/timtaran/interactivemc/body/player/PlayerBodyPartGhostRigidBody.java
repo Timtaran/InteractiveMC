@@ -8,8 +8,11 @@ import com.github.stephengold.joltjni.*;
 import com.github.stephengold.joltjni.enumerate.EMotionType;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.timtaran.interactivemc.data.ClientDataStore;
 import net.timtaran.interactivemc.data.PlayerDataStore;
 import net.timtaran.interactivemc.network.sync.DataSerializers;
+import net.xmx.velthoric.core.body.client.VxClientBodyManager;
 import net.xmx.velthoric.core.network.synchronization.VxDataSerializers;
 import net.xmx.velthoric.core.network.synchronization.VxSynchronizedData;
 import net.xmx.velthoric.core.network.synchronization.accessor.VxServerAccessor;
@@ -115,6 +118,16 @@ public class PlayerBodyPartGhostRigidBody extends VxRigidBody {
                 VxConversions.toJolt(targetRot),
                 FIXED_TIME_STEP
         );
+    }
+
+    @Override
+    public void onBodyAdded(ClientLevel level) {
+        ClientDataStore.playerControlledBodies.add(VxClientBodyManager.getInstance().getStore().getIndexForNetworkId(getNetworkId()));
+    }
+
+    @Override
+    public void onBodyRemoved(ClientLevel level) {
+        ClientDataStore.playerControlledBodies.remove(VxClientBodyManager.getInstance().getStore().getIndexForNetworkId(getNetworkId()));
     }
 
     @Override

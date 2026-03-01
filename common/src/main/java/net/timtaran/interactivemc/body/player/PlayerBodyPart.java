@@ -7,7 +7,7 @@ package net.timtaran.interactivemc.body.player;
 import com.github.stephengold.joltjni.RVec3;
 import com.github.stephengold.joltjni.Vec3;
 import net.minecraft.world.InteractionHand;
-import org.jetbrains.annotations.Nullable;
+import org.joml.Vector3f;
 import org.vivecraft.api.data.VRBodyPart;
 
 public enum PlayerBodyPart {
@@ -65,17 +65,17 @@ public enum PlayerBodyPart {
     public RVec3 getLocalGrabPoint() {
         return switch (this) {
             case HEAD -> new RVec3(0f, 0f, 0f);
-            case MAIN_HAND -> new RVec3(0, -0f, -0.34f);
-            case OFF_HAND -> new RVec3(0, 0f, -0.34f);
+            case MAIN_HAND, OFF_HAND -> new RVec3(0, 0f, -0.34f);
         };
     }
 
-    /**
-     * Calculates the local pivot point on this body part for its joint connection.
-     * This is typically at the top-center for limbs and the bottom-center for the head.
-     *
-     * @return A vector representing the local pivot point.
-     */
+    public Vector3f getLocalGrabPointVec3f() {
+        return switch (this) {
+            case HEAD -> new Vector3f(0f, 0f, 0f);
+            case MAIN_HAND, OFF_HAND -> new Vector3f(0, 0f, -0.34f);
+        };
+    }
+
     public net.minecraft.world.phys.Vec3 getTrackingOffset() {
         return switch (this) {
             case HEAD -> new net.minecraft.world.phys.Vec3(0f, 0.035f, 0.1f);
@@ -83,12 +83,10 @@ public enum PlayerBodyPart {
         };
     }
 
-    @Nullable
     public static PlayerBodyPart fromInteractionHand(InteractionHand interactionHand) {
         return switch (interactionHand) {
             case MAIN_HAND -> MAIN_HAND;
             case OFF_HAND -> OFF_HAND;
-            default -> null;
         };
     }
 

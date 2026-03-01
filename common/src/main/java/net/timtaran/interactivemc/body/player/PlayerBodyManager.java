@@ -35,6 +35,9 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class PlayerBodyManager {
+    public static final float GRAB_RADIUS = 0.3f;
+    private static final Vec3 SHAPE_SCALE = new Vec3(1f, 1f, 1f);
+
     private static final HashMap<VxPhysicsWorld, PlayerBodyManager> managers = new HashMap<>();
 
     private record PlayerBodyPartData(UUID bodyPartId, UUID ghostBodyPartId, @Nullable UUID grabbedBodyId,
@@ -209,7 +212,7 @@ public class PlayerBodyManager {
         };
              BroadPhaseLayerFilter bplFilter = new BroadPhaseLayerFilter();
              BodyFilter bodyFilter = new BodyFilter(); // runtime checks works really strange so we will check body ids below
-             SphereShape shape = new SphereShape(1f)) {
+             SphereShape shape = new SphereShape(GRAB_RADIUS)) {
 
             RVec3Arg base = new RVec3(0.0f, 0.0f, 0.0f);
 
@@ -226,9 +229,7 @@ public class PlayerBodyManager {
             worldGrabPoint.addInPlace(localGrabPointRotated.xx(), localGrabPointRotated.yy(), localGrabPointRotated.zz());
             RMat44 comTransform = new VxTransform(worldGrabPoint, vxTransform.getRotation()).toRMat44();
 
-            Vec3 shapeScale = new Vec3(0.3f, 0.3f, 0.3f);
-
-            List<VxPhysicsIntersector.IntersectShapeResult> intersections = VxPhysicsIntersector.narrowIntersectShape(world, shape, shapeScale, comTransform, base, bplFilter, olFilter, bodyFilter);
+            List<VxPhysicsIntersector.IntersectShapeResult> intersections = VxPhysicsIntersector.narrowIntersectShape(world, shape, SHAPE_SCALE, comTransform, base, bplFilter, olFilter, bodyFilter);
 
             intersections.sort(Comparator.comparingDouble(result -> { // sort by closest intersection point to base.
                 Vec3 p = result.bodyContactPoint();

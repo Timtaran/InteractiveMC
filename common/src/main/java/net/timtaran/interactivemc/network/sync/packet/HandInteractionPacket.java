@@ -11,10 +11,10 @@ import net.xmx.velthoric.network.VxByteBuf;
 /**
  * @author timtaran
  */
-public abstract class C2SHandInteractionPacket implements IVxNetPacket {
+public abstract class HandInteractionPacket implements IVxNetPacket {
     private final InteractionHand interactionHand;
 
-    public C2SHandInteractionPacket(InteractionHand interactionHand) {
+    protected HandInteractionPacket(InteractionHand interactionHand) {
         this.interactionHand = interactionHand;
     }
 

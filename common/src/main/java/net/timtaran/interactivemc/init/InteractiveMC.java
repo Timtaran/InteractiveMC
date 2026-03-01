@@ -6,14 +6,10 @@ package net.timtaran.interactivemc.init;
 
 import com.mojang.logging.LogUtils;
 import dev.architectury.event.events.common.PlayerEvent;
-import dev.architectury.event.events.common.TickEvent;
-import net.minecraft.world.InteractionHand;
 import net.timtaran.interactivemc.body.BodyRegistry;
 import net.timtaran.interactivemc.body.player.PlayerBodyManager;
 import net.timtaran.interactivemc.init.registry.ViveRegistry;
 import net.timtaran.interactivemc.network.PacketRegistry;
-import net.xmx.velthoric.core.physics.world.VxPhysicsWorld;
-import net.timtaran.interactivemc.util.vivecraft.ViveCraftUtils;
 import org.slf4j.Logger;
 
 /**
@@ -46,19 +42,6 @@ public class InteractiveMC {
         PlayerEvent.PLAYER_QUIT.register(player ->
                 PlayerBodyManager.get(player.level()).removePlayer(player)
         );
-
-        // todo remove
-        TickEvent.PLAYER_POST.register(player -> {
-            if (player.level().getGameTime() % 20 == 0) {
-                if (!ViveCraftUtils.isVRPlayer(player)) {
-                    VxPhysicsWorld physicsWorld = VxPhysicsWorld.get(player.level().dimension());
-
-                    physicsWorld.execute(() -> {
-                        PlayerBodyManager.get(physicsWorld).grab(player, InteractionHand.MAIN_HAND);
-                    });
-                }
-            }
-        });
     }
 
     /**
