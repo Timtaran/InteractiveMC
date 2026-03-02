@@ -9,6 +9,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.player.LocalPlayer;
 import net.timtaran.interactivemc.network.Networking;
 import net.timtaran.interactivemc.network.sync.packet.C2SFrameVRPosePacket;
+import net.timtaran.interactivemc.data.ClientDataStore;
 import org.vivecraft.api.client.Tracker;
 import org.vivecraft.api.client.VRClientAPI;
 import org.vivecraft.api.data.VRPose;
@@ -34,6 +35,7 @@ public class PlayerBodyTracker implements Tracker {
     public void activeProcess(LocalPlayer localPlayer) {
         // todo optimize?
         VRPose renderPose = VRClientAPI.instance().getWorldRenderPose();
+        ClientDataStore.currentPose = renderPose;
         Networking.sendToServer(new C2SFrameVRPosePacket(renderPose));
     }
 }
