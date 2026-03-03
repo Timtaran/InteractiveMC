@@ -26,13 +26,9 @@ import net.xmx.velthoric.core.physics.world.VxPhysicsWorld;
 
 import java.util.UUID;
 
-/**
- * Represents a single rigid body part of a ragdoll, such as a head, torso, or limb.
- * It stores data about its type, dimensions, and the skin texture it should use for rendering.
- *
- * @author xI-Mx-Ix
- */
 public class PlayerBodyPartRigidBody extends VxRigidBody implements Grabber {
+    private boolean isIndexSaved = false;
+
     public static final VxServerAccessor<Vec3> DATA_HALF_EXTENTS = VxServerAccessor.create(PlayerBodyPartRigidBody.class, VxDataSerializers.VEC3);
     public static final VxServerAccessor<PlayerBodyPart> DATA_BODY_PART = VxServerAccessor.create(PlayerBodyPartRigidBody.class, DataSerializers.BODY_PART);
     public static final VxServerAccessor<UUID> DATA_PLAYER_ID = VxServerAccessor.create(PlayerBodyPartRigidBody.class, VxDataSerializers.UUID);
@@ -92,15 +88,30 @@ public class PlayerBodyPartRigidBody extends VxRigidBody implements Grabber {
         setServerData(DATA_BODY_PART, DataSerializers.BODY_PART.read(buf));
         setServerData(DATA_PLAYER_ID, VxDataSerializers.UUID.read(buf));
     }
+    private void addBodyIndexToClientStorage() {
+        Integer index = VxClientBodyManager.getInstance().getStore().getIndexForNetworkId(getNetworkId());
 
-    @Override
-    public void onBodyAdded(ClientLevel level) {
-        ClientDataStore.playerControlledBodies.add(VxClientBodyManager.getInstance().getStore().getIndexForNetworkId(getNetworkId()));
+        if (index == null)
+            return;
+
+        ClientDataStore.playerControlledBodies.add(index);
     }
 
     @Override
     public void onBodyRemoved(ClientLevel level) {
-        ClientDataStore.playerControlledBodies.remove(VxClientBodyManager.getInstance().getStore().getIndexForNetworkId(getNetworkId()));
+        Integer index = VxClientBodyManager.getInstance().getStore().getIndexForNetworkId(getNetworkId());
+
+        if (index == null)
+            return;
+
+        isIndexSaved = true;
+        ClientDataStore.playerControlledBodies.remove(index);
+    }
+
+    @Override
+    public void onClientTick() {
+        if (!isIndexSaved)
+            addBodyIndexToClientStorage();
     }
 
     @Override

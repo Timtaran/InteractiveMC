@@ -40,6 +40,8 @@ public class PlayerBodyPartGhostRigidBody extends VxRigidBody {
     private static final float FIXED_TIME_STEP = 1f / 60; // check VxPhysicsWorld
     private static short selectiveGhostLayer = -1;
 
+    private boolean isIndexSaved = false;
+
     public static final VxServerAccessor<Vec3> DATA_HALF_EXTENTS = VxServerAccessor.create(PlayerBodyPartGhostRigidBody.class, VxDataSerializers.VEC3);
     public static final VxServerAccessor<PlayerBodyPart> DATA_BODY_PART = VxServerAccessor.create(PlayerBodyPartGhostRigidBody.class, DataSerializers.BODY_PART);
     public static final VxServerAccessor<UUID> DATA_PLAYER_ID = VxServerAccessor.create(PlayerBodyPartGhostRigidBody.class, VxDataSerializers.UUID);
@@ -122,12 +124,33 @@ public class PlayerBodyPartGhostRigidBody extends VxRigidBody {
 
     @Override
     public void onBodyAdded(ClientLevel level) {
-        ClientDataStore.playerControlledBodies.add(VxClientBodyManager.getInstance().getStore().getIndexForNetworkId(getNetworkId()));
+        addBodyIndexToClientStorage();
+    }
+
+    private void addBodyIndexToClientStorage() {
+        Integer index = VxClientBodyManager.getInstance().getStore().getIndexForNetworkId(getNetworkId());
+
+        if (index == null)
+            return;
+
+        isIndexSaved = true;
+        ClientDataStore.playerControlledBodies.add(index);
     }
 
     @Override
     public void onBodyRemoved(ClientLevel level) {
-        ClientDataStore.playerControlledBodies.remove(VxClientBodyManager.getInstance().getStore().getIndexForNetworkId(getNetworkId()));
+        Integer index = VxClientBodyManager.getInstance().getStore().getIndexForNetworkId(getNetworkId());
+
+        if (index == null)
+            return;
+
+        ClientDataStore.playerControlledBodies.remove(index);
+    }
+
+    @Override
+    public void onClientTick() {
+        if (!isIndexSaved)
+            addBodyIndexToClientStorage();
     }
 
     @Override
