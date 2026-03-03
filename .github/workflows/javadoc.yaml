@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+      - release/*
 
 jobs:
   build:
@@ -30,10 +31,16 @@ jobs:
       - name: Generate Javadoc
         run: ./gradlew javadoc
 
+      - name: Extract branch name
+        shell: bash
+        run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
+        id: extract_branch
+
       - name: Publish javadoc to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
           publish_dir: common/build/docs/javadoc
+          destination_dir: ${{ steps.extract_branch.outputs.branch }}
           force_orphan: true
