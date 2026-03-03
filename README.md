@@ -38,7 +38,7 @@ The main goals for future development include:
 - Make every item physical
 - Advanced APIs and features for addon developers
 - Advanced interactions for weapons and other specific items
-- Interaction support for large mods such as [Create](https://modrinth.com/mod/create)
+- Interaction support for popular mods such as [Create](https://modrinth.com/mod/create)
 - Rendering from the physical head position (prevents clipping through walls)
 - Full physical player body with bending
 - Elimination of input lag
