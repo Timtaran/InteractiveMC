@@ -8,6 +8,7 @@ import com.mojang.logging.LogUtils;
 import dev.architectury.event.events.common.PlayerEvent;
 import net.timtaran.interactivemc.body.BodyRegistry;
 import net.timtaran.interactivemc.body.player.PlayerBodyManager;
+import net.timtaran.interactivemc.init.registry.KeyMapRegistry;
 import net.timtaran.interactivemc.init.registry.ViveRegistry;
 import net.timtaran.interactivemc.network.PacketRegistry;
 import org.slf4j.Logger;
@@ -53,5 +54,6 @@ public class InteractiveMC {
 
         ViveRegistry.init();
         BodyRegistry.registerClient();
+        KeyMapRegistry.init();
     }
 }

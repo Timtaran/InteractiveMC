@@ -1,3 +1,7 @@
+/*
+ * This file is part of InteractiveMC.
+ * Licensed under LGPL 3.0.
+ */
 package net.timtaran.interactivemc.util.vivecraft;
 
 import org.vivecraft.api.data.VRPose;

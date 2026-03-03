@@ -36,7 +36,10 @@ public class C2SGrabPacket extends HandInteractionPacket {
                             context.getPlayer().getServer().execute(() ->
                                     Networking.sendToPlayer(
                                             serverPlayer,
-                                            new S2CGrabResultPacket(getInteractionHand(), grabbedBody != null)
+                                            new S2CGrabResultPacket(
+                                                    getInteractionHand(),
+                                                    grabbedBody == null ? null : grabbedBody.getPhysicsId()
+                                            )
                                     )
                             );
                         }

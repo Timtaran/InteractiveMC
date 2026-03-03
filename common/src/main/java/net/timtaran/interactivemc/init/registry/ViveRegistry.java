@@ -16,16 +16,11 @@ import org.vivecraft.client_vr.ClientDataHolderVR;
  */
 public class ViveRegistry {
     private static final PlayerBodyTracker PLAYER_BODY_TRACKER = new PlayerBodyTracker();
-    private static final BodyGrabModule MAIN_HAND_GRAB_MODULE = new BodyGrabModule(InteractionHand.MAIN_HAND);
-    private static final BodyGrabModule OFF_HAND_GRAB_MODULE = new BodyGrabModule(InteractionHand.OFF_HAND);
 
     /**
      * Initializes and registers ViveCraft VR trackers.
      */
     public static void init() {
         ClientDataHolderVR.getInstance().registerTracker(PLAYER_BODY_TRACKER);
-        ClientDataHolderVR.getInstance().interactTracker.registerModules(
-                MAIN_HAND_GRAB_MODULE, OFF_HAND_GRAB_MODULE
-        );
     }
 }

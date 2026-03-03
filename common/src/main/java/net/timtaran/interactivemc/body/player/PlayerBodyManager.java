@@ -252,23 +252,28 @@ public class PlayerBodyManager {
                     Body grabbedJoltBody = VxJoltBridge.INSTANCE.getJoltBody(world, intersection.bodyId());
 
                     if (grabbedJoltBody.getObjectLayer() != VxPhysicsLayers.TERRAIN) {
-                       VxBody grabbedBody = world.getBodyManager().getByJoltBodyId(intersection.bodyId());
+                        VxBody grabbedBody = world.getBodyManager().getByJoltBodyId(intersection.bodyId());
 
                         if (grabbedBody == null) {
                             InteractiveMC.LOGGER.warn("vxBody1 is null for body ID: {}", intersection.bodyId());
                             continue;
                         }
 
-                        VxTransform grabbedBodyTransform = grabbedBody.getTransform();
-                        // Calculate a new world-space position for the body so that the local contact point
-                        // aligns exactly with the desired grab point in world space.
-                        RVec3 worldGrabPointOnBody = new RVec3(
-                                worldGrabPoint.xx() - (intersection.bodyContactPoint().getX() - grabbedBodyTransform.getTranslation().xx()),
-                                worldGrabPoint.yy() - (intersection.bodyContactPoint().getY() - grabbedBodyTransform.getTranslation().yy()),
-                                worldGrabPoint.zz() - (intersection.bodyContactPoint().getZ() - grabbedBodyTransform.getTranslation().zz())
-                        );
+                        if (grabbedJoltBody.getMotionType() == EMotionType.Dynamic) {
+                            VxTransform grabbedBodyTransform = grabbedBody.getTransform();
+                            // Calculate a new world-space position for the body so that the local contact point
+                            // aligns exactly with the desired grab point in world space.
+                            RVec3 worldGrabPointOnBody = new RVec3(
+                                    worldGrabPoint.xx() - (intersection.bodyContactPoint().getX() - grabbedBodyTransform.getTranslation().xx()),
+                                    worldGrabPoint.yy() - (intersection.bodyContactPoint().getY() - grabbedBodyTransform.getTranslation().yy()),
+                                    worldGrabPoint.zz() - (intersection.bodyContactPoint().getZ() - grabbedBodyTransform.getTranslation().zz())
+                            );
 
-                        grabbedJoltBody.setPositionAndRotationInternal(worldGrabPointOnBody, grabbedBodyTransform.getRotation());
+                            grabbedJoltBody.setPositionAndRotationInternal(worldGrabPointOnBody, grabbedBodyTransform.getRotation());
+                        }
+                        else {
+                            // todo add move grabber body if grabbed body not meant to be moved by physics
+                        }
 
                         try (FixedConstraintSettings settings = new FixedConstraintSettings()) {
                             settings.setSpace(EConstraintSpace.WorldSpace);
