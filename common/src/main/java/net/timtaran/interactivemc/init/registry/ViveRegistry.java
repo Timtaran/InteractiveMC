@@ -5,7 +5,6 @@
 package net.timtaran.interactivemc.init.registry;
 
 import net.minecraft.world.InteractionHand;
-import net.timtaran.interactivemc.bridge.vivecraft.BodyGrabModule;
 import net.timtaran.interactivemc.bridge.vivecraft.PlayerBodyTracker;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 
