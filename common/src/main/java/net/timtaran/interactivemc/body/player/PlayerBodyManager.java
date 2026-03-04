@@ -14,9 +14,9 @@ import com.github.stephengold.joltjni.readonly.RVec3Arg;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.timtaran.interactivemc.body.BodyRegistry;
+import net.timtaran.interactivemc.init.registry.BodyRegistry;
 import net.timtaran.interactivemc.body.Grabber;
-import net.timtaran.interactivemc.body.GroupFilters;
+import net.timtaran.interactivemc.util.velthoric.GroupFilters;
 import net.timtaran.interactivemc.init.InteractiveMC;
 import net.xmx.velthoric.core.body.VxRemovalReason;
 import net.xmx.velthoric.core.body.server.VxServerBodyManager;
@@ -197,6 +197,10 @@ public class PlayerBodyManager {
                     "Missing body part " + playerBodyPart + " for player " + player.getUUID()
             );
         }
+
+        if (playerBodyPartData.grabbedBodyId() != null)
+            return null; // already grabbing something
+
         VxBody body = world.getBodyManager().getVxBody(playerBodyPartData.bodyPartId);
         if (body == null) {
             throw new IllegalStateException(
@@ -245,8 +249,7 @@ public class PlayerBodyManager {
 
             for (VxPhysicsIntersector.IntersectShapeResult intersection : intersections) {
                 if (
-                        !playersJoltBodies.get(player.getUUID()).contains(intersection.bodyId()) &&
-                                playerBodyPartData.grabbedBodyId() == null
+                        !playersJoltBodies.get(player.getUUID()).contains(intersection.bodyId())
 
                 ) {
                     Body grabbedJoltBody = VxJoltBridge.INSTANCE.getJoltBody(world, intersection.bodyId());
@@ -259,7 +262,10 @@ public class PlayerBodyManager {
                             continue;
                         }
 
-                        if (grabbedJoltBody.getMotionType() == EMotionType.Dynamic) {
+                        CollisionGroup grabbedBodyCollisionGroup = grabbedJoltBody.getCollisionGroup();
+                        boolean isNotGrabbed = (grabbedBodyCollisionGroup.getGroupFilter() == null || grabbedBodyCollisionGroup.getGroupId() == GroupFilters.PLAYER_BODY_GROUP_ID);
+
+                        if (grabbedJoltBody.getMotionType() == EMotionType.Dynamic && isNotGrabbed) {
                             VxTransform grabbedBodyTransform = grabbedBody.getTransform();
                             // Calculate a new world-space position for the body so that the local contact point
                             // aligns exactly with the desired grab point in world space.
@@ -281,8 +287,8 @@ public class PlayerBodyManager {
                             settings.setPoint2(worldGrabPoint);
 
                             // todo rework
-                            if (body instanceof Grabber grabber)
-                                grabbedJoltBody.setCollisionGroup(new CollisionGroup(GroupFilters.PLAYER_BODY_FILTER, 0, grabber.getSubGroupId()));
+                            //if (body instanceof Grabber grabber)
+                            //    grabbedJoltBody.setCollisionGroup(new CollisionGroup(GroupFilters.PLAYER_BODY_FILTER, GroupFilters.PLAYER_BODY_GROUP_ID, grabber.getSubGroupId()));
 
                             VxConstraint constraint = constraintManager.createConstraint(settings, body.getPhysicsId(), grabbedBody.getPhysicsId());
                             constraint.setPersistent(false);

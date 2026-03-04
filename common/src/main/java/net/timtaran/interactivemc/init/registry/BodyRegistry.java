@@ -2,7 +2,7 @@
  * This file is part of Velthoric.
  * Licensed under LGPL 3.0.
  */
-package net.timtaran.interactivemc.body;
+package net.timtaran.interactivemc.init.registry;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;

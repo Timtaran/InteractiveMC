@@ -4,7 +4,10 @@
  */
 package net.timtaran.interactivemc.body.player;
 
-import com.github.stephengold.joltjni.*;
+import com.github.stephengold.joltjni.BodyCreationSettings;
+import com.github.stephengold.joltjni.BoxShapeSettings;
+import com.github.stephengold.joltjni.ShapeSettings;
+import com.github.stephengold.joltjni.Vec3;
 import com.github.stephengold.joltjni.enumerate.EMotionType;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -13,17 +16,17 @@ import net.timtaran.interactivemc.data.ClientDataStore;
 import net.timtaran.interactivemc.data.PlayerDataStore;
 import net.timtaran.interactivemc.network.sync.DataSerializers;
 import net.xmx.velthoric.core.body.client.VxClientBodyManager;
+import net.xmx.velthoric.core.body.registry.VxBodyType;
+import net.xmx.velthoric.core.body.type.VxRigidBody;
+import net.xmx.velthoric.core.body.type.factory.VxRigidBodyFactory;
 import net.xmx.velthoric.core.network.synchronization.VxDataSerializers;
 import net.xmx.velthoric.core.network.synchronization.VxSynchronizedData;
 import net.xmx.velthoric.core.network.synchronization.accessor.VxServerAccessor;
 import net.xmx.velthoric.core.physics.VxJoltBridge;
 import net.xmx.velthoric.core.physics.VxPhysicsLayers;
+import net.xmx.velthoric.core.physics.world.VxPhysicsWorld;
 import net.xmx.velthoric.math.VxConversions;
 import net.xmx.velthoric.network.VxByteBuf;
-import net.xmx.velthoric.core.body.registry.VxBodyType;
-import net.xmx.velthoric.core.body.type.VxRigidBody;
-import net.xmx.velthoric.core.body.type.factory.VxRigidBodyFactory;
-import net.xmx.velthoric.core.physics.world.VxPhysicsWorld;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.vivecraft.api.data.VRBodyPartData;
@@ -34,7 +37,7 @@ import java.util.UUID;
 /**
  * Kinematic ghost rigid body without any physics which will be used to be linked with dynamic rigid body via constraint.
  *
- * @author timtaran 
+ * @author timtaran
  */
 public class PlayerBodyPartGhostRigidBody extends VxRigidBody {
     private static final float FIXED_TIME_STEP = 1f / 60; // check VxPhysicsWorld
@@ -71,22 +74,26 @@ public class PlayerBodyPartGhostRigidBody extends VxRigidBody {
 
     public int createJoltBody(VxRigidBodyFactory factory) {
         if (selectiveGhostLayer == -1) {
-            selectiveGhostLayer = VxPhysicsLayers.claimLayer();
+            physicsWorld.execute(() -> {
+                selectiveGhostLayer = VxPhysicsLayers.claimLayer();
 
-            // Map it to the moving broad-phase layer as the spawned box is dynamic.
-            VxPhysicsLayers.setBroadPhaseMapping(selectiveGhostLayer, VxPhysicsLayers.BP_MOVING);
+                // Map it to the moving broad-phase layer as the spawned box is dynamic.
+                VxPhysicsLayers.setBroadPhaseMapping(selectiveGhostLayer, VxPhysicsLayers.BP_MOVING);
 
-            // Configure selective collisions
-            VxPhysicsLayers.setCollision(selectiveGhostLayer, VxPhysicsLayers.NON_MOVING, false);
-            VxPhysicsLayers.setCollision(selectiveGhostLayer, VxPhysicsLayers.MOVING, false);
-            VxPhysicsLayers.setCollision(selectiveGhostLayer, VxPhysicsLayers.TERRAIN, false);
-            VxPhysicsLayers.setCollision(selectiveGhostLayer, selectiveGhostLayer, false);
+                // Configure selective collisions
+                VxPhysicsLayers.setCollision(selectiveGhostLayer, VxPhysicsLayers.NON_MOVING, false);
+                VxPhysicsLayers.setCollision(selectiveGhostLayer, VxPhysicsLayers.MOVING, false);
+                VxPhysicsLayers.setCollision(selectiveGhostLayer, VxPhysicsLayers.TERRAIN, false);
+                VxPhysicsLayers.setCollision(selectiveGhostLayer, selectiveGhostLayer, false);
+            });
         }
 
         PlayerBodyPart partType = get(DATA_BODY_PART);
         Vec3 fullSize = partType.getSize();
 
-        try (ShapeSettings shapeSettings = new BoxShapeSettings(new Vec3(fullSize.getX() / 2, fullSize.getY() / 2, fullSize.getZ() / 2)); BodyCreationSettings bcs = new BodyCreationSettings()) {
+        try (
+                ShapeSettings shapeSettings = new BoxShapeSettings(new Vec3(fullSize.getX() / 2, fullSize.getY() / 2, fullSize.getZ() / 2));
+                BodyCreationSettings bcs = new BodyCreationSettings()) {
             bcs.setMotionType(EMotionType.Kinematic);
             bcs.setObjectLayer(selectiveGhostLayer);
             bcs.setAllowSleeping(false);

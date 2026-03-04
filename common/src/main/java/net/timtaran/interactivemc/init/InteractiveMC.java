@@ -6,7 +6,7 @@ package net.timtaran.interactivemc.init;
 
 import com.mojang.logging.LogUtils;
 import dev.architectury.event.events.common.PlayerEvent;
-import net.timtaran.interactivemc.body.BodyRegistry;
+import net.timtaran.interactivemc.init.registry.BodyRegistry;
 import net.timtaran.interactivemc.body.player.PlayerBodyManager;
 import net.timtaran.interactivemc.init.registry.KeyMapRegistry;
 import net.timtaran.interactivemc.init.registry.ViveRegistry;

@@ -20,6 +20,7 @@ import java.util.Set;
  * Injects into vivecraft keybindings setup to register hidden keymappings.
  *
  * @author timtaran
+ * @see KeyMapRegistry
  */
 @Mixin(value = VivecraftVRMod.class, remap = false)
 public class KeyMappingRegisterMixin {

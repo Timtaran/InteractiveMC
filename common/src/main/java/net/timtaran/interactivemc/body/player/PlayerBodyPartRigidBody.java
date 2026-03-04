@@ -10,7 +10,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.timtaran.interactivemc.body.Grabber;
-import net.timtaran.interactivemc.body.GroupFilters;
+import net.timtaran.interactivemc.util.velthoric.GroupFilters;
 import net.timtaran.interactivemc.data.ClientDataStore;
 import net.timtaran.interactivemc.network.sync.DataSerializers;
 import net.xmx.velthoric.core.body.client.VxClientBodyManager;
@@ -64,7 +64,7 @@ public class PlayerBodyPartRigidBody extends VxRigidBody implements Grabber {
         try (ShapeSettings shapeSettings = new BoxShapeSettings(new Vec3(fullSize.getX() / 2, fullSize.getY() / 2, fullSize.getZ() / 2)); BodyCreationSettings bcs = new BodyCreationSettings()) {
             bcs.setMotionType(EMotionType.Dynamic);
             bcs.setObjectLayer(VxPhysicsLayers.MOVING);
-            bcs.setCollisionGroup(new CollisionGroup(GroupFilters.PLAYER_BODY_FILTER, 0, getSubGroupId()));
+            // bcs.setCollisionGroup(new CollisionGroup(GroupFilters.PLAYER_BODY_FILTER, 0, getSubGroupId()));
             return factory.create(shapeSettings, bcs);
         }
     }
@@ -112,11 +112,6 @@ public class PlayerBodyPartRigidBody extends VxRigidBody implements Grabber {
     public void onClientTick() {
         if (!isIndexSaved)
             addBodyIndexToClientStorage();
-    }
-
-    @Override
-    public int getGroupId() {
-        return GroupFilters.PLAYER_BODY_GROUP;
     }
 
     @Override

@@ -29,6 +29,7 @@ import org.vivecraft.client_vr.provider.MCVR;
  * Processes all keymappings right before vivecraft right before vivecraft would perform own checks.
  *
  * @author timtaran
+ * @see KeyMapRegistry
  */
 @Mixin(value = MCVR.class, remap = false)
 public class KeyMappingHandlingMixin {

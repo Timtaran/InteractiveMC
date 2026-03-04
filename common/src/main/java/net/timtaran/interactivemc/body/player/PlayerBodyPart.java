@@ -20,6 +20,8 @@ public enum PlayerBodyPart {
     private final int subGroupId;
     private final Vec3 size;
 
+    public static final int BODY_PARTS_AMOUNT = PlayerBodyPart.values().length;
+
     /**
      * Defines a body part for a VR player body.
      *

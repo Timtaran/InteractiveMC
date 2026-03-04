@@ -9,7 +9,7 @@ import com.github.stephengold.joltjni.Vec3;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.timtaran.interactivemc.body.Grabber;
-import net.timtaran.interactivemc.body.GroupFilters;
+import net.timtaran.interactivemc.util.velthoric.GroupFilters;
 import net.xmx.velthoric.core.network.synchronization.VxDataSerializers;
 import net.xmx.velthoric.core.network.synchronization.accessor.VxServerAccessor;
 import net.xmx.velthoric.core.physics.VxJoltBridge;
@@ -76,7 +76,7 @@ public abstract class GrabbableBody extends VxRigidBody {
     public abstract int createJoltBody(VxRigidBodyFactory factory);
 
     public <T extends VxRigidBody & Grabber> void grab(T grabber, Vec3 grabPoint, Vec3 grabRotation) {
-        VxJoltBridge.INSTANCE.getJoltBody(physicsWorld, this).setCollisionGroup(new CollisionGroup(GroupFilters.PLAYER_BODY_FILTER, 0, grabber.getSubGroupId()));
+        // VxJoltBridge.INSTANCE.getJoltBody(physicsWorld, this).setCollisionGroup(new CollisionGroup(GroupFilters.PLAYER_BODY_FILTER, 0, grabber.getSubGroupId()));
     }
 
     public void release() {
