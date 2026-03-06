@@ -44,7 +44,6 @@ public class KeyMappingHandlingMixin {
 
     @Unique
     private static void interactivemc$updateGrabState(InteractionHand hand, KeyMapping keyMapping) {
-        System.out.println(keyMapping.isDown());
         if (keyMapping.consumeClick()) {
             interactivemc$grab(hand);
         } else if (!keyMapping.isDown() && ClientDataStore.grabbedBodies.get(hand) != null) {

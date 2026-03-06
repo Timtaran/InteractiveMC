@@ -74,7 +74,6 @@ public class PlayerBodyPartGhostRigidBody extends VxRigidBody {
 
     public int createJoltBody(VxRigidBodyFactory factory) {
         if (selectiveGhostLayer == -1) {
-            physicsWorld.execute(() -> {
                 selectiveGhostLayer = VxPhysicsLayers.claimLayer();
 
                 // Map it to the moving broad-phase layer as the spawned box is dynamic.
@@ -85,7 +84,6 @@ public class PlayerBodyPartGhostRigidBody extends VxRigidBody {
                 VxPhysicsLayers.setCollision(selectiveGhostLayer, VxPhysicsLayers.MOVING, false);
                 VxPhysicsLayers.setCollision(selectiveGhostLayer, VxPhysicsLayers.TERRAIN, false);
                 VxPhysicsLayers.setCollision(selectiveGhostLayer, selectiveGhostLayer, false);
-            });
         }
 
         PlayerBodyPart partType = get(DATA_BODY_PART);
@@ -102,8 +100,8 @@ public class PlayerBodyPartGhostRigidBody extends VxRigidBody {
     }
 
     @Override
-    public void onPhysicsTick(VxPhysicsWorld world) {
-        super.onPhysicsTick(world);
+    public void onPrePhysicsTick(VxPhysicsWorld world) {
+        super.onPrePhysicsTick(world);
 
         VRPose pose = PlayerDataStore.vrPoses.get(get(DATA_PLAYER_ID));
         if (pose == null) return;

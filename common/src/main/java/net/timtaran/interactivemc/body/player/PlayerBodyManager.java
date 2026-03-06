@@ -101,6 +101,7 @@ public class PlayerBodyManager {
                     body.setServerData(PlayerBodyPartRigidBody.DATA_BODY_PART, partType);
                 }
         );
+        System.out.println(bodyPartGhost);
         VxJoltBridge.INSTANCE.getJoltBody(world, bodyPartGhost).setMotionType(EMotionType.Kinematic);
         // Workaround until https://github.com/xI-Mx-Ix/Velthoric/issues/31 will be resolved
 
