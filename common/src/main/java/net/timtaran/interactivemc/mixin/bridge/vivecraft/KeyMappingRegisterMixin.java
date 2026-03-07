@@ -2,7 +2,7 @@
  * This file is part of InteractiveMC.
  * Licensed under LGPL 3.0.
  */
-package net.timtaran.interactivemc.mixin.compat.vivecraft;
+package net.timtaran.interactivemc.mixin.bridge.vivecraft;
 
 import net.minecraft.client.KeyMapping;
 import net.timtaran.interactivemc.init.registry.KeyMapRegistry;
@@ -17,24 +17,24 @@ import org.vivecraft.client.VivecraftVRMod;
 import java.util.Set;
 
 /**
- * Mixin that injects into ViveCraft's keybinding setup to register hidden keymappings.
+ * Mixin that injects into Vivecraft's keybinding setup to register hidden keymappings.
  * <p>
  * This mixin registers the grab and trigger keymappings as hidden keybindings
- * so that ViveCraft doesn't interfere with them.
+ * so that Vivecraft doesn't interfere with them.
  *
  * @author timtaran
  * @see KeyMapRegistry
  */
 @Mixin(value = VivecraftVRMod.class, remap = false)
 public class KeyMappingRegisterMixin {
-    /** The set of hidden keybindings maintained by ViveCraft. */
+    /** The set of hidden keybindings maintained by Vivecraft. */
     @Shadow
     private Set<KeyMapping> hiddenKeyBindingSet;
 
     /**
-     * Registers InteractiveMC keymappings as hidden in ViveCraft.
+     * Registers InteractiveMC keymappings as hidden in Vivecraft.
      * <p>
-     * This method is called after ViveCraft initializes its hidden keybinding set,
+     * This method is called after Vivecraft initializes its hidden keybinding set,
      * allowing us to add our custom grab and trigger keymappings to it.
      * </p>
      *

@@ -7,7 +7,7 @@ package net.timtaran.interactivemc.util.vivecraft;
 import org.vivecraft.api.data.VRPose;
 
 /**
- * Represents the VR data of a player in the ViveCraft mod.
+ * Represents the VR data of a player in the Vivecraft mod.
  * <p>
  * This record contains the scaling factors and current VR pose of a player.
  *

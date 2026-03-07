@@ -14,17 +14,17 @@ import org.vivecraft.server.ServerVRPlayers;
 import org.vivecraft.server.ServerVivePlayer;
 
 /**
- * Utilities for interacting with ViveCraft without using the API, as it lacks the necessary functions.
+ * Utilities for interacting with Vivecraft without using the API, as it lacks the necessary functions.
  *
  * @author timtaran
  */
-public class ViveCraftUtils {
+public class VivecraftUtils {
 
     /**
-     * Checks if the given player is a ViveCraft VR player.
+     * Checks if the given player is a Vivecraft VR player.
      *
      * @param player the player to check
-     * @return `true` if the player is a ViveCraft VR player, `false` otherwise
+     * @return `true` if the player is a Vivecraft VR player, `false` otherwise
      */
     public static boolean isVRPlayer(Player player) {
         if (player instanceof LocalPlayer)
@@ -46,7 +46,7 @@ public class ViveCraftUtils {
      * If the player is a client player, retrieves data from the ClientVRPlayers instance.
      *
      * @param player the player to retrieve the VR player data for
-     * @return the VR player data, or null if the player is not a ViveCraft VR player
+     * @return the VR player data, or null if the player is not a Vivecraft VR player
      */
 
     @Nullable

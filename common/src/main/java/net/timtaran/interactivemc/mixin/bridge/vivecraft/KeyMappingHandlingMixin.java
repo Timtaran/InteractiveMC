@@ -2,7 +2,7 @@
  * This file is part of InteractiveMC.
  * Licensed under LGPL 3.0.
  */
-package net.timtaran.interactivemc.mixin.compat.vivecraft;
+package net.timtaran.interactivemc.mixin.bridge.vivecraft;
 
 import net.minecraft.client.KeyMapping;
 import net.minecraft.world.InteractionHand;
@@ -26,10 +26,10 @@ import org.vivecraft.api.data.VRBodyPartData;
 import org.vivecraft.client_vr.provider.MCVR;
 
 /**
- * Mixin that processes keymappings right before ViveCraft would perform its own checks.
+ * Mixin that processes keymappings right before Vivecraft would perform its own checks.
  * <p>
  * This mixin intercepts the key binding processing to handle grab and release
- * actions before ViveCraft's default handling takes place.
+ * actions before Vivecraft's default handling takes place.
  *
  * @author timtaran
  * @see KeyMapRegistry
@@ -40,7 +40,7 @@ public class KeyMappingHandlingMixin {
      * Injects into the processBindings method to handle grab/release keymappings.
      * <p>
      * This method is called at the very beginning of processBindings, before
-     * ViveCraft's default key handling.
+     * Vivecraft's default key handling.
      * </p>
      *
      * @param ci the callback info for the mixin injection

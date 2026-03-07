@@ -4,8 +4,8 @@
   "compatibilityLevel": "JAVA_21",
   "minVersion": "0.8",
   "client": [
-    "compat.vivecraft.KeyMappingRegisterMixin",
-    "compat.vivecraft.KeyMappingHandlingMixin"
+    "bridge.vivecraft.KeyMappingRegisterMixin",
+    "bridge.vivecraft.KeyMappingHandlingMixin"
   ],
   "mixins": [
   ],

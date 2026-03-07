@@ -15,7 +15,7 @@ import org.vivecraft.api.client.VRClientAPI;
 import org.vivecraft.api.data.VRPose;
 
 /**
- * Tracker for monitoring the player's body movements in ViveCraft VR.
+ * Tracker for monitoring the player's body movements in Vivecraft VR.
  *
  * @author timtaran
  */

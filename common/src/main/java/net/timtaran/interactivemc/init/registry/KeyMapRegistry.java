@@ -5,12 +5,14 @@
 package net.timtaran.interactivemc.init.registry;
 
 import net.minecraft.client.KeyMapping;
+import net.timtaran.interactivemc.mixin.bridge.vivecraft.KeyMappingHandlingMixin;
+import net.timtaran.interactivemc.mixin.bridge.vivecraft.KeyMappingRegisterMixin;
 import net.timtaran.interactivemc.util.InteractiveMCIdentifier;
 
 /**
  * Class containing all mod keymappings.
- * Registration happens inside {@link net.timtaran.interactivemc.mixin.compat.vivecraft.KeyMappingRegisterMixin}.
- * Handling happens inside {@link net.timtaran.interactivemc.mixin.compat.vivecraft.KeyMappingHandlingMixin}.
+ * Registration happens inside {@link KeyMappingRegisterMixin}.
+ * Handling happens inside {@link KeyMappingHandlingMixin}.
  *
  * @author timtaran
  */
