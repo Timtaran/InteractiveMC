@@ -36,6 +36,9 @@ import java.util.UUID;
 
 /**
  * Kinematic ghost rigid body without any physics which will be used to be linked with dynamic rigid body via constraint.
+ * <p>
+ * This ghost body tracks the player's VR controller position and orientation, and is connected to the
+ * dynamic body through a six-degree-of-freedom constraint.
  *
  * @author timtaran
  */
@@ -45,12 +48,19 @@ public class PlayerBodyPartGhostRigidBody extends VxRigidBody {
 
     private boolean isIndexSaved = false;
 
+    /** The half-extents (dimensions) of this ghost body part. */
     public static final VxServerAccessor<Vec3> DATA_HALF_EXTENTS = VxServerAccessor.create(PlayerBodyPartGhostRigidBody.class, VxDataSerializers.VEC3);
+    /** The type of body part (head, hands, etc.). */
     public static final VxServerAccessor<PlayerBodyPart> DATA_BODY_PART = VxServerAccessor.create(PlayerBodyPartGhostRigidBody.class, DataSerializers.BODY_PART);
+    /** The UUID of the player who owns this ghost body part. */
     public static final VxServerAccessor<UUID> DATA_PLAYER_ID = VxServerAccessor.create(PlayerBodyPartGhostRigidBody.class, VxDataSerializers.UUID);
 
     /**
      * Server-side constructor.
+     *
+     * @param type the body type
+     * @param world the physics world
+     * @param id the unique identifier for this body
      */
     public PlayerBodyPartGhostRigidBody(VxBodyType<PlayerBodyPartGhostRigidBody> type, VxPhysicsWorld world, UUID id) {
         super(type, world, id);
@@ -59,6 +69,9 @@ public class PlayerBodyPartGhostRigidBody extends VxRigidBody {
 
     /**
      * Client-side constructor.
+     *
+     * @param type the body type
+     * @param id the unique identifier for this body
      */
     @Environment(EnvType.CLIENT)
     public PlayerBodyPartGhostRigidBody(VxBodyType<PlayerBodyPartGhostRigidBody> type, UUID id) {
@@ -72,6 +85,16 @@ public class PlayerBodyPartGhostRigidBody extends VxRigidBody {
         builder.define(DATA_PLAYER_ID, UUID.randomUUID());
     }
 
+    /**
+     * Creates the Jolt physics body for this ghost rigid body.
+     * <p>
+     * The body is configured as kinematic (non-physics) and uses a selective collision layer
+     * to avoid collisions with other bodies.
+     * </p>
+     *
+     * @param factory the rigid body factory
+     * @return the Jolt body ID
+     */
     public int createJoltBody(VxRigidBodyFactory factory) {
         if (selectiveGhostLayer == -1) {
                 selectiveGhostLayer = VxPhysicsLayers.claimLayer();
@@ -127,11 +150,19 @@ public class PlayerBodyPartGhostRigidBody extends VxRigidBody {
         );
     }
 
+    /**
+     * Called when the body is added to the client world.
+     *
+     * @param level the client level
+     */
     @Override
     public void onBodyAdded(ClientLevel level) {
         addBodyIndexToClientStorage();
     }
 
+    /**
+     * Adds this body's index to the client-side storage for tracking.
+     */
     private void addBodyIndexToClientStorage() {
         Integer index = VxClientBodyManager.getInstance().getStore().getIndexForNetworkId(getNetworkId());
 
@@ -142,6 +173,11 @@ public class PlayerBodyPartGhostRigidBody extends VxRigidBody {
         ClientDataStore.playerControlledBodies.add(index);
     }
 
+    /**
+     * Called when the body is removed from the client world.
+     *
+     * @param level the client level
+     */
     @Override
     public void onBodyRemoved(ClientLevel level) {
         Integer index = VxClientBodyManager.getInstance().getStore().getIndexForNetworkId(getNetworkId());
@@ -152,6 +188,9 @@ public class PlayerBodyPartGhostRigidBody extends VxRigidBody {
         ClientDataStore.playerControlledBodies.remove(index);
     }
 
+    /**
+     * Called every client tick to ensure the body index is saved.
+     */
     @Override
     public void onClientTick() {
         if (!isIndexSaved)

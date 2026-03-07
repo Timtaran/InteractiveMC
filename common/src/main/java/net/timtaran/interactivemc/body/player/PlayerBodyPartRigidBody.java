@@ -24,15 +24,27 @@ import net.xmx.velthoric.core.physics.world.VxPhysicsWorld;
 
 import java.util.UUID;
 
+/**
+ * A dynamic rigid body representing a player's body part (head, hands, etc.).
+ *
+ * @author timtaran
+ */
 public class PlayerBodyPartRigidBody extends VxRigidBody {
     private boolean isIndexSaved = false;
 
+    /** The half-extents (dimensions) of this body part. */
     public static final VxServerAccessor<Vec3> DATA_HALF_EXTENTS = VxServerAccessor.create(PlayerBodyPartRigidBody.class, VxDataSerializers.VEC3);
+    /** The type of body part (head, hands, etc.). */
     public static final VxServerAccessor<PlayerBodyPart> DATA_BODY_PART = VxServerAccessor.create(PlayerBodyPartRigidBody.class, DataSerializers.BODY_PART);
+    /** The UUID of the player who owns this body part. */
     public static final VxServerAccessor<UUID> DATA_PLAYER_ID = VxServerAccessor.create(PlayerBodyPartRigidBody.class, VxDataSerializers.UUID);
 
     /**
      * Server-side constructor.
+     *
+     * @param type the body type
+     * @param world the physics world
+     * @param id the unique identifier for this body
      */
     public PlayerBodyPartRigidBody(VxBodyType<PlayerBodyPartRigidBody> type, VxPhysicsWorld world, UUID id) {
         super(type, world, id);
@@ -41,6 +53,9 @@ public class PlayerBodyPartRigidBody extends VxRigidBody {
 
     /**
      * Client-side constructor.
+     *
+     * @param type the body type
+     * @param id the unique identifier for this body
      */
     @Environment(EnvType.CLIENT)
     public PlayerBodyPartRigidBody(VxBodyType<PlayerBodyPartRigidBody> type, UUID id) {
@@ -67,6 +82,12 @@ public class PlayerBodyPartRigidBody extends VxRigidBody {
         }
     }
 
+    /**
+     * Called during each physics tick.
+     * Override this method in subclasses if additional physics processing is needed.
+     *
+     * @param world the physics world
+     */
     public void onPhysicsTick(VxPhysicsWorld world) {
         super.onPhysicsTick(world);
     }
@@ -86,6 +107,10 @@ public class PlayerBodyPartRigidBody extends VxRigidBody {
         setServerData(DATA_BODY_PART, DataSerializers.BODY_PART.read(buf));
         setServerData(DATA_PLAYER_ID, VxDataSerializers.UUID.read(buf));
     }
+
+    /**
+     * Adds this body's index to the client-side storage for tracking.
+     */
     private void addBodyIndexToClientStorage() {
         Integer index = VxClientBodyManager.getInstance().getStore().getIndexForNetworkId(getNetworkId());
 

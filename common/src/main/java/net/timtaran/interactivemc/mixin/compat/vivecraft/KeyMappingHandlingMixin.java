@@ -26,13 +26,25 @@ import org.vivecraft.api.data.VRBodyPartData;
 import org.vivecraft.client_vr.provider.MCVR;
 
 /**
- * Processes all keymappings right before vivecraft right before vivecraft would perform own checks.
+ * Mixin that processes keymappings right before ViveCraft would perform its own checks.
+ * <p>
+ * This mixin intercepts the key binding processing to handle grab and release
+ * actions before ViveCraft's default handling takes place.
  *
  * @author timtaran
  * @see KeyMapRegistry
  */
 @Mixin(value = MCVR.class, remap = false)
 public class KeyMappingHandlingMixin {
+    /**
+     * Injects into the processBindings method to handle grab/release keymappings.
+     * <p>
+     * This method is called at the very beginning of processBindings, before
+     * ViveCraft's default key handling.
+     * </p>
+     *
+     * @param ci the callback info for the mixin injection
+     */
     @Inject(
             method = "processBindings",
             at = @At("HEAD")
@@ -42,6 +54,16 @@ public class KeyMappingHandlingMixin {
         interactivemc$updateGrabState(InteractionHand.OFF_HAND, KeyMapRegistry.OFF_GRAB_KEYMAPPING);
     }
 
+    /**
+     * Updates the grab/release state for a single hand based on key state.
+     * <p>
+     * If the grab key is pressed, attempts to grab an object. If the key is released
+     * and an object was being held, releases it.
+     * </p>
+     *
+     * @param hand the interaction hand (main or off-hand)
+     * @param keyMapping the key mapping to check
+     */
     @Unique
     private static void interactivemc$updateGrabState(InteractionHand hand, KeyMapping keyMapping) {
         if (keyMapping.consumeClick()) {
@@ -51,6 +73,16 @@ public class KeyMappingHandlingMixin {
         }
     }
 
+    /**
+     * Attempts to grab an object using the specified hand.
+     * <p>
+     * Performs a sphere cast from the controller position to find nearby bodies
+     * that can be grabbed. Sends a grab packet to the server.
+     * </p>
+     *
+     * @param interactionHand the hand attempting to grab (main or off-hand)
+     * @return true if a grabbable object was found nearby, false otherwise
+     */
     @Unique
     private static boolean interactivemc$grab(InteractionHand interactionHand) {
         boolean isGrabbing = false;
@@ -80,6 +112,14 @@ public class KeyMappingHandlingMixin {
         return isGrabbing;
     }
 
+    /**
+     * Releases the currently grabbed object using the specified hand.
+     * <p>
+     * Sends a release packet to the server to remove the grab constraint.
+     * </p>
+     *
+     * @param interactionHand the hand to release (main or off-hand)
+     */
     @Unique
     private static void interactivemc$release(InteractionHand interactionHand) {
         Networking.sendToServer(new C2SReleasePacket(interactionHand));

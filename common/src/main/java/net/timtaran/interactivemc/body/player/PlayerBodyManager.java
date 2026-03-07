@@ -32,6 +32,21 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * Manages the creation, tracking, and interaction of player bodies in the physics world.
+ * <p>
+ * Each player has multiple body parts (head, hands, etc.) represented as both
+ * dynamic and ghost (kinematic) rigid bodies.
+ * <p>
+ * The manager is responsible for:
+ * <ul>
+ *     <li>Creating and removing player bodies</li>
+ *     <li>Managing grab interactions between bodies</li>
+ *     <li>Maintaining constraints between bodies</li>
+ * </ul>
+ *
+ * @author timtaran
+ */
 public class PlayerBodyManager {
     public static final float GRAB_RADIUS = 0.3f;
     private static final Vec3 SHAPE_SCALE = new Vec3(1f, 1f, 1f);
@@ -58,16 +73,32 @@ public class PlayerBodyManager {
         this.world = world;
     }
 
+    /**
+     * Gets the PlayerBodyManager for the given level.
+     *
+     * @param level the level
+     * @return the manager for that level's physics world
+     */
     public static PlayerBodyManager get(Level level) {
         return get(VxPhysicsWorld.get(level.dimension()));
     }
 
+    /**
+     * Gets the PlayerBodyManager for the given physics world.
+     *
+     * @param world the physics world
+     * @return the manager for that world
+     */
     public static PlayerBodyManager get(VxPhysicsWorld world) {
         return managers.computeIfAbsent(world, PlayerBodyManager::new);
     }
 
     /**
-     * @return Data about the created body part, including the IDs of both the main and ghost bodies.
+     * Creates a body part for the given player and body part type.
+     *
+     * @param partType the type of body part (head, hands, etc.)
+     * @param player the player who owns this body part
+     * @return data about the created body part, including the IDs of both the main and ghost bodies
      */
     private PlayerBodyPartData createBodyPart(PlayerBodyPart partType, Player player) {
         Vec3 size = partType.getSize();
@@ -138,6 +169,14 @@ public class PlayerBodyManager {
         return new PlayerBodyPartData(bodyPart.getPhysicsId(), bodyPartGhost.getPhysicsId(), null, null);
     }
 
+    /**
+     * Spawns all body parts for a player when they join or respawn.
+     * <p>
+     * If the player already has bodies, they will be removed first.
+     * </p>
+     *
+     * @param player the player to spawn bodies for
+     */
     public void spawnPlayer(Player player) {
         if (playersBodies.containsKey(player.getUUID())) {
             removePlayer(player);
@@ -165,6 +204,11 @@ public class PlayerBodyManager {
         playersJoltBodies.put(player.getUUID(), joltBodyIds);
     }
 
+    /**
+     * Removes all body parts for a player when they leave the game.
+     *
+     * @param player the player to remove bodies for
+     */
     public void removePlayer(Player player) {
         EnumMap<PlayerBodyPart, PlayerBodyPartData> playerBodies = playersBodies.remove(player.getUUID());
         if (playerBodies == null) return;
@@ -178,6 +222,17 @@ public class PlayerBodyManager {
         }
     }
 
+    /**
+     * Attempts to grab an object using the specified player's hand.
+     * <p>
+     * This method performs a sphere cast from the grab point and tries to grab the closest
+     * non-player body within the grab radius.
+     * </p>
+     *
+     * @param player the player attempting to grab
+     * @param interactionHand the hand to use for grabbing (main or off-hand)
+     * @return the body that was grabbed, or null if no body was grabbed
+     */
     @Nullable
     public VxBody grab(Player player, InteractionHand interactionHand) {
         PlayerBodyPart playerBodyPart = PlayerBodyPart.fromInteractionHand(interactionHand);
@@ -300,6 +355,15 @@ public class PlayerBodyManager {
         return null;
     }
 
+    /**
+     * Releases any object being grabbed by the specified player's hand.
+     * <p>
+     * This removes the grab constraint, allowing the grabbed body to move freely again.
+     * </p>
+     *
+     * @param player the player releasing the grab
+     * @param interactionHand the hand to release (main or off-hand)
+     */
     public void release(Player player, InteractionHand interactionHand) {
         PlayerBodyPart playerBodyPart = PlayerBodyPart.fromInteractionHand(interactionHand);
         if (playerBodyPart == null)

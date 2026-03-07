@@ -17,8 +17,25 @@ import net.xmx.velthoric.core.body.client.VxRenderState;
 import net.xmx.velthoric.core.body.client.renderer.VxRigidBodyRenderer;
 import org.joml.Quaternionf;
 
+/**
+ * Renderer for player body part rigid bodies.
+ * <p>
+ * Renders player body parts as wireframe cubes with the appropriate dimensions and orientation.
+ *
+ * @author timtaran
+ */
 @Environment(EnvType.CLIENT)
 public class PlayerBodyPartRenderer extends VxRigidBodyRenderer<PlayerBodyPartRigidBody> {
+    /**
+     * Renders a player body part rigid body as a wireframe cube.
+     *
+     * @param body the body to render
+     * @param poseStack the pose stack for transformations
+     * @param bufferSource the buffer source for rendering
+     * @param partialTicks the partial ticks for interpolation
+     * @param packedLight the packed light value
+     * @param renderState the render state containing transform and other data
+     */
     @Override
     public void render(PlayerBodyPartRigidBody body, PoseStack poseStack, MultiBufferSource bufferSource, float partialTicks, int packedLight, VxRenderState renderState) {
         Vec3 halfExtents = body.get(PlayerBodyPartRigidBody.DATA_HALF_EXTENTS);
@@ -43,8 +60,20 @@ public class PlayerBodyPartRenderer extends VxRigidBodyRenderer<PlayerBodyPartRi
         poseStack.popPose();
     }
 
-    // Some AI slop down
-    // Call this from your client-side render method
+    /**
+     * Renders a unit cube wireframe with the specified color.
+     * <p>
+     * This method draws all 12 edges of a unit cube from (0,0,0) to (1,1,1).
+     * The pose stack should be positioned and scaled appropriately before calling this method.
+     *
+     * @param poseStack the pose stack for transformations
+     * @param bufferSource the buffer source for rendering
+     * @param packedLight the packed light value
+     * @param r the red color component (0.0 to 1.0)
+     * @param g the green color component (0.0 to 1.0)
+     * @param b the blue color component (0.0 to 1.0)
+     * @param a the alpha component (0.0 to 1.0)
+     */
     public static void renderUnitCubeWireframe(PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, float r, float g, float b, float a) {
         PoseStack.Pose pose = poseStack.last();
         VertexConsumer builder = bufferSource.getBuffer(RenderType.lines());
@@ -79,7 +108,20 @@ public class PlayerBodyPartRenderer extends VxRigidBodyRenderer<PlayerBodyPartRi
         }
     }
 
-    // Emit a single vertex using the set* API on the VertexConsumer (works with your decompiled interface)
+    /**
+     * Emits a single vertex to the vertex consumer.
+     *
+     * @param pose the current pose for transformations
+     * @param builder the vertex consumer
+     * @param x the x coordinate
+     * @param y the y coordinate
+     * @param z the z coordinate
+     * @param r the red color component (0.0 to 1.0)
+     * @param g the green color component (0.0 to 1.0)
+     * @param b the blue color component (0.0 to 1.0)
+     * @param a the alpha component (0.0 to 1.0)
+     * @param packedLight the packed light value
+     */
     private static void emitVertex(PoseStack.Pose pose,
                                    VertexConsumer builder,
                                    float x, float y, float z,

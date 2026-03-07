@@ -17,16 +17,29 @@ import org.vivecraft.client.VivecraftVRMod;
 import java.util.Set;
 
 /**
- * Injects into vivecraft keybindings setup to register hidden keymappings.
+ * Mixin that injects into ViveCraft's keybinding setup to register hidden keymappings.
+ * <p>
+ * This mixin registers the grab and trigger keymappings as hidden keybindings
+ * so that ViveCraft doesn't interfere with them.
  *
  * @author timtaran
  * @see KeyMapRegistry
  */
 @Mixin(value = VivecraftVRMod.class, remap = false)
 public class KeyMappingRegisterMixin {
+    /** The set of hidden keybindings maintained by ViveCraft. */
     @Shadow
     private Set<KeyMapping> hiddenKeyBindingSet;
 
+    /**
+     * Registers InteractiveMC keymappings as hidden in ViveCraft.
+     * <p>
+     * This method is called after ViveCraft initializes its hidden keybinding set,
+     * allowing us to add our custom grab and trigger keymappings to it.
+     * </p>
+     *
+     * @param ci the callback info for the mixin injection
+     */
     @Inject(
             method = "setupKeybindingSets",
             at = @At(value = "FIELD", target = "Lorg/vivecraft/client/VivecraftVRMod;hiddenKeyBindingSet:Ljava/util/Set;", opcode = Opcodes.PUTFIELD, shift = At.Shift.AFTER)
