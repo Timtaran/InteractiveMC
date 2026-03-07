@@ -40,7 +40,7 @@ import java.util.UUID;
  * @author timtaran
  */
 public class PlayerBodyPartGhostRigidBody extends VxRigidBody {
-    private static final float FIXED_TIME_STEP = 1f / 60; // check VxPhysicsWorld
+    private static final float FIXED_TIME_STEP = VxPhysicsWorld.getFixedTimeStep();
     private static short selectiveGhostLayer = -1;
 
     private boolean isIndexSaved = false;
