@@ -4,19 +4,14 @@
  */
 package net.timtaran.interactivemc.body.type;
 
-import com.github.stephengold.joltjni.CollisionGroup;
 import com.github.stephengold.joltjni.Vec3;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.timtaran.interactivemc.body.Grabber;
-import net.timtaran.interactivemc.util.velthoric.GroupFilters;
 import net.xmx.velthoric.core.network.synchronization.VxDataSerializers;
 import net.xmx.velthoric.core.network.synchronization.accessor.VxServerAccessor;
-import net.xmx.velthoric.core.physics.VxJoltBridge;
 import net.xmx.velthoric.network.VxByteBuf;
 import net.xmx.velthoric.core.body.registry.VxBodyType;
 import net.xmx.velthoric.core.body.type.VxRigidBody;
-import net.xmx.velthoric.core.body.type.factory.VxRigidBodyFactory;
 import net.xmx.velthoric.core.physics.world.VxPhysicsWorld;
 
 import java.util.UUID;
@@ -64,25 +59,6 @@ public abstract class GrabbableBody extends VxRigidBody {
     protected GrabbableBody(VxBodyType<? extends GrabbableBody> type, UUID id) {
         super(type, id);
     }
-
-    /**
-     * Defines and creates the Jolt physics body using the provided factory.
-     * This method must be implemented by subclasses to define the shape and
-     * properties of the rigid body.
-     *
-     * @param factory The factory provided by the VxBodyManager to create the body.
-     * @return The body ID assigned by Jolt.
-     */
-    public abstract int createJoltBody(VxRigidBodyFactory factory);
-
-    public <T extends VxRigidBody & Grabber> void grab(T grabber, Vec3 grabPoint, Vec3 grabRotation) {
-        // VxJoltBridge.INSTANCE.getJoltBody(physicsWorld, this).setCollisionGroup(new CollisionGroup(GroupFilters.PLAYER_BODY_FILTER, 0, grabber.getSubGroupId()));
-    }
-
-    public void release() {
-        VxJoltBridge.INSTANCE.getJoltBody(physicsWorld, this).setCollisionGroup(new CollisionGroup());
-    }
-
 
     @Override
     public void writePersistenceData(VxByteBuf buf) {

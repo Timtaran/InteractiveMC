@@ -15,8 +15,6 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.timtaran.interactivemc.init.registry.BodyRegistry;
-import net.timtaran.interactivemc.body.Grabber;
-import net.timtaran.interactivemc.util.velthoric.GroupFilters;
 import net.timtaran.interactivemc.init.InteractiveMC;
 import net.xmx.velthoric.core.body.VxRemovalReason;
 import net.xmx.velthoric.core.body.server.VxServerBodyManager;
@@ -262,10 +260,7 @@ public class PlayerBodyManager {
                             continue;
                         }
 
-                        CollisionGroup grabbedBodyCollisionGroup = grabbedJoltBody.getCollisionGroup();
-                        boolean isNotGrabbed = (grabbedBodyCollisionGroup.getGroupFilter() == null || grabbedBodyCollisionGroup.getGroupId() == GroupFilters.PLAYER_BODY_GROUP_ID);
-
-                        if (grabbedJoltBody.getMotionType() == EMotionType.Dynamic && isNotGrabbed) {
+                        if (grabbedJoltBody.getMotionType() == EMotionType.Dynamic) {
                             VxTransform grabbedBodyTransform = grabbedBody.getTransform();
                             // Calculate a new world-space position for the body so that the local contact point
                             // aligns exactly with the desired grab point in world space.
@@ -278,7 +273,7 @@ public class PlayerBodyManager {
                             grabbedJoltBody.setPositionAndRotationInternal(worldGrabPointOnBody, grabbedBodyTransform.getRotation());
                         }
                         else {
-                            // todo add move grabber body if grabbed body not meant to be moved by physics
+                            // todo move grabber body if grabbed body not meant to be moved by physics
                         }
 
                         try (FixedConstraintSettings settings = new FixedConstraintSettings()) {

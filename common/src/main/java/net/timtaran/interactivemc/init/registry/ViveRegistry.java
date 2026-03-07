@@ -18,7 +18,7 @@ public class ViveRegistry {
     /**
      * Initializes and registers ViveCraft VR trackers.
      */
-    public static void init() {
+    public static void registerClient() {
         ClientDataHolderVR.getInstance().registerTracker(PLAYER_BODY_TRACKER);
     }
 }

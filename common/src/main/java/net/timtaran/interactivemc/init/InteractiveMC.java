@@ -5,13 +5,10 @@
 package net.timtaran.interactivemc.init;
 
 import com.mojang.logging.LogUtils;
-import dev.architectury.event.events.common.PlayerEvent;
 import net.timtaran.interactivemc.init.registry.BodyRegistry;
-import net.timtaran.interactivemc.body.player.PlayerBodyManager;
-import net.timtaran.interactivemc.init.registry.KeyMapRegistry;
+import net.timtaran.interactivemc.init.registry.EventRegistry;
 import net.timtaran.interactivemc.init.registry.ViveRegistry;
 import net.timtaran.interactivemc.network.PacketRegistry;
-import net.xmx.velthoric.core.physics.world.VxPhysicsWorld;
 import org.slf4j.Logger;
 
 /**
@@ -30,31 +27,9 @@ public class InteractiveMC {
     public static void onInit() {
         LOGGER.info("Initializing InteractiveMC");
 
+        EventRegistry.register();
         BodyRegistry.register();
         PacketRegistry.registerPackets();
-
-        // todo refactor
-
-        PlayerEvent.PLAYER_JOIN.register(player -> {
-            VxPhysicsWorld physicsWorld = VxPhysicsWorld.get(player.level().dimension());
-            physicsWorld.execute(() ->
-                    PlayerBodyManager.get(physicsWorld).spawnPlayer(player));
-        });
-
-        PlayerEvent.PLAYER_RESPAWN.register(
-                (player, _conqueredEnd, _removalReason) -> {
-                    VxPhysicsWorld physicsWorld = VxPhysicsWorld.get(player.level().dimension());
-                    physicsWorld.execute(() ->
-                            PlayerBodyManager.get(physicsWorld).spawnPlayer(player));
-                });
-
-        PlayerEvent.PLAYER_QUIT.register(player ->
-                {
-                    VxPhysicsWorld physicsWorld = VxPhysicsWorld.get(player.level().dimension());
-                    physicsWorld.execute(() ->
-                            PlayerBodyManager.get(physicsWorld).removePlayer(player));
-                }
-        );
     }
 
     /**
@@ -64,8 +39,8 @@ public class InteractiveMC {
     public static void onClientInit() {
         LOGGER.info("Initializing InteractiveMC Client");
 
-        ViveRegistry.init();
+        EventRegistry.registerClient();
+        ViveRegistry.registerClient();
         BodyRegistry.registerClient();
-        KeyMapRegistry.init();
     }
 }

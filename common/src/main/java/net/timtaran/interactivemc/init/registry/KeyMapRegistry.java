@@ -54,25 +54,4 @@ public class KeyMapRegistry {
             -1,
             KeyMapping.CATEGORY_GAMEPLAY
     );
-
-//    /**
-//     * Fake keymapping that is being return to make Vivecraft think some key is not pressed
-//     */
-//    public static final KeyMapping FAKE_KEYMAPPING = new KeyMapping(
-//            InteractiveMCIdentifier.getTranslationKey("key", "fakemapping"),
-//            -1,
-//            KeyMapping.CATEGORY_MISC
-//    );
-
-    /**
-     * Registers the key mappings. Should be called during the client initialization phase.
-     */
-    public static void init() {
-//        KeyMappingRegistry.register(MAIN_TRIGGER_KEYMAPPING);
-//        KeyMappingRegistry.register(MAIN_GRAB_KEYMAPPING);
-//        KeyMappingRegistry.register(OFF_GRAB_KEYMAPPING);
-//        KeyMappingRegistry.register(OFF_TRIGGER_KEYMAPPING);
-//
-//        ClientTickEvent.CLIENT_POST.register(KeyMapRegistry::handleInputs);
-    }
 }

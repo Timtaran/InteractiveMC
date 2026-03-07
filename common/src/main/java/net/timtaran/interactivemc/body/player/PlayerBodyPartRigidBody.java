@@ -9,8 +9,6 @@ import com.github.stephengold.joltjni.enumerate.EMotionType;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.timtaran.interactivemc.body.Grabber;
-import net.timtaran.interactivemc.util.velthoric.GroupFilters;
 import net.timtaran.interactivemc.data.ClientDataStore;
 import net.timtaran.interactivemc.network.sync.DataSerializers;
 import net.xmx.velthoric.core.body.client.VxClientBodyManager;
@@ -26,7 +24,7 @@ import net.xmx.velthoric.core.physics.world.VxPhysicsWorld;
 
 import java.util.UUID;
 
-public class PlayerBodyPartRigidBody extends VxRigidBody implements Grabber {
+public class PlayerBodyPartRigidBody extends VxRigidBody {
     private boolean isIndexSaved = false;
 
     public static final VxServerAccessor<Vec3> DATA_HALF_EXTENTS = VxServerAccessor.create(PlayerBodyPartRigidBody.class, VxDataSerializers.VEC3);
@@ -112,10 +110,5 @@ public class PlayerBodyPartRigidBody extends VxRigidBody implements Grabber {
     public void onClientTick() {
         if (!isIndexSaved)
             addBodyIndexToClientStorage();
-    }
-
-    @Override
-    public int getSubGroupId() {
-        return get(DATA_BODY_PART).getSubGroupId();
     }
 }
