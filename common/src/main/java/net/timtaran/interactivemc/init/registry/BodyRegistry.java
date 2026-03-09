@@ -28,6 +28,7 @@ public class BodyRegistry {
             .rigidProvider(PlayerBodyPartRigidBody::createJoltBody)
             .noSummon()
             .netSync()
+            .setPersistent(false)
             .persistence(PlayerBodyPartRigidBody::writePersistenceData, PlayerBodyPartRigidBody::readPersistenceData)
             .build(InteractiveMCIdentifier.get("player_body_part"));
 
