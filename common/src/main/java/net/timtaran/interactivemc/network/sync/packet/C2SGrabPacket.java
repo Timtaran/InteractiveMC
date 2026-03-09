@@ -10,7 +10,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.timtaran.interactivemc.body.player.PlayerBodyManager;
 import net.timtaran.interactivemc.network.Networking;
-import net.xmx.velthoric.core.body.type.VxBody;
+import net.xmx.velthoric.core.body.VxBody;
 import net.xmx.velthoric.core.physics.world.VxPhysicsWorld;
 
 /**

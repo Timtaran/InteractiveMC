@@ -7,11 +7,11 @@ package net.timtaran.interactivemc.body.type;
 import com.github.stephengold.joltjni.Vec3;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.xmx.velthoric.core.body.VxBody;
+import net.xmx.velthoric.core.body.VxBodyType;
 import net.xmx.velthoric.core.network.synchronization.VxDataSerializers;
 import net.xmx.velthoric.core.network.synchronization.accessor.VxServerAccessor;
 import net.xmx.velthoric.network.VxByteBuf;
-import net.xmx.velthoric.core.body.registry.VxBodyType;
-import net.xmx.velthoric.core.body.type.VxRigidBody;
 import net.xmx.velthoric.core.physics.world.VxPhysicsWorld;
 
 import java.util.UUID;
@@ -25,7 +25,7 @@ import java.util.UUID;
  *
  * @author timtaran
  */
-public abstract class GrabbableBody extends VxRigidBody {
+public abstract class GrabbableBody extends VxBody {
     /**
      * Server-side accessor for the main grab point position in local space.
      * <p>
@@ -51,7 +51,7 @@ public abstract class GrabbableBody extends VxRigidBody {
      * @param world the physics world this body belongs to
      * @param id the unique UUID for this body
      */
-    protected GrabbableBody(VxBodyType<? extends GrabbableBody> type, VxPhysicsWorld world, UUID id) {
+    protected GrabbableBody(VxBodyType type, VxPhysicsWorld world, UUID id) {
         super(type, world, id);
     }
 
@@ -62,7 +62,7 @@ public abstract class GrabbableBody extends VxRigidBody {
      * @param id the unique UUID for this body
      */
     @Environment(EnvType.CLIENT)
-    protected GrabbableBody(VxBodyType<? extends GrabbableBody> type, UUID id) {
+    protected GrabbableBody(VxBodyType type, UUID id) {
         super(type, id);
     }
 
@@ -71,9 +71,7 @@ public abstract class GrabbableBody extends VxRigidBody {
      *
      * @param buf the buffer to write to
      */
-    @Override
     public void writePersistenceData(VxByteBuf buf) {
-        super.writePersistenceData(buf);
         VxDataSerializers.VEC3.write(buf, get(DATA_MAIN_GRAB_POINT_POSITION));
         VxDataSerializers.VEC3.write(buf, get(DATA_MAIN_GRAB_POINT_ROTATION));
     }
@@ -83,11 +81,8 @@ public abstract class GrabbableBody extends VxRigidBody {
      *
      * @param buf the buffer to read from
      */
-    @Override
     public void readPersistenceData(VxByteBuf buf) {
-        super.readPersistenceData(buf);
         setServerData(DATA_MAIN_GRAB_POINT_POSITION, VxDataSerializers.VEC3.read(buf));
         setServerData(DATA_MAIN_GRAB_POINT_ROTATION, VxDataSerializers.VEC3.read(buf));
-
     }
 }

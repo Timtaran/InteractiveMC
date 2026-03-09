@@ -10,8 +10,8 @@ import net.timtaran.interactivemc.body.player.PlayerBodyPartGhostRenderer;
 import net.timtaran.interactivemc.body.player.PlayerBodyPartGhostRigidBody;
 import net.timtaran.interactivemc.body.player.PlayerBodyPartRenderer;
 import net.timtaran.interactivemc.body.player.PlayerBodyPartRigidBody;
+import net.xmx.velthoric.core.body.VxBodyType;
 import net.xmx.velthoric.core.body.registry.VxBodyRegistry;
-import net.xmx.velthoric.core.body.registry.VxBodyType;
 import net.timtaran.interactivemc.util.InteractiveMCIdentifier;
 
 /**
@@ -23,15 +23,21 @@ import net.timtaran.interactivemc.util.InteractiveMCIdentifier;
  */
 public class BodyRegistry {
     /** The dynamic rigid body type for player body parts (head, hands, etc.). */
-    public static final VxBodyType<PlayerBodyPartRigidBody> PLAYER_BODY_PART = VxBodyType.Builder
-            .<PlayerBodyPartRigidBody>create(PlayerBodyPartRigidBody::new)
+    public static final VxBodyType PLAYER_BODY_PART = VxBodyType.Builder
+            .create(PlayerBodyPartRigidBody::new)
+            .rigidProvider(PlayerBodyPartRigidBody::createJoltBody)
             .noSummon()
+            .netSync()
+            .persistence(PlayerBodyPartRigidBody::writePersistenceData, PlayerBodyPartRigidBody::readPersistenceData)
             .build(InteractiveMCIdentifier.get("player_body_part"));
 
     /** The ghost (kinematic) rigid body type for player body parts, used to track VR controller positions. */
-    public static final VxBodyType<PlayerBodyPartGhostRigidBody> PLAYER_BODY_PART_GHOST = VxBodyType.Builder
-            .<PlayerBodyPartGhostRigidBody>create(PlayerBodyPartGhostRigidBody::new)
+    public static final VxBodyType PLAYER_BODY_PART_GHOST = VxBodyType.Builder
+            .create(PlayerBodyPartGhostRigidBody::new)
+            .rigidProvider(PlayerBodyPartGhostRigidBody::createJoltBody)
             .noSummon()
+            .setPersistent(false)
+            .persistence(PlayerBodyPartGhostRigidBody::writePersistenceData, PlayerBodyPartGhostRigidBody::readPersistenceData)
             .build(InteractiveMCIdentifier.get("player_ghost_body_part"));
 
     /**
@@ -50,8 +56,8 @@ public class BodyRegistry {
         var registry = VxBodyRegistry.getInstance();
 
         // Client-side factory registration
-        registry.registerClientFactory(PLAYER_BODY_PART.getTypeId(), (type, id) -> new PlayerBodyPartRigidBody((VxBodyType<PlayerBodyPartRigidBody>) type, id));
-        registry.registerClientFactory(PLAYER_BODY_PART_GHOST.getTypeId(), (type, id) -> new PlayerBodyPartGhostRigidBody((VxBodyType<PlayerBodyPartGhostRigidBody>) type, id));
+        registry.registerClientFactory(PLAYER_BODY_PART.getTypeId(), PlayerBodyPartRigidBody::new);
+        registry.registerClientFactory(PLAYER_BODY_PART_GHOST.getTypeId(), PlayerBodyPartGhostRigidBody::new);
 
         // Client-side renderer registration
         registry.registerClientRenderer(PLAYER_BODY_PART.getTypeId(), new PlayerBodyPartRenderer());

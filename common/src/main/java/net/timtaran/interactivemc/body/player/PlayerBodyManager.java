@@ -18,7 +18,7 @@ import net.timtaran.interactivemc.init.registry.BodyRegistry;
 import net.timtaran.interactivemc.init.InteractiveMC;
 import net.xmx.velthoric.core.body.VxRemovalReason;
 import net.xmx.velthoric.core.body.server.VxServerBodyManager;
-import net.xmx.velthoric.core.body.type.VxBody;
+import net.xmx.velthoric.core.body.VxBody;
 import net.xmx.velthoric.core.constraint.VxConstraint;
 import net.xmx.velthoric.core.constraint.manager.VxConstraintManager;
 import net.xmx.velthoric.core.intersection.VxPhysicsIntersector;
@@ -109,7 +109,7 @@ public class PlayerBodyManager {
                 new Quat()
         );
 
-        PlayerBodyPartRigidBody bodyPart = world.getBodyManager().createRigidBody(
+        PlayerBodyPartRigidBody bodyPart = (PlayerBodyPartRigidBody) world.getBodyManager().createBody(
                 BodyRegistry.PLAYER_BODY_PART,
                 transform,
                 EActivation.Activate,
@@ -120,7 +120,7 @@ public class PlayerBodyManager {
                 }
         );
 
-        PlayerBodyPartGhostRigidBody bodyPartGhost = world.getBodyManager().createRigidBody(
+        PlayerBodyPartGhostRigidBody bodyPartGhost = (PlayerBodyPartGhostRigidBody) world.getBodyManager().createBody(
                 BodyRegistry.PLAYER_BODY_PART_GHOST,
                 transform,
                 EActivation.Activate,

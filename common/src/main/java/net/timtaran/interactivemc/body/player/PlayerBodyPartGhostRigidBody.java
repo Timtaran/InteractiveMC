@@ -15,10 +15,10 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.timtaran.interactivemc.data.ClientDataStore;
 import net.timtaran.interactivemc.data.PlayerDataStore;
 import net.timtaran.interactivemc.network.sync.DataSerializers;
+import net.xmx.velthoric.core.body.VxBody;
+import net.xmx.velthoric.core.body.VxBodyType;
 import net.xmx.velthoric.core.body.client.VxClientBodyManager;
-import net.xmx.velthoric.core.body.registry.VxBodyType;
-import net.xmx.velthoric.core.body.type.VxRigidBody;
-import net.xmx.velthoric.core.body.type.factory.VxRigidBodyFactory;
+import net.xmx.velthoric.core.body.factory.VxRigidBodyFactory;
 import net.xmx.velthoric.core.network.synchronization.VxDataSerializers;
 import net.xmx.velthoric.core.network.synchronization.VxSynchronizedData;
 import net.xmx.velthoric.core.network.synchronization.accessor.VxServerAccessor;
@@ -42,7 +42,7 @@ import java.util.UUID;
  *
  * @author timtaran
  */
-public class PlayerBodyPartGhostRigidBody extends VxRigidBody {
+public class PlayerBodyPartGhostRigidBody extends VxBody {
     private static final float FIXED_TIME_STEP = VxPhysicsWorld.getFixedTimeStep();
     private static short selectiveGhostLayer = -1;
 
@@ -62,9 +62,8 @@ public class PlayerBodyPartGhostRigidBody extends VxRigidBody {
      * @param world the physics world
      * @param id the unique identifier for this body
      */
-    public PlayerBodyPartGhostRigidBody(VxBodyType<PlayerBodyPartGhostRigidBody> type, VxPhysicsWorld world, UUID id) {
+    public PlayerBodyPartGhostRigidBody(VxBodyType type, VxPhysicsWorld world, UUID id) {
         super(type, world, id);
-        setPersistent(false);
     }
 
     /**
@@ -74,7 +73,7 @@ public class PlayerBodyPartGhostRigidBody extends VxRigidBody {
      * @param id the unique identifier for this body
      */
     @Environment(EnvType.CLIENT)
-    public PlayerBodyPartGhostRigidBody(VxBodyType<PlayerBodyPartGhostRigidBody> type, UUID id) {
+    public PlayerBodyPartGhostRigidBody(VxBodyType type, UUID id) {
         super(type, id);
     }
 
@@ -95,7 +94,7 @@ public class PlayerBodyPartGhostRigidBody extends VxRigidBody {
      * @param factory the rigid body factory
      * @return the Jolt body ID
      */
-    public int createJoltBody(VxRigidBodyFactory factory) {
+    public static int createJoltBody(VxBody body, VxRigidBodyFactory factory) {
         if (selectiveGhostLayer == -1) {
                 selectiveGhostLayer = VxPhysicsLayers.claimLayer();
 
@@ -109,7 +108,7 @@ public class PlayerBodyPartGhostRigidBody extends VxRigidBody {
                 VxPhysicsLayers.setCollision(selectiveGhostLayer, selectiveGhostLayer, false);
         }
 
-        PlayerBodyPart partType = get(DATA_BODY_PART);
+        PlayerBodyPart partType = body.get(DATA_BODY_PART);
         Vec3 fullSize = partType.getSize();
 
         try (
@@ -124,8 +123,6 @@ public class PlayerBodyPartGhostRigidBody extends VxRigidBody {
 
     @Override
     public void onPrePhysicsTick(VxPhysicsWorld world) {
-        super.onPrePhysicsTick(world);
-
         VRPose pose = PlayerDataStore.vrPoses.get(get(DATA_PLAYER_ID));
         if (pose == null) return;
 
@@ -197,19 +194,15 @@ public class PlayerBodyPartGhostRigidBody extends VxRigidBody {
             addBodyIndexToClientStorage();
     }
 
-    @Override
-    public void writePersistenceData(VxByteBuf buf) {
-        super.writePersistenceData(buf);
-        VxDataSerializers.VEC3.write(buf, get(DATA_HALF_EXTENTS));
-        DataSerializers.BODY_PART.write(buf, get(DATA_BODY_PART));
-        VxDataSerializers.UUID.write(buf, get(DATA_PLAYER_ID));
+    public static void writePersistenceData(VxBody body, VxByteBuf buf) {
+        VxDataSerializers.VEC3.write(buf, body.get(DATA_HALF_EXTENTS));
+        DataSerializers.BODY_PART.write(buf, body.get(DATA_BODY_PART));
+        VxDataSerializers.UUID.write(buf, body.get(DATA_PLAYER_ID));
     }
 
-    @Override
-    public void readPersistenceData(VxByteBuf buf) {
-        super.readPersistenceData(buf);
-        setServerData(DATA_HALF_EXTENTS, VxDataSerializers.VEC3.read(buf));
-        setServerData(DATA_BODY_PART, DataSerializers.BODY_PART.read(buf));
-        setServerData(DATA_PLAYER_ID, VxDataSerializers.UUID.read(buf));
+    public static void readPersistenceData(VxBody body, VxByteBuf buf) {
+        body.setServerData(DATA_HALF_EXTENTS, VxDataSerializers.VEC3.read(buf));
+        body.setServerData(DATA_BODY_PART, DataSerializers.BODY_PART.read(buf));
+        body.setServerData(DATA_PLAYER_ID, VxDataSerializers.UUID.read(buf));
     }
 }

@@ -13,8 +13,9 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.xmx.velthoric.core.body.VxBody;
 import net.xmx.velthoric.core.body.client.VxRenderState;
-import net.xmx.velthoric.core.body.client.renderer.VxRigidBodyRenderer;
+import net.xmx.velthoric.core.body.client.renderer.VxBodyRenderer;
 import org.joml.Quaternionf;
 
 /**
@@ -25,7 +26,7 @@ import org.joml.Quaternionf;
  * @author timtaran
  */
 @Environment(EnvType.CLIENT)
-public class PlayerBodyPartRenderer extends VxRigidBodyRenderer<PlayerBodyPartRigidBody> {
+public class PlayerBodyPartRenderer extends VxBodyRenderer<VxBody> {
     /**
      * Renders a player body part rigid body as a wireframe cube.
      *
@@ -37,7 +38,7 @@ public class PlayerBodyPartRenderer extends VxRigidBodyRenderer<PlayerBodyPartRi
      * @param renderState the render state containing transform and other data
      */
     @Override
-    public void render(PlayerBodyPartRigidBody body, PoseStack poseStack, MultiBufferSource bufferSource, float partialTicks, int packedLight, VxRenderState renderState) {
+    public void render(VxBody body, PoseStack poseStack, MultiBufferSource bufferSource, float partialTicks, int packedLight, VxRenderState renderState) {
         Vec3 halfExtents = body.get(PlayerBodyPartRigidBody.DATA_HALF_EXTENTS);
         float hx = halfExtents.getX();
         float hy = halfExtents.getY();
