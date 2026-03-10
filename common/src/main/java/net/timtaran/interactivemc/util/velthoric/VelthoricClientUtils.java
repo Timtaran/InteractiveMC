@@ -35,9 +35,9 @@ public class VelthoricClientUtils {
      * <p>The distance check is performed using squared distance
      * to avoid an expensive square root operation.</p>
      *
-     * @param x the x-coordinate of the search point
-     * @param y the y-coordinate of the search point
-     * @param z the z-coordinate of the search point
+     * @param x      the x-coordinate of the search point
+     * @param y      the y-coordinate of the search point
+     * @param z      the z-coordinate of the search point
      * @param radius the search radius (must be >= 0)
      * @return a list of indices of bodies located strictly inside the radius
      */

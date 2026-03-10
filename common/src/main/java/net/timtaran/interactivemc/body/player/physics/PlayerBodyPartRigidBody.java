@@ -4,7 +4,10 @@
  */
 package net.timtaran.interactivemc.body.player.physics;
 
-import com.github.stephengold.joltjni.*;
+import com.github.stephengold.joltjni.BodyCreationSettings;
+import com.github.stephengold.joltjni.BoxShapeSettings;
+import com.github.stephengold.joltjni.ShapeSettings;
+import com.github.stephengold.joltjni.Vec3;
 import com.github.stephengold.joltjni.enumerate.EMotionType;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -20,8 +23,8 @@ import net.xmx.velthoric.core.network.synchronization.VxDataSerializers;
 import net.xmx.velthoric.core.network.synchronization.VxSynchronizedData;
 import net.xmx.velthoric.core.network.synchronization.accessor.VxServerAccessor;
 import net.xmx.velthoric.core.physics.VxPhysicsLayers;
-import net.xmx.velthoric.network.VxByteBuf;
 import net.xmx.velthoric.core.physics.world.VxPhysicsWorld;
+import net.xmx.velthoric.network.VxByteBuf;
 
 import java.util.UUID;
 
@@ -33,19 +36,25 @@ import java.util.UUID;
 public class PlayerBodyPartRigidBody extends VxBody {
     private boolean isIndexSaved = false;
 
-    /** The half-extents (dimensions) of this body part. */
+    /**
+     * The half-extents (dimensions) of this body part.
+     */
     public static final VxServerAccessor<Vec3> DATA_HALF_EXTENTS = VxServerAccessor.create(PlayerBodyPartRigidBody.class, VxDataSerializers.VEC3);
-    /** The type of body part (head, hands, etc.). */
+    /**
+     * The type of body part (head, hands, etc.).
+     */
     public static final VxServerAccessor<PlayerBodyPart> DATA_BODY_PART = VxServerAccessor.create(PlayerBodyPartRigidBody.class, DataSerializers.BODY_PART);
-    /** The UUID of the player who owns this body part. */
+    /**
+     * The UUID of the player who owns this body part.
+     */
     public static final VxServerAccessor<UUID> DATA_PLAYER_ID = VxServerAccessor.create(PlayerBodyPartRigidBody.class, VxDataSerializers.UUID);
 
     /**
      * Server-side constructor.
      *
-     * @param type the body type
+     * @param type  the body type
      * @param world the physics world
-     * @param id the unique identifier for this body
+     * @param id    the unique identifier for this body
      */
     public PlayerBodyPartRigidBody(VxBodyType type, VxPhysicsWorld world, UUID id) {
         super(type, world, id);
@@ -55,7 +64,7 @@ public class PlayerBodyPartRigidBody extends VxBody {
      * Client-side constructor.
      *
      * @param type the body type
-     * @param id the unique identifier for this body
+     * @param id   the unique identifier for this body
      */
     @Environment(EnvType.CLIENT)
     public PlayerBodyPartRigidBody(VxBodyType type, UUID id) {

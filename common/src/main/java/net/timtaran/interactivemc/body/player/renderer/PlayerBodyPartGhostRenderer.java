@@ -28,12 +28,12 @@ public class PlayerBodyPartGhostRenderer extends VxBodyRenderer<VxBody> {
     /**
      * Renders a player body part ghost rigid body as a white wireframe cube.
      *
-     * @param body the ghost body to render
-     * @param poseStack the pose stack for transformations
+     * @param body         the ghost body to render
+     * @param poseStack    the pose stack for transformations
      * @param bufferSource the buffer source for rendering
      * @param partialTicks the partial ticks for interpolation
-     * @param packedLight the packed light value
-     * @param renderState the render state containing transform and other data
+     * @param packedLight  the packed light value
+     * @param renderState  the render state containing transform and other data
      */
     @Override
     public void render(VxBody body, PoseStack poseStack, MultiBufferSource bufferSource, float partialTicks, int packedLight, VxRenderState renderState) {
@@ -54,7 +54,7 @@ public class PlayerBodyPartGhostRenderer extends VxBodyRenderer<VxBody> {
         poseStack.translate(-hx, -hy, -hz);
         poseStack.scale(fullWidth, fullHeight, fullDepth);
 
-        PlayerBodyPartRenderer.renderUnitCubeWireframe(poseStack, bufferSource, packedLight,  1.0f, 1.0f, 1.0f, 1.0f);
+        PlayerBodyPartRenderer.renderUnitCubeWireframe(poseStack, bufferSource, packedLight, 1.0f, 1.0f, 1.0f, 1.0f);
 
         poseStack.popPose();
     }

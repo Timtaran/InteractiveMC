@@ -20,7 +20,9 @@ import java.util.UUID;
  * @author timtaran
  */
 public class S2CGrabResultPacket extends HandInteractionPacket {
-    /** The UUID of the grabbed body, or null if the grab was unsuccessful. */
+    /**
+     * The UUID of the grabbed body, or null if the grab was unsuccessful.
+     */
     private final UUID grabbedBodyUUID;
 
     /**

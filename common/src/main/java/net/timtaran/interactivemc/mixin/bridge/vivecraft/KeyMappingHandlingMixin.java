@@ -7,11 +7,11 @@ package net.timtaran.interactivemc.mixin.bridge.vivecraft;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.world.InteractionHand;
 import net.timtaran.interactivemc.body.player.interaction.GrabInteraction;
+import net.timtaran.interactivemc.body.player.packet.C2SGrabPacket;
+import net.timtaran.interactivemc.body.player.packet.C2SReleasePacket;
 import net.timtaran.interactivemc.body.player.store.ClientPlayerBodyDataStore;
 import net.timtaran.interactivemc.init.registry.KeyMapRegistry;
 import net.timtaran.interactivemc.network.Networking;
-import net.timtaran.interactivemc.body.player.packet.C2SGrabPacket;
-import net.timtaran.interactivemc.body.player.packet.C2SReleasePacket;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -55,7 +55,7 @@ public class KeyMappingHandlingMixin {
      * and an object was being held, releases it.
      * </p>
      *
-     * @param hand the interaction hand (main or off-hand)
+     * @param hand       the interaction hand (main or off-hand)
      * @param keyMapping the key mapping to check
      */
     @Unique

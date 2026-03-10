@@ -31,12 +31,12 @@ public class PlayerBodyPartRenderer extends VxBodyRenderer<VxBody> {
     /**
      * Renders a player body part rigid body as a wireframe cube.
      *
-     * @param body the body to render
-     * @param poseStack the pose stack for transformations
+     * @param body         the body to render
+     * @param poseStack    the pose stack for transformations
      * @param bufferSource the buffer source for rendering
      * @param partialTicks the partial ticks for interpolation
-     * @param packedLight the packed light value
-     * @param renderState the render state containing transform and other data
+     * @param packedLight  the packed light value
+     * @param renderState  the render state containing transform and other data
      */
     @Override
     public void render(VxBody body, PoseStack poseStack, MultiBufferSource bufferSource, float partialTicks, int packedLight, VxRenderState renderState) {
@@ -68,13 +68,13 @@ public class PlayerBodyPartRenderer extends VxBodyRenderer<VxBody> {
      * This method draws all 12 edges of a unit cube from (0,0,0) to (1,1,1).
      * The pose stack should be positioned and scaled appropriately before calling this method.
      *
-     * @param poseStack the pose stack for transformations
+     * @param poseStack    the pose stack for transformations
      * @param bufferSource the buffer source for rendering
-     * @param packedLight the packed light value
-     * @param r the red color component (0.0 to 1.0)
-     * @param g the green color component (0.0 to 1.0)
-     * @param b the blue color component (0.0 to 1.0)
-     * @param a the alpha component (0.0 to 1.0)
+     * @param packedLight  the packed light value
+     * @param r            the red color component (0.0 to 1.0)
+     * @param g            the green color component (0.0 to 1.0)
+     * @param b            the blue color component (0.0 to 1.0)
+     * @param a            the alpha component (0.0 to 1.0)
      */
     public static void renderUnitCubeWireframe(PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, float r, float g, float b, float a) {
         PoseStack.Pose pose = poseStack.last();
@@ -86,22 +86,22 @@ public class PlayerBodyPartRenderer extends VxBodyRenderer<VxBody> {
         // 12 edges: each entry is {x1,y1,z1, x2,y2,z2}
         float[][] edges = {
                 // bottom face
-                {min, min, min,  max, min, min},
-                {max, min, min,  max, min, max},
-                {max, min, max,  min, min, max},
-                {min, min, max,  min, min, min},
+                {min, min, min, max, min, min},
+                {max, min, min, max, min, max},
+                {max, min, max, min, min, max},
+                {min, min, max, min, min, min},
 
                 // top face
-                {min, max, min,  max, max, min},
-                {max, max, min,  max, max, max},
-                {max, max, max,  min, max, max},
-                {min, max, max,  min, max, min},
+                {min, max, min, max, max, min},
+                {max, max, min, max, max, max},
+                {max, max, max, min, max, max},
+                {min, max, max, min, max, min},
 
                 // verticals
-                {min, min, min,  min, max, min},
-                {max, min, min,  max, max, min},
-                {max, min, max,  max, max, max},
-                {min, min, max,  min, max, max}
+                {min, min, min, min, max, min},
+                {max, min, min, max, max, min},
+                {max, min, max, max, max, max},
+                {min, min, max, min, max, max}
         };
 
         for (float[] e : edges) {
@@ -113,15 +113,15 @@ public class PlayerBodyPartRenderer extends VxBodyRenderer<VxBody> {
     /**
      * Emits a single vertex to the vertex consumer.
      *
-     * @param pose the current pose for transformations
-     * @param builder the vertex consumer
-     * @param x the x coordinate
-     * @param y the y coordinate
-     * @param z the z coordinate
-     * @param r the red color component (0.0 to 1.0)
-     * @param g the green color component (0.0 to 1.0)
-     * @param b the blue color component (0.0 to 1.0)
-     * @param a the alpha component (0.0 to 1.0)
+     * @param pose        the current pose for transformations
+     * @param builder     the vertex consumer
+     * @param x           the x coordinate
+     * @param y           the y coordinate
+     * @param z           the z coordinate
+     * @param r           the red color component (0.0 to 1.0)
+     * @param g           the green color component (0.0 to 1.0)
+     * @param b           the blue color component (0.0 to 1.0)
+     * @param a           the alpha component (0.0 to 1.0)
      * @param packedLight the packed light value
      */
     private static void emitVertex(PoseStack.Pose pose,

@@ -6,13 +6,13 @@ package net.timtaran.interactivemc.init.registry;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.timtaran.interactivemc.body.player.renderer.PlayerBodyPartGhostRenderer;
 import net.timtaran.interactivemc.body.player.physics.PlayerBodyPartGhostRigidBody;
-import net.timtaran.interactivemc.body.player.renderer.PlayerBodyPartRenderer;
 import net.timtaran.interactivemc.body.player.physics.PlayerBodyPartRigidBody;
+import net.timtaran.interactivemc.body.player.renderer.PlayerBodyPartGhostRenderer;
+import net.timtaran.interactivemc.body.player.renderer.PlayerBodyPartRenderer;
+import net.timtaran.interactivemc.util.InteractiveMCIdentifier;
 import net.xmx.velthoric.core.body.VxBodyType;
 import net.xmx.velthoric.core.body.registry.VxBodyRegistry;
-import net.timtaran.interactivemc.util.InteractiveMCIdentifier;
 
 /**
  * Registry for physics body types used in the mod.
@@ -22,7 +22,9 @@ import net.timtaran.interactivemc.util.InteractiveMCIdentifier;
  * @author timtaran
  */
 public class BodyRegistry {
-    /** The dynamic rigid body type for player body parts (head, hands, etc.). */
+    /**
+     * The dynamic rigid body type for player body parts (head, hands, etc.).
+     */
     public static final VxBodyType PLAYER_BODY_PART = VxBodyType.Builder
             .create(PlayerBodyPartRigidBody::new)
             .rigidProvider(PlayerBodyPartRigidBody::createJoltBody)
@@ -32,7 +34,9 @@ public class BodyRegistry {
             .persistence(PlayerBodyPartRigidBody::writePersistenceData, PlayerBodyPartRigidBody::readPersistenceData)
             .build(InteractiveMCIdentifier.get("player_body_part"));
 
-    /** The ghost (kinematic) rigid body type for player body parts, used to track VR controller positions. */
+    /**
+     * The ghost (kinematic) rigid body type for player body parts, used to track VR controller positions.
+     */
     public static final VxBodyType PLAYER_BODY_PART_GHOST = VxBodyType.Builder
             .create(PlayerBodyPartGhostRigidBody::new)
             .rigidProvider(PlayerBodyPartGhostRigidBody::createJoltBody)

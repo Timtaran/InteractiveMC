@@ -27,7 +27,9 @@ import java.util.Set;
  */
 @Mixin(value = VivecraftVRMod.class, remap = false)
 public class KeyMappingRegisterMixin {
-    /** The set of hidden keybindings maintained by Vivecraft. */
+    /**
+     * The set of hidden keybindings maintained by Vivecraft.
+     */
     @Shadow
     private Set<KeyMapping> hiddenKeyBindingSet;
 

@@ -27,7 +27,10 @@ import net.xmx.velthoric.math.VxConversions;
 import net.xmx.velthoric.math.VxTransform;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * Manages the creation, tracking, and interaction of player bodies in the physics world.
@@ -209,7 +212,7 @@ public class PlayerBodyManager {
      * @param player          the player attempting to grab
      * @param interactionHand the hand to use for grabbing (main or off-hand)
      * @return the body that was grabbed, or null if no body was grabbed
-     * @see GrabInteraction#grab(Player, VxBody, PlayerBodyPart) 
+     * @see GrabInteraction#grab(Player, VxBody, PlayerBodyPart)
      */
     @Nullable
     public VxBody grab(Player player, InteractionHand interactionHand) {

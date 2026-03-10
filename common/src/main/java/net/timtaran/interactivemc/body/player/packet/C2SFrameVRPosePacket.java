@@ -31,7 +31,9 @@ import java.util.Map;
  * @author timtaran
  */
 public class C2SFrameVRPosePacket implements IVxNetPacket {
-    /** The current VR pose data containing all body part positions and rotations. */
+    /**
+     * The current VR pose data containing all body part positions and rotations.
+     */
     private final VRPose pose;
 
     /**
@@ -49,7 +51,7 @@ public class C2SFrameVRPosePacket implements IVxNetPacket {
      * If the data is null, a boolean flag is written instead. Otherwise, the position,
      * direction, and rotation are serialized.
      *
-     * @param buf the buffer to write to
+     * @param buf  the buffer to write to
      * @param data the body part data to serialize, or null if not present
      */
     private static void writeBodyPartData(FriendlyByteBuf buf, @Nullable VRBodyPartData data) {
@@ -115,20 +117,20 @@ public class C2SFrameVRPosePacket implements IVxNetPacket {
 
         return new C2SFrameVRPosePacket(
                 new VRPoseImpl(
-                    map.get(VRBodyPart.HEAD),
-                    map.get(VRBodyPart.MAIN_HAND),
-                    map.get(VRBodyPart.OFF_HAND),
-                    map.get(VRBodyPart.RIGHT_FOOT),
-                    map.get(VRBodyPart.LEFT_FOOT),
-                    map.get(VRBodyPart.WAIST),
-                    map.get(VRBodyPart.RIGHT_KNEE),
-                    map.get(VRBodyPart.LEFT_KNEE),
-                    map.get(VRBodyPart.RIGHT_ELBOW),
-                    map.get(VRBodyPart.LEFT_ELBOW),
-                    isSeated,
-                    isLeftHanded,
-                    fbtMode
-            )
+                        map.get(VRBodyPart.HEAD),
+                        map.get(VRBodyPart.MAIN_HAND),
+                        map.get(VRBodyPart.OFF_HAND),
+                        map.get(VRBodyPart.RIGHT_FOOT),
+                        map.get(VRBodyPart.LEFT_FOOT),
+                        map.get(VRBodyPart.WAIST),
+                        map.get(VRBodyPart.RIGHT_KNEE),
+                        map.get(VRBodyPart.LEFT_KNEE),
+                        map.get(VRBodyPart.RIGHT_ELBOW),
+                        map.get(VRBodyPart.LEFT_ELBOW),
+                        isSeated,
+                        isLeftHanded,
+                        fbtMode
+                )
         );
     }
 

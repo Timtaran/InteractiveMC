@@ -31,7 +31,9 @@ public enum PlayerBodyPart {
     OFF_HAND(new Vec3(0.25f, 0.25f, 0.75f));
     // todo add elbow
 
-    /** The full size (width, height, depth) of the physics shape for this body part. */
+    /**
+     * The full size (width, height, depth) of the physics shape for this body part.
+     */
     private final Vec3 size;
 
     /**

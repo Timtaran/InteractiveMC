@@ -17,7 +17,9 @@ import net.xmx.velthoric.network.VxByteBuf;
  * @author timtaran
  */
 public abstract class HandInteractionPacket implements IVxNetPacket {
-    /** The hand that is performing this interaction. */
+    /**
+     * The hand that is performing this interaction.
+     */
     private final InteractionHand interactionHand;
 
     /**

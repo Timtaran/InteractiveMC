@@ -43,5 +43,6 @@ public final class ClientPlayerBodyDataStore {
      */
     public static VRPose currentPose;
 
-    private ClientPlayerBodyDataStore() {}
+    private ClientPlayerBodyDataStore() {
+    }
 }

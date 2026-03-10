@@ -49,19 +49,25 @@ public class PlayerBodyPartGhostRigidBody extends VxBody {
 
     private boolean isIndexSaved = false;
 
-    /** The half-extents (dimensions) of this ghost body part. */
+    /**
+     * The half-extents (dimensions) of this ghost body part.
+     */
     public static final VxServerAccessor<Vec3> DATA_HALF_EXTENTS = VxServerAccessor.create(PlayerBodyPartGhostRigidBody.class, VxDataSerializers.VEC3);
-    /** The type of body part (head, hands, etc.). */
+    /**
+     * The type of body part (head, hands, etc.).
+     */
     public static final VxServerAccessor<PlayerBodyPart> DATA_BODY_PART = VxServerAccessor.create(PlayerBodyPartGhostRigidBody.class, DataSerializers.BODY_PART);
-    /** The UUID of the player who owns this ghost body part. */
+    /**
+     * The UUID of the player who owns this ghost body part.
+     */
     public static final VxServerAccessor<UUID> DATA_PLAYER_ID = VxServerAccessor.create(PlayerBodyPartGhostRigidBody.class, VxDataSerializers.UUID);
 
     /**
      * Server-side constructor.
      *
-     * @param type the body type
+     * @param type  the body type
      * @param world the physics world
-     * @param id the unique identifier for this body
+     * @param id    the unique identifier for this body
      */
     public PlayerBodyPartGhostRigidBody(VxBodyType type, VxPhysicsWorld world, UUID id) {
         super(type, world, id);
@@ -71,7 +77,7 @@ public class PlayerBodyPartGhostRigidBody extends VxBody {
      * Client-side constructor.
      *
      * @param type the body type
-     * @param id the unique identifier for this body
+     * @param id   the unique identifier for this body
      */
     @Environment(EnvType.CLIENT)
     public PlayerBodyPartGhostRigidBody(VxBodyType type, UUID id) {
@@ -97,16 +103,16 @@ public class PlayerBodyPartGhostRigidBody extends VxBody {
      */
     public static int createJoltBody(VxBody body, VxRigidBodyFactory factory) {
         if (selectiveGhostLayer == -1) {
-                selectiveGhostLayer = VxPhysicsLayers.claimLayer();
+            selectiveGhostLayer = VxPhysicsLayers.claimLayer();
 
-                // Map it to the moving broad-phase layer as the spawned box is dynamic.
-                VxPhysicsLayers.setBroadPhaseMapping(selectiveGhostLayer, VxPhysicsLayers.BP_MOVING);
+            // Map it to the moving broad-phase layer as the spawned box is dynamic.
+            VxPhysicsLayers.setBroadPhaseMapping(selectiveGhostLayer, VxPhysicsLayers.BP_MOVING);
 
-                // Configure selective collisions
-                VxPhysicsLayers.setCollision(selectiveGhostLayer, VxPhysicsLayers.NON_MOVING, false);
-                VxPhysicsLayers.setCollision(selectiveGhostLayer, VxPhysicsLayers.MOVING, false);
-                VxPhysicsLayers.setCollision(selectiveGhostLayer, VxPhysicsLayers.TERRAIN, false);
-                VxPhysicsLayers.setCollision(selectiveGhostLayer, selectiveGhostLayer, false);
+            // Configure selective collisions
+            VxPhysicsLayers.setCollision(selectiveGhostLayer, VxPhysicsLayers.NON_MOVING, false);
+            VxPhysicsLayers.setCollision(selectiveGhostLayer, VxPhysicsLayers.MOVING, false);
+            VxPhysicsLayers.setCollision(selectiveGhostLayer, VxPhysicsLayers.TERRAIN, false);
+            VxPhysicsLayers.setCollision(selectiveGhostLayer, selectiveGhostLayer, false);
         }
 
         PlayerBodyPart partType = body.get(DATA_BODY_PART);
