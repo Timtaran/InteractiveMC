@@ -1,0 +1,14 @@
+net.timtaran.interactivemc.body.player
+net.timtaran.interactivemc.body.type
+net.timtaran.interactivemc.bridge.vivecraft
+net.timtaran.interactivemc.data
+net.timtaran.interactivemc.event.player
+net.timtaran.interactivemc.init
+net.timtaran.interactivemc.init.registry
+net.timtaran.interactivemc.mixin.bridge.vivecraft
+net.timtaran.interactivemc.network
+net.timtaran.interactivemc.network.sync
+net.timtaran.interactivemc.network.sync.packet
+net.timtaran.interactivemc.util
+net.timtaran.interactivemc.util.velthoric
+net.timtaran.interactivemc.util.vivecraft
