@@ -2,11 +2,11 @@
  * This file is part of InteractiveMC.
  * Licensed under LGPL 3.0.
  */
-package net.timtaran.interactivemc.network.sync.packet;
+package net.timtaran.interactivemc.body.player.packet;
 
 import dev.architectury.networking.NetworkManager;
 import net.minecraft.world.InteractionHand;
-import net.timtaran.interactivemc.data.ClientDataStore;
+import net.timtaran.interactivemc.body.player.store.ClientPlayerBodyDataStore;
 import net.xmx.velthoric.network.VxByteBuf;
 
 import java.util.UUID;
@@ -65,6 +65,6 @@ public class S2CGrabResultPacket extends HandInteractionPacket {
      */
     @Override
     public void handle(NetworkManager.PacketContext context) {
-        ClientDataStore.grabbedBodies.put(getInteractionHand(), grabbedBodyUUID);
+        ClientPlayerBodyDataStore.grabbedBodies.put(getInteractionHand(), grabbedBodyUUID);
     }
 }

@@ -2,7 +2,7 @@
  * This file is part of InteractiveMC.
  * Licensed under LGPL 3.0.
  */
-package net.timtaran.interactivemc.data;
+package net.timtaran.interactivemc.body.player.store;
 
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import net.minecraft.world.InteractionHand;
@@ -21,9 +21,8 @@ import java.util.UUID;
  *
  * @author timtaran
  */
-public final class ClientDataStore {
+public final class ClientPlayerBodyDataStore {
     /**
-     * Tracks the UUIDs of bodies currently grabbed in each hand.
      * Maps from {@link InteractionHand} to the UUID of the grabbed body.
      */
     public static EnumMap<InteractionHand, UUID> grabbedBodies = new EnumMap<>(Map.of(
@@ -33,6 +32,9 @@ public final class ClientDataStore {
 
     /**
      * List containing indices of all bodies controlled by the player.
+     * Stores the Jolt physics body IDs associated with each player.
+     * <p>
+     * Used for fast lookups in {@link net.timtaran.interactivemc.body.player.interaction.GrabInteraction#canGrabClient(InteractionHand)}
      */
     public static List<Integer> playerControlledBodies = new IntArrayList();
 
@@ -41,5 +43,5 @@ public final class ClientDataStore {
      */
     public static VRPose currentPose;
 
-    private ClientDataStore() {}
+    private ClientPlayerBodyDataStore() {}
 }

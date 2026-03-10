@@ -2,7 +2,7 @@
  * This file is part of InteractiveMC.
  * Licensed under LGPL 3.0.
  */
-package net.timtaran.interactivemc.network.sync.packet;
+package net.timtaran.interactivemc.body.player.packet;
 
 import net.minecraft.world.InteractionHand;
 import net.xmx.velthoric.network.IVxNetPacket;

@@ -2,14 +2,15 @@
  * This file is part of InteractiveMC.
  * Licensed under LGPL 3.0.
  */
-package net.timtaran.interactivemc.body.player;
+package net.timtaran.interactivemc.body.player.physics;
 
 import com.github.stephengold.joltjni.*;
 import com.github.stephengold.joltjni.enumerate.EMotionType;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.timtaran.interactivemc.data.ClientDataStore;
+import net.timtaran.interactivemc.body.player.PlayerBodyPart;
+import net.timtaran.interactivemc.body.player.store.ClientPlayerBodyDataStore;
 import net.timtaran.interactivemc.network.sync.DataSerializers;
 import net.xmx.velthoric.core.body.VxBody;
 import net.xmx.velthoric.core.body.VxBodyType;
@@ -111,7 +112,7 @@ public class PlayerBodyPartRigidBody extends VxBody {
         if (index == null)
             return;
 
-        ClientDataStore.playerControlledBodies.add(index);
+        ClientPlayerBodyDataStore.playerControlledBodies.add(index);
     }
 
     @Override
@@ -122,7 +123,7 @@ public class PlayerBodyPartRigidBody extends VxBody {
             return;
 
         isIndexSaved = true;
-        ClientDataStore.playerControlledBodies.remove(index);
+        ClientPlayerBodyDataStore.playerControlledBodies.remove(index);
     }
 
     @Override

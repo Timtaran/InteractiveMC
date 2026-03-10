@@ -9,10 +9,10 @@
 package net.timtaran.interactivemc.network;
 
 import dev.architectury.networking.NetworkManager;
-import net.timtaran.interactivemc.network.sync.packet.C2SFrameVRPosePacket;
-import net.timtaran.interactivemc.network.sync.packet.C2SGrabPacket;
-import net.timtaran.interactivemc.network.sync.packet.C2SReleasePacket;
-import net.timtaran.interactivemc.network.sync.packet.S2CGrabResultPacket;
+import net.timtaran.interactivemc.body.player.packet.C2SFrameVRPosePacket;
+import net.timtaran.interactivemc.body.player.packet.C2SGrabPacket;
+import net.timtaran.interactivemc.body.player.packet.C2SReleasePacket;
+import net.timtaran.interactivemc.body.player.packet.S2CGrabResultPacket;
 import net.xmx.velthoric.network.IVxNetPacket;
 import net.xmx.velthoric.network.VxByteBuf;
 

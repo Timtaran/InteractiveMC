@@ -2,11 +2,11 @@
  * This file is part of InteractiveMC.
  * Licensed under LGPL 3.0.
  */
-package net.timtaran.interactivemc.network.sync.packet;
+package net.timtaran.interactivemc.body.player.packet;
 
 import dev.architectury.networking.NetworkManager;
 import net.minecraft.network.FriendlyByteBuf;
-import net.timtaran.interactivemc.data.PlayerDataStore;
+import net.timtaran.interactivemc.body.player.store.PlayerBodyDataStore;
 import net.xmx.velthoric.network.IVxNetPacket;
 import net.xmx.velthoric.network.VxByteBuf;
 import org.jetbrains.annotations.Nullable;
@@ -142,6 +142,6 @@ public class C2SFrameVRPosePacket implements IVxNetPacket {
      */
     @Override
     public void handle(NetworkManager.PacketContext context) {
-        PlayerDataStore.vrPoses.put(context.getPlayer().getUUID(), pose);
+        PlayerBodyDataStore.vrPoses.put(context.getPlayer().getUUID(), pose);
     }
 }

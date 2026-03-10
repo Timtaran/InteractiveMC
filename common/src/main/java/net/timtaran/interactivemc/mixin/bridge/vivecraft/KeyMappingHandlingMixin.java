@@ -6,23 +6,17 @@ package net.timtaran.interactivemc.mixin.bridge.vivecraft;
 
 import net.minecraft.client.KeyMapping;
 import net.minecraft.world.InteractionHand;
-import net.timtaran.interactivemc.body.player.PlayerBodyManager;
-import net.timtaran.interactivemc.body.player.PlayerBodyPart;
-import net.timtaran.interactivemc.data.ClientDataStore;
+import net.timtaran.interactivemc.body.player.interaction.GrabInteraction;
+import net.timtaran.interactivemc.body.player.store.ClientPlayerBodyDataStore;
 import net.timtaran.interactivemc.init.registry.KeyMapRegistry;
 import net.timtaran.interactivemc.network.Networking;
-import net.timtaran.interactivemc.network.sync.packet.C2SGrabPacket;
-import net.timtaran.interactivemc.network.sync.packet.C2SReleasePacket;
-import net.timtaran.interactivemc.util.velthoric.VelthoricClientUtils;
-import org.joml.Quaternionf;
-import org.joml.Vector3f;
+import net.timtaran.interactivemc.body.player.packet.C2SGrabPacket;
+import net.timtaran.interactivemc.body.player.packet.C2SReleasePacket;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.vivecraft.api.data.VRBodyPart;
-import org.vivecraft.api.data.VRBodyPartData;
 import org.vivecraft.client_vr.provider.MCVR;
 
 /**
@@ -68,55 +62,28 @@ public class KeyMappingHandlingMixin {
     private static void interactivemc$updateGrabState(InteractionHand hand, KeyMapping keyMapping) {
         if (keyMapping.consumeClick()) {
             interactivemc$grab(hand);
-        } else if (!keyMapping.isDown() && ClientDataStore.grabbedBodies.get(hand) != null) {
+        } else if (!keyMapping.isDown() && ClientPlayerBodyDataStore.grabbedBodies.get(hand) != null) {
             interactivemc$release(hand);
         }
     }
 
     /**
-     * Attempts to grab an object using the specified hand.
-     * <p>
-     * Performs a sphere cast from the controller position to find nearby bodies
-     * that can be grabbed. Sends a grab packet to the server.
-     * </p>
+     * Sends packet to the server to grab an object using the specified hand and predicts response
+     * using {@link GrabInteraction#canGrabClient(InteractionHand)}.
      *
      * @param interactionHand the hand attempting to grab (main or off-hand)
      * @return true if a grabbable object was found nearby, false otherwise
      */
     @Unique
     private static boolean interactivemc$grab(InteractionHand interactionHand) {
-        boolean isGrabbing = false;
+        boolean isGrabbing = GrabInteraction.canGrabClient(interactionHand);
 
-        if (ClientDataStore.currentPose != null) {
-            Vector3f localGrabOffset = PlayerBodyPart.fromInteractionHand(interactionHand).getLocalGrabPointVec3f();
-            VRBodyPartData bodyPartData = ClientDataStore.currentPose.getBodyPartData(VRBodyPart.fromInteractionHand(interactionHand));
-            if (bodyPartData != null) {
-                Quaternionf targetRot = new Quaternionf(bodyPartData.getRotation());
-
-                Vector3f controllerPos = bodyPartData.getPos().toVector3f();
-                Vector3f offset = new Vector3f(localGrabOffset);
-                targetRot.transform(offset);
-
-                Vector3f targetPos = controllerPos.add(offset);
-
-                for (Integer bodyIndex : VelthoricClientUtils.bodiesAround(targetPos.x, targetPos.y, targetPos.z, PlayerBodyManager.GRAB_RADIUS)) {
-                    if (!ClientDataStore.playerControlledBodies.contains(bodyIndex)) {
-                        isGrabbing = true;
-                        break;
-                    }
-                }
-            }
-        }
-        System.out.println("sendpacket" + isGrabbing);
         Networking.sendToServer(new C2SGrabPacket(interactionHand));
         return isGrabbing;
     }
 
     /**
-     * Releases the currently grabbed object using the specified hand.
-     * <p>
      * Sends a release packet to the server to remove the grab constraint.
-     * </p>
      *
      * @param interactionHand the hand to release (main or off-hand)
      */

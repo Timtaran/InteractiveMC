@@ -6,10 +6,10 @@ package net.timtaran.interactivemc.init.registry;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.timtaran.interactivemc.body.player.PlayerBodyPartGhostRenderer;
-import net.timtaran.interactivemc.body.player.PlayerBodyPartGhostRigidBody;
-import net.timtaran.interactivemc.body.player.PlayerBodyPartRenderer;
-import net.timtaran.interactivemc.body.player.PlayerBodyPartRigidBody;
+import net.timtaran.interactivemc.body.player.renderer.PlayerBodyPartGhostRenderer;
+import net.timtaran.interactivemc.body.player.physics.PlayerBodyPartGhostRigidBody;
+import net.timtaran.interactivemc.body.player.renderer.PlayerBodyPartRenderer;
+import net.timtaran.interactivemc.body.player.physics.PlayerBodyPartRigidBody;
 import net.xmx.velthoric.core.body.VxBodyType;
 import net.xmx.velthoric.core.body.registry.VxBodyRegistry;
 import net.timtaran.interactivemc.util.InteractiveMCIdentifier;

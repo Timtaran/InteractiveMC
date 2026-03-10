@@ -7,6 +7,8 @@ package net.timtaran.interactivemc.body.player;
 import com.github.stephengold.joltjni.RVec3;
 import com.github.stephengold.joltjni.Vec3;
 import net.minecraft.world.InteractionHand;
+import net.timtaran.interactivemc.body.player.physics.PlayerBodyPartGhostRigidBody;
+import net.timtaran.interactivemc.body.player.physics.PlayerBodyPartRigidBody;
 import org.joml.Vector3f;
 import org.vivecraft.api.data.VRBodyPart;
 
@@ -19,8 +21,8 @@ import org.vivecraft.api.data.VRBodyPart;
  *
  * @author timtaran
  * @see net.timtaran.interactivemc.body.player.PlayerBodyManager
- * @see net.timtaran.interactivemc.body.player.PlayerBodyPartRigidBody
- * @see net.timtaran.interactivemc.body.player.PlayerBodyPartGhostRigidBody
+ * @see PlayerBodyPartRigidBody
+ * @see PlayerBodyPartGhostRigidBody
  */
 public enum PlayerBodyPart {
     HEAD(new Vec3(0.5f, 0.5f, 0.5f)),

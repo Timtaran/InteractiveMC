@@ -2,7 +2,7 @@
  * This file is part of InteractiveMC.
  * Licensed under LGPL 3.0.
  */
-package net.timtaran.interactivemc.body.player;
+package net.timtaran.interactivemc.body.player.physics;
 
 import com.github.stephengold.joltjni.BodyCreationSettings;
 import com.github.stephengold.joltjni.BoxShapeSettings;
@@ -12,8 +12,9 @@ import com.github.stephengold.joltjni.enumerate.EMotionType;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.timtaran.interactivemc.data.ClientDataStore;
-import net.timtaran.interactivemc.data.PlayerDataStore;
+import net.timtaran.interactivemc.body.player.PlayerBodyPart;
+import net.timtaran.interactivemc.body.player.store.ClientPlayerBodyDataStore;
+import net.timtaran.interactivemc.body.player.store.PlayerBodyDataStore;
 import net.timtaran.interactivemc.network.sync.DataSerializers;
 import net.xmx.velthoric.core.body.VxBody;
 import net.xmx.velthoric.core.body.VxBodyType;
@@ -123,7 +124,7 @@ public class PlayerBodyPartGhostRigidBody extends VxBody {
 
     @Override
     public void onPrePhysicsTick(VxPhysicsWorld world) {
-        VRPose pose = PlayerDataStore.vrPoses.get(get(DATA_PLAYER_ID));
+        VRPose pose = PlayerBodyDataStore.vrPoses.get(get(DATA_PLAYER_ID));
         if (pose == null) return;
 
         PlayerBodyPart bodyPart = get(DATA_BODY_PART);
@@ -167,7 +168,7 @@ public class PlayerBodyPartGhostRigidBody extends VxBody {
             return;
 
         isIndexSaved = true;
-        ClientDataStore.playerControlledBodies.add(index);
+        ClientPlayerBodyDataStore.playerControlledBodies.add(index);
     }
 
     /**
@@ -182,7 +183,7 @@ public class PlayerBodyPartGhostRigidBody extends VxBody {
         if (index == null)
             return;
 
-        ClientDataStore.playerControlledBodies.remove(index);
+        ClientPlayerBodyDataStore.playerControlledBodies.remove(index);
     }
 
     /**

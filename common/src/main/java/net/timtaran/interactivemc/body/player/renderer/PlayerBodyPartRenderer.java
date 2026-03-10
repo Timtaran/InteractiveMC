@@ -2,7 +2,7 @@
  * This file is part of InteractiveMC.
  * Licensed under LGPL 3.0.
  */
-package net.timtaran.interactivemc.body.player;
+package net.timtaran.interactivemc.body.player.renderer;
 
 import com.github.stephengold.joltjni.Quat;
 import com.github.stephengold.joltjni.Vec3;
@@ -13,6 +13,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.timtaran.interactivemc.body.player.physics.PlayerBodyPartRigidBody;
 import net.xmx.velthoric.core.body.VxBody;
 import net.xmx.velthoric.core.body.client.VxRenderState;
 import net.xmx.velthoric.core.body.client.renderer.VxBodyRenderer;
