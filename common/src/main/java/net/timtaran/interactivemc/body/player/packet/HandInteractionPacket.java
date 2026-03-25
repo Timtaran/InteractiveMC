@@ -20,7 +20,7 @@ public abstract class HandInteractionPacket implements IVxNetPacket {
     /**
      * The hand that is performing this interaction.
      */
-    private final InteractionHand interactionHand;
+    private final InteractionHand interactionHand; // todo replace with player body part
 
     /**
      * Constructs a new hand interaction packet.

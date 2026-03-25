@@ -139,6 +139,14 @@ public enum PlayerBodyPart {
         };
     }
 
+    public InteractionHand toInteractionHand() {
+        return switch (this) {
+            case MAIN_HAND -> InteractionHand.MAIN_HAND;
+            case OFF_HAND -> InteractionHand.OFF_HAND;
+            default -> null;
+        };
+    }
+
     /**
      * Converts this {@link PlayerBodyPart} to its corresponding {@link VRBodyPart}.
      * <p>

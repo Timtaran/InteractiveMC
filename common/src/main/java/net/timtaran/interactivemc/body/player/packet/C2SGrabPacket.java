@@ -6,11 +6,8 @@ package net.timtaran.interactivemc.body.player.packet;
 
 import dev.architectury.networking.NetworkManager;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.timtaran.interactivemc.body.player.PlayerBodyManager;
-import net.timtaran.interactivemc.network.Networking;
-import net.xmx.velthoric.core.body.VxBody;
 import net.xmx.velthoric.core.physics.world.VxPhysicsWorld;
 
 /**
@@ -55,21 +52,9 @@ public class C2SGrabPacket extends HandInteractionPacket {
     public void handle(NetworkManager.PacketContext context) {
         VxPhysicsWorld physicsWorld = VxPhysicsWorld.get(context.getPlayer().level().dimension());
         if (physicsWorld != null)
-            physicsWorld.execute(() -> {
-                        VxBody grabbedBody = PlayerBodyManager.get(physicsWorld).grab(context.getPlayer(), getInteractionHand());
+            physicsWorld.execute(() ->
+                    PlayerBodyManager.get(physicsWorld).grab(context.getPlayer(), getInteractionHand())
 
-                        if (context.getPlayer() instanceof ServerPlayer serverPlayer) {
-                            context.getPlayer().getServer().execute(() ->
-                                    Networking.sendToPlayer(
-                                            serverPlayer,
-                                            new S2CGrabResultPacket(
-                                                    getInteractionHand(),
-                                                    grabbedBody == null ? null : grabbedBody.getPhysicsId()
-                                            )
-                                    )
-                            );
-                        }
-                    }
             );
     }
 }

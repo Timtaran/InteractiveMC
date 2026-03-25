@@ -10,14 +10,18 @@ import com.github.stephengold.joltjni.enumerate.EAxis;
 import com.github.stephengold.joltjni.enumerate.EConstraintSpace;
 import com.github.stephengold.joltjni.enumerate.EMotionType;
 import com.github.stephengold.joltjni.operator.Op;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.timtaran.interactivemc.body.player.interaction.GrabInteraction;
+import net.timtaran.interactivemc.body.player.packet.S2CGrabResultPacket;
 import net.timtaran.interactivemc.body.player.physics.PlayerBodyPartGhostRigidBody;
 import net.timtaran.interactivemc.body.player.physics.PlayerBodyPartRigidBody;
 import net.timtaran.interactivemc.body.player.store.PlayerBodyDataStore;
+import net.timtaran.interactivemc.init.InteractiveMC;
 import net.timtaran.interactivemc.init.registry.BodyRegistry;
+import net.timtaran.interactivemc.network.Networking;
 import net.xmx.velthoric.core.body.VxBody;
 import net.xmx.velthoric.core.body.VxRemovalReason;
 import net.xmx.velthoric.core.body.server.VxServerBodyManager;
@@ -27,10 +31,7 @@ import net.xmx.velthoric.math.VxConversions;
 import net.xmx.velthoric.math.VxTransform;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 /**
  * Manages the creation, tracking, and interaction of player bodies in the physics world.
@@ -55,7 +56,8 @@ public class PlayerBodyManager {
 
     private PlayerBodyManager(VxPhysicsWorld world) {
         this.world = world;
-        this.grabInteraction = new GrabInteraction(world);
+        this.grabInteraction = new GrabInteraction(world, this);
+        ContactListenerManager.init(world); // todo delete this
     }
 
     /**
@@ -244,16 +246,48 @@ public class PlayerBodyManager {
 
         GrabInteraction.GrabResult grabResult = grabInteraction.grab(player, body, playerBodyPart);
 
-        if (grabResult.grabbedBody() == null)
-            return null;
-
-        playerBodies.put(playerBodyPart, new PlayerBodyPartData(
-                playerBodyPartData.bodyPartId(), playerBodyPartData.ghostBodyPartId(),
-                grabResult.grabbedBody().getPhysicsId(),
-                grabResult.grabConstraint() != null ? grabResult.grabConstraint().getConstraintId() : null
-        ));
+        processGrabResult(player, playerBodyPart, grabResult);
 
         return grabResult.grabbedBody();
+    }
+
+    /**
+     * Pulls not attached grabbed body to player hand.
+     *
+     * @param player the player attempting to pull
+     */
+    public void pull(Player player, InteractionHand interactionHand) {
+        try {
+            PlayerBodyPart playerBodyPart = PlayerBodyPart.fromInteractionHand(interactionHand);
+            if (playerBodyPart == null)
+                return;
+
+            EnumMap<PlayerBodyPart, PlayerBodyPartData> playerBodies = PlayerBodyDataStore.playersBodies.get(player.getUUID());
+            if (playerBodies == null)
+                return;
+
+            PlayerBodyPartData playerBodyPartData = playerBodies.get(playerBodyPart);
+            // every player body part should be initialized if we have playerBodies
+            if (playerBodyPartData == null)
+                return;
+
+            if (
+                    playerBodyPartData.grabbedBodyId() == null || // is grabbing any body
+                            playerBodyPartData.grabConstraintId() != null  // is not attached
+            )
+                return;
+
+            VxBody grabberBody = world.getBodyManager().getVxBody(playerBodyPartData.bodyPartId());
+            if (grabberBody == null) {
+                return;
+            }
+
+            VxBody grabbedBody = world.getBodyManager().getVxBody(playerBodyPartData.grabbedBodyId());
+
+            grabInteraction.pull(player, grabbedBody, grabbedBody, playerBodyPart);
+        } catch (Exception e) {
+            InteractiveMC.LOGGER.error("Error while pulling grabbed body", e);
+        }
     }
 
     /**
@@ -279,12 +313,47 @@ public class PlayerBodyManager {
             );
         }
 
-        if (playerBodyPartData.grabbedBodyId() == null || playerBodyPartData.grabConstraintId() == null) {
+        if (playerBodyPartData.grabbedBodyId() == null) {
             return;
         }
 
         grabInteraction.release(playerBodyPartData);
 
         playerBodies.put(playerBodyPart, new PlayerBodyPartData(playerBodyPartData.bodyPartId(), playerBodyPartData.ghostBodyPartId(), null, null));
+        System.out.println("released body");
+    }
+
+    public void processGrabResult(Player player, PlayerBodyPart playerBodyPart, GrabInteraction.GrabResult grabResult) {
+        EnumMap<PlayerBodyPart, PlayerBodyPartData> playerBodies = PlayerBodyDataStore.playersBodies.get(player.getUUID());
+        if (playerBodies == null)
+            return;
+
+        PlayerBodyPartData playerBodyPartData = playerBodies.get(playerBodyPart);
+        if (playerBodyPartData == null) {
+            return;
+        }
+
+        playerBodies.put(playerBodyPart, new PlayerBodyPartData(
+                playerBodyPartData.bodyPartId(), playerBodyPartData.ghostBodyPartId(),
+                grabResult.grabbedBody() != null ? grabResult.grabbedBody().getPhysicsId() : null,
+                grabResult.grabConstraint() != null ? grabResult.grabConstraint().getConstraintId() : null
+        ));
+
+        InteractionHand interactionHand = playerBodyPart.toInteractionHand();
+        if (interactionHand == null)
+            return;
+
+        if (player instanceof ServerPlayer serverPlayer) {
+            player.getServer().execute(() ->
+                    Networking.sendToPlayer(
+                            serverPlayer,
+                            new S2CGrabResultPacket(
+                                    interactionHand,
+                                    grabResult.grabbedBody() == null ? UUID.randomUUID() : grabResult.grabbedBody().getPhysicsId()
+                                    // todo replace (I forgot with what, but random uuid is used here because passing null values causes NPE)
+                            )
+                    )
+            );
+        }
     }
 }

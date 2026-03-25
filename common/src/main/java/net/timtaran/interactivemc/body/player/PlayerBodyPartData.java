@@ -14,13 +14,13 @@ import java.util.UUID;
  * <ul>
  *     <li>{@code grabbedBodyId == null} — nothing is grabbed</li>
  *     <li>{@code grabbedBodyId != null && grabConstraintId == null} — body is being pulled</li>
- *     <li>{@code grabbedBodyId != null && grabConstraintId != null} — body is mounted using a constraint</li>
+ *     <li>{@code grabbedBodyId != null && grabConstraintId != null} — body is attached using a constraint</li>
  * </ul>
  *
  * @param bodyPartId       ID of dynamic body part
  * @param ghostBodyPartId  ID of the ghost body part
  * @param grabbedBodyId    ID of the grabbed/pulled body ({@code null} if body not grabbing anything)
- * @param grabConstraintId ID of the grab constraint ({@code null} if not mounted)
+ * @param grabConstraintId ID of the grab constraint ({@code null} if not attached)
  * @author timtaran
  */
 public record PlayerBodyPartData(UUID bodyPartId, UUID ghostBodyPartId, @Nullable UUID grabbedBodyId,
