@@ -1,21 +1,21 @@
 package net.timtaran.interactivemc.init.registry;
 
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.*;
-import com.mojang.math.Axis;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.*;
+import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.world.phys.Vec3;
 import net.timtaran.interactivemc.event.player.PlayerLifecycleEvents;
 import net.timtaran.interactivemc.event.tick.ServerTickEvents;
-import net.xmx.velthoric.event.api.VxRenderEvent;
 import org.joml.Matrix4f;
-import org.joml.Vector3f;
 
 /**
  * Registry for mod events.
@@ -27,6 +27,7 @@ import org.joml.Vector3f;
  */
 public class EventRegistry {
     public static Vec3 pointPos = new Vec3(0f, 128f, 0f);
+
     /**
      * Registers common events that apply to both client and server.
      */

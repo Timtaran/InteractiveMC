@@ -29,40 +29,6 @@ import org.joml.Quaternionf;
 @Environment(EnvType.CLIENT)
 public class PlayerBodyPartRenderer extends VxBodyRenderer<VxBody> {
     /**
-     * Renders a player body part rigid body as a wireframe cube.
-     *
-     * @param body         the body to render
-     * @param poseStack    the pose stack for transformations
-     * @param bufferSource the buffer source for rendering
-     * @param partialTicks the partial ticks for interpolation
-     * @param packedLight  the packed light value
-     * @param renderState  the render state containing transform and other data
-     */
-    @Override
-    public void render(VxBody body, PoseStack poseStack, MultiBufferSource bufferSource, float partialTicks, int packedLight, VxRenderState renderState) {
-        Vec3 halfExtents = body.get(PlayerBodyPartRigidBody.DATA_HALF_EXTENTS);
-        float hx = halfExtents.getX();
-        float hy = halfExtents.getY();
-        float hz = halfExtents.getZ();
-
-        float fullWidth = hx * 2.0f;
-        float fullHeight = hy * 2.0f;
-        float fullDepth = hz * 2.0f;
-
-        poseStack.pushPose();
-
-        Quat renderRotation = renderState.transform.getRotation();
-        poseStack.mulPose(new Quaternionf(renderRotation.getX(), renderRotation.getY(), renderRotation.getZ(), renderRotation.getW()));
-
-        poseStack.translate(-hx, -hy, -hz);
-        poseStack.scale(fullWidth, fullHeight, fullDepth);
-
-        renderUnitCubeWireframe(poseStack, bufferSource, packedLight, 1.0f, 1.0f, 0.0f, 1.0f);
-
-        poseStack.popPose();
-    }
-
-    /**
      * Renders a unit cube wireframe with the specified color.
      * <p>
      * This method draws all 12 edges of a unit cube from (0,0,0) to (1,1,1).
@@ -136,5 +102,39 @@ public class PlayerBodyPartRenderer extends VxBodyRenderer<VxBody> {
                 .setOverlay(OverlayTexture.NO_OVERLAY)          // overlay
                 .setLight(packedLight)                          // packed light
                 .setNormal(0f, 1f, 0f); // normal (ignored for lines)
+    }
+
+    /**
+     * Renders a player body part rigid body as a wireframe cube.
+     *
+     * @param body         the body to render
+     * @param poseStack    the pose stack for transformations
+     * @param bufferSource the buffer source for rendering
+     * @param partialTicks the partial ticks for interpolation
+     * @param packedLight  the packed light value
+     * @param renderState  the render state containing transform and other data
+     */
+    @Override
+    public void render(VxBody body, PoseStack poseStack, MultiBufferSource bufferSource, float partialTicks, int packedLight, VxRenderState renderState) {
+        Vec3 halfExtents = body.get(PlayerBodyPartRigidBody.DATA_HALF_EXTENTS);
+        float hx = halfExtents.getX();
+        float hy = halfExtents.getY();
+        float hz = halfExtents.getZ();
+
+        float fullWidth = hx * 2.0f;
+        float fullHeight = hy * 2.0f;
+        float fullDepth = hz * 2.0f;
+
+        poseStack.pushPose();
+
+        Quat renderRotation = renderState.transform.getRotation();
+        poseStack.mulPose(new Quaternionf(renderRotation.getX(), renderRotation.getY(), renderRotation.getZ(), renderRotation.getW()));
+
+        poseStack.translate(-hx, -hy, -hz);
+        poseStack.scale(fullWidth, fullHeight, fullDepth);
+
+        renderUnitCubeWireframe(poseStack, bufferSource, packedLight, 1.0f, 1.0f, 0.0f, 1.0f);
+
+        poseStack.popPose();
     }
 }

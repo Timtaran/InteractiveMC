@@ -4,6 +4,8 @@
  */
 package net.timtaran.interactivemc.body.player.store;
 
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
+import it.unimi.dsi.fastutil.ints.IntSet;
 import net.timtaran.interactivemc.body.player.PlayerBodyPart;
 import net.timtaran.interactivemc.body.player.PlayerBodyPartData;
 import org.vivecraft.api.data.VRPose;
@@ -34,10 +36,24 @@ public class PlayerBodyDataStore {
     /**
      * Contains the Jolt body IDs of all player bodies for quick lookup during interactions.
      */
-    public static final HashMap<UUID, List<Integer>> playersJoltBodies = new HashMap<>();
+    public static final HashMap<UUID, Set<Integer>> playersJoltBodies = new HashMap<>();
+
+    /**
+     * Contains the Jolt body IDs of all grabbed player bodies for quick lookup during interactions.
+     */
+    public static final IntSet grabbedBodies = new IntOpenHashSet();
 
     /**
      * The VR poses of the players by UUID.
      */
     public static Map<UUID, VRPose> vrPoses = new HashMap<>();
+
+    public static boolean isPlayerControlledBody(UUID playerId, int bodyId) {
+        Set<Integer> bodies = playersJoltBodies.get(playerId);
+        return bodies != null && bodies.contains(bodyId);
+    }
+
+    public static boolean isBodyGrabbed(int bodyId) {
+        return grabbedBodies.contains(bodyId);
+    }
 }

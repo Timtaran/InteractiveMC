@@ -77,25 +77,6 @@ public class C2SFrameVRPosePacket implements IVxNetPacket {
     }
 
     /**
-     * Encodes the packet's VR pose data into a network buffer.
-     * <p>
-     * Serializes all body parts, seated state, handedness, and FBT mode.
-     *
-     * @param buf the buffer to write to
-     */
-    @Override
-    public void encode(VxByteBuf buf) {
-        buf.writeBoolean(pose.isSeated());
-        buf.writeBoolean(pose.isLeftHanded());
-
-        buf.writeEnum(pose.getFBTMode());
-
-        for (VRBodyPart part : VRBodyPart.values()) {
-            writeBodyPartData(buf, pose.getBodyPartData(part));
-        }
-    }
-
-    /**
      * Decodes the packet from a network buffer.
      * <p>
      * Reconstructs the VR pose from the serialized data by reading all body parts
@@ -132,6 +113,25 @@ public class C2SFrameVRPosePacket implements IVxNetPacket {
                         fbtMode
                 )
         );
+    }
+
+    /**
+     * Encodes the packet's VR pose data into a network buffer.
+     * <p>
+     * Serializes all body parts, seated state, handedness, and FBT mode.
+     *
+     * @param buf the buffer to write to
+     */
+    @Override
+    public void encode(VxByteBuf buf) {
+        buf.writeBoolean(pose.isSeated());
+        buf.writeBoolean(pose.isLeftHanded());
+
+        buf.writeEnum(pose.getFBTMode());
+
+        for (VRBodyPart part : VRBodyPart.values()) {
+            writeBodyPartData(buf, pose.getBodyPartData(part));
+        }
     }
 
     /**

@@ -4,6 +4,7 @@
  */
 package net.timtaran.interactivemc.body.type;
 
+import com.github.stephengold.joltjni.RVec3;
 import com.github.stephengold.joltjni.Vec3;
 import net.minecraft.world.entity.player.Player;
 import net.timtaran.interactivemc.body.player.PlayerBodyPart;
@@ -23,7 +24,8 @@ public interface IGrabbable {
      * <p>
      * Defines where on the body a grabber attaches.
      *
-     * @param intersectionPoint the intersection point between the grabber and the body.
+     * @param intersectionPoint the intersection point between the grabber and the body,
+     *                          relative to the body position (not center of mass).
      *                          Implementations may use this to determine the closest
      *                          valid grab point.
      *                          If the grab point is arbitrary, return
@@ -31,7 +33,7 @@ public interface IGrabbable {
      * @return the local position of the grab point, or {@code null} to prevent grabbing.
      */
     @Nullable
-    Vec3 getGrabPoint(Vec3 intersectionPoint);
+    RVec3 getGrabPoint(RVec3 intersectionPoint);
 
     /**
      * Gets the grab point position in the local space.
@@ -55,8 +57,8 @@ public interface IGrabbable {
     /**
      * Method called when the body is grabbed.
      *
-     * @param player    the player grabbing the body
-     * @param bodyPart  player body part grabbing the body
+     * @param player     the player grabbing the body
+     * @param bodyPart   player body part grabbing the body
      * @param isAttached {@code true} if the body is attached to the player body part, {@code false} otherwise
      */
     default void onGrab(Player player, PlayerBodyPart bodyPart, boolean isAttached) {

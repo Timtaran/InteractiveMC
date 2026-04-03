@@ -10,6 +10,8 @@ import com.github.stephengold.joltjni.enumerate.EAxis;
 import com.github.stephengold.joltjni.enumerate.EConstraintSpace;
 import com.github.stephengold.joltjni.enumerate.EMotionType;
 import com.github.stephengold.joltjni.operator.Op;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
+import it.unimi.dsi.fastutil.ints.IntSet;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
@@ -169,7 +171,7 @@ public class PlayerBodyManager {
         }
 
         EnumMap<PlayerBodyPart, PlayerBodyPartData> playerBodies = new EnumMap<>(PlayerBodyPart.class);
-        List<Integer> joltBodyIds = new ArrayList<>();
+        IntSet joltBodyIds = new IntOpenHashSet();
 
         VxServerBodyManager bodyManager = world.getBodyManager();
 
@@ -319,6 +321,14 @@ public class PlayerBodyManager {
 
         grabInteraction.release(playerBodyPartData);
 
+        VxBody grabbedBody = world.getBodyManager().getVxBody(playerBodyPartData.grabbedBodyId());
+        if (grabbedBody != null) {
+            if (PlayerBodyDataStore.grabbedBodies.contains(grabbedBody.getBodyId()))
+                return;
+
+            PlayerBodyDataStore.grabbedBodies.remove(grabbedBody.getBodyId());
+        }
+
         playerBodies.put(playerBodyPart, new PlayerBodyPartData(playerBodyPartData.bodyPartId(), playerBodyPartData.ghostBodyPartId(), null, null));
         System.out.println("released body");
     }
@@ -339,6 +349,14 @@ public class PlayerBodyManager {
                 grabResult.grabConstraint() != null ? grabResult.grabConstraint().getConstraintId() : null
         ));
 
+
+        if (grabResult.grabbedBody() != null) {
+            if (PlayerBodyDataStore.grabbedBodies.contains(grabResult.grabbedBody().getBodyId()))
+                return;
+
+            PlayerBodyDataStore.grabbedBodies.add(grabResult.grabbedBody().getBodyId());
+        }
+
         InteractionHand interactionHand = playerBodyPart.toInteractionHand();
         if (interactionHand == null)
             return;
@@ -350,7 +368,7 @@ public class PlayerBodyManager {
                             new S2CGrabResultPacket(
                                     interactionHand,
                                     grabResult.grabbedBody() == null ? UUID.randomUUID() : grabResult.grabbedBody().getPhysicsId()
-                                    // todo replace (I forgot with what, but random uuid is used here because passing null values causes NPE)
+                                    // todo: replace (I forgot with what, but random uuid is used here because passing null values causes NPE)
                             )
                     )
             );

@@ -25,10 +25,25 @@ import org.vivecraft.api.data.VRBodyPart;
  * @see PlayerBodyPartGhostRigidBody
  */
 public enum PlayerBodyPart {
-    HEAD(new Vec3(0.5f, 0.5f, 0.5f)),
+    HEAD(
+            new Vec3(0.5f, 0.5f, 0.5f),
+            new net.minecraft.world.phys.Vec3(0f, -0.1f, -0.1f),
+            new Vector3f(0f, 0.035f, 0.1f),
+            new RVec3(0d, 0d, 0d)
+    ),
 
-    MAIN_HAND(new Vec3(0.25f, 0.25f, 0.75f)),
-    OFF_HAND(new Vec3(0.25f, 0.25f, 0.75f));
+    MAIN_HAND(
+            new Vec3(0.25f, 0.25f, 0.75f),
+            new net.minecraft.world.phys.Vec3(0.5f, 0f, -0.2f),
+            new Vector3f(0, 0, 0.35f),
+            new RVec3(0d, 0d, -0.34d)
+    ),
+    OFF_HAND(
+            new Vec3(0.25f, 0.25f, 0.75f),
+            new net.minecraft.world.phys.Vec3(-0.5f, 0f, -0.2f),
+            new Vector3f(0, 0, 0.35f),
+            new RVec3(0d, 0d, -0.34d)
+    );
     // todo add elbow
 
     /**
@@ -37,88 +52,45 @@ public enum PlayerBodyPart {
     private final Vec3 size;
 
     /**
-     * Constructs a new player body part with the specified properties.
-     *
-     * @param size the full size (width, height, depth) of the physics shape
-     */
-    PlayerBodyPart(Vec3 size) {
-        this.size = size;
-    }
-
-    /**
-     * Gets the full size of this body part.
-     * <p>
-     * The size represents the dimensions of the physics shape (width x height x depth).
-     * This is the full size, not half-extents.
-     * </p>
-     *
-     * @return a vector representing the width, height, and depth
-     */
-    public Vec3 getSize() {
-        return size;
-    }
-
-    /**
-     * Calculates the local pivot point on this body part for its joint connection.
+     * The local pivot point on this body part for its joint connection.
      * This is typically at the top-center for limbs and the bottom-center for the head.
-     *
-     * @return A vector representing the local pivot point.
      */
-    public net.minecraft.world.phys.Vec3 getLocalPivot() {
-        return switch (this) {
-            case HEAD -> new net.minecraft.world.phys.Vec3(0f, -0.1f, -0.1f);
-            case MAIN_HAND -> new net.minecraft.world.phys.Vec3(0.5f, 0f, -0.2f);
-            case OFF_HAND -> new net.minecraft.world.phys.Vec3(-0.5f, 0f, -0.2f);
-        };
-    }
+    private final net.minecraft.world.phys.Vec3 localPivot;
 
     /**
-     * Gets the local grab point on this body part in RVec3 format.
-     * <p>
-     * This point defines where objects are grabbed when a player tries to grab something
-     * with this body part. For hands, it's at the tip.
-     * </p>
-     *
-     * @return a vector in local space representing the grab point (RVec3 format)
-     */
-    public RVec3 getLocalGrabPoint() {
-        return switch (this) {
-            case HEAD -> new RVec3(0f, 0f, 0f);
-            case MAIN_HAND, OFF_HAND -> new RVec3(0, 0f, -0.34f);
-        };
-    }
-
-    /**
-     * Gets the local grab point on this body part in Vector3f format.
-     * <p>
-     * This is the same as {@link #getLocalGrabPoint()} but in JOML Vector3f format
-     * for convenience when working with JOML math operations.
-     * </p>
-     *
-     * @return a vector in local space representing the grab point (Vector3f format)
-     */
-    public Vector3f getLocalGrabPointVec3f() {
-        return switch (this) {
-            case HEAD -> new Vector3f(0f, 0f, 0f);
-            case MAIN_HAND, OFF_HAND -> new Vector3f(0, 0f, -0.34f);
-        };
-    }
-
-    /**
-     * Gets the tracking offset applied to VR controller data for this body part.
+     * The tracking offset applied to VR controller data for this body part.
      * <p>
      * This offset is applied when tracking the body part's position from VR controller data.
      * It compensates for the difference between where the VR controller is held and where
      * the actual body part should be physically located.
      * </p>
-     *
-     * @return a vector representing the offset to apply to tracked position
      */
-    public net.minecraft.world.phys.Vec3 getTrackingOffset() {
-        return switch (this) {
-            case HEAD -> new net.minecraft.world.phys.Vec3(0f, 0.035f, 0.1f);
-            case MAIN_HAND, OFF_HAND -> new net.minecraft.world.phys.Vec3(0f, 0f, 0.35f);
-        };
+    private final Vector3f trackingOffset;
+
+    /**
+     * The local grab point on this body part in RVec3 format.
+     * <p>
+     * This point defines where objects are grabbed when a player tries to grab something
+     * with this body part. For hands, it's at the tip.
+     * </p>
+     */
+    private final RVec3 grabPoint;
+
+    /**
+     * Constructs a new player body part with the specified properties.
+     *
+     * @param size the full size (width, height, depth) of the physics shape
+     */
+    PlayerBodyPart(
+            Vec3 size,
+            net.minecraft.world.phys.Vec3 localPivot,
+            Vector3f trackingOffset,
+            RVec3 grabPoint
+    ) {
+        this.size = size;
+        this.localPivot = localPivot;
+        this.trackingOffset = trackingOffset;
+        this.grabPoint = grabPoint;
     }
 
     /**
@@ -136,6 +108,55 @@ public enum PlayerBodyPart {
         return switch (interactionHand) {
             case MAIN_HAND -> MAIN_HAND;
             case OFF_HAND -> OFF_HAND;
+        };
+    }
+
+    /**
+     * Gets the full size of this body part.
+     * <p>
+     * The size represents the dimensions of the physics shape (width x height x depth).
+     * This is the full size, not half-extents.
+     * </p>
+     *
+     * @return a vector representing the width, height, and depth
+     */
+    public Vec3 getSize() {
+        return size;
+    }
+
+    public net.minecraft.world.phys.Vec3 getLocalPivot() {
+        return localPivot;
+    }
+
+    /**
+     * Gets the local grab point on this body part in RVec3 format.
+     * <p>
+     * This point defines where objects are grabbed when a player tries to grab something
+     * with this body part. For hands, it's at the tip.
+     * </p>
+     *
+     * @return a vector in local space representing the grab point (RVec3 format)
+     */
+    public RVec3 getGrabPoint() {
+        return switch (this) {
+            case HEAD -> new RVec3(0f, 0f, 0f);
+            case MAIN_HAND, OFF_HAND -> new RVec3(0, 0f, -0.34f);
+        };
+    }
+
+    public Vector3f getGrabPointVec3f() {
+        // todo decide do we actually need this method
+        // vivecraft stores player hand position at the tip, so vec3f grab point is trackingOffset + rvec3 grab point, which is very close to zero
+        return switch (this) {
+            case HEAD -> new Vector3f(0f, 0f, 0f);
+            case MAIN_HAND, OFF_HAND -> new Vector3f(0, 0f, -0.01f);
+        };
+    }
+
+    public Vector3f getTrackingOffset() {
+        return switch (this) {
+            case HEAD -> new Vector3f(0f, 0.035f, 0.1f);
+            case MAIN_HAND, OFF_HAND -> new Vector3f(0f, 0f, 0.35f);
         };
     }
 

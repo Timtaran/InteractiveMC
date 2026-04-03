@@ -37,6 +37,16 @@ public class S2CGrabResultPacket extends HandInteractionPacket {
     }
 
     /**
+     * Decodes a grab result packet from a network buffer.
+     *
+     * @param buf the buffer to read from
+     * @return a new instance of the grab result packet
+     */
+    public static S2CGrabResultPacket decode(VxByteBuf buf) {
+        return new S2CGrabResultPacket(buf.readEnum(InteractionHand.class), buf.readUUID());
+    }
+
+    /**
      * Encodes the packet data into a network buffer.
      *
      * @param buf the buffer to write to
@@ -45,16 +55,6 @@ public class S2CGrabResultPacket extends HandInteractionPacket {
     public void encode(VxByteBuf buf) {
         super.encode(buf);
         buf.writeUUID(grabbedBodyUUID);
-    }
-
-    /**
-     * Decodes a grab result packet from a network buffer.
-     *
-     * @param buf the buffer to read from
-     * @return a new instance of the grab result packet
-     */
-    public static S2CGrabResultPacket decode(VxByteBuf buf) {
-        return new S2CGrabResultPacket(buf.readEnum(InteractionHand.class), buf.readUUID());
     }
 
     /**

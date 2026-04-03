@@ -10,11 +10,6 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class ContactListenerManager {
-    public record Reject(int body1, int body2) {}
-    public interface Operation {
-        void execute(int bodyid1, int bodyid2);
-    }
-    public record Notify(int body1, int body2, Operation operation) {}
     public static final List<Reject> hashMap = new CopyOnWriteArrayList<>();
     public static final List<Notify> notifyList = new CopyOnWriteArrayList<>();
     public static final List<Notify> notifyOnRemovalList = new CopyOnWriteArrayList<>();
@@ -52,5 +47,14 @@ public class ContactListenerManager {
                 return ValidateResult.AcceptContact.ordinal();
             }
         });
+    }
+    public interface Operation {
+        void execute(int bodyid1, int bodyid2);
+    }
+
+    public record Reject(int body1, int body2) {
+    }
+
+    public record Notify(int body1, int body2, Operation operation) {
     }
 }

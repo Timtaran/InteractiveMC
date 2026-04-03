@@ -31,24 +31,6 @@ import org.vivecraft.client_vr.provider.MCVR;
 @Mixin(value = MCVR.class, remap = false)
 public class KeyMappingHandlingMixin {
     /**
-     * Injects into the processBindings method to handle grab/release keymappings.
-     * <p>
-     * This method is called at the very beginning of processBindings, before
-     * Vivecraft's default key handling.
-     * </p>
-     *
-     * @param ci the callback info for the mixin injection
-     */
-    @Inject(
-            method = "processBindings",
-            at = @At("HEAD")
-    )
-    private void interactivemc$processKeymappings(CallbackInfo ci) {
-        interactivemc$updateGrabState(InteractionHand.MAIN_HAND, KeyMapRegistry.MAIN_GRAB_KEYMAPPING);
-        interactivemc$updateGrabState(InteractionHand.OFF_HAND, KeyMapRegistry.OFF_GRAB_KEYMAPPING);
-    }
-
-    /**
      * Updates the grab/release state for a single hand based on key state.
      * <p>
      * If the grab key is pressed, attempts to grab an object. If the key is released
@@ -90,6 +72,24 @@ public class KeyMappingHandlingMixin {
     @Unique
     private static void interactivemc$release(InteractionHand interactionHand) {
         Networking.sendToServer(new C2SReleasePacket(interactionHand));
+    }
+
+    /**
+     * Injects into the processBindings method to handle grab/release keymappings.
+     * <p>
+     * This method is called at the very beginning of processBindings, before
+     * Vivecraft's default key handling.
+     * </p>
+     *
+     * @param ci the callback info for the mixin injection
+     */
+    @Inject(
+            method = "processBindings",
+            at = @At("HEAD")
+    )
+    private void interactivemc$processKeymappings(CallbackInfo ci) {
+        interactivemc$updateGrabState(InteractionHand.MAIN_HAND, KeyMapRegistry.MAIN_GRAB_KEYMAPPING);
+        interactivemc$updateGrabState(InteractionHand.OFF_HAND, KeyMapRegistry.OFF_GRAB_KEYMAPPING);
     }
 
 //    @ModifyExpressionValue(

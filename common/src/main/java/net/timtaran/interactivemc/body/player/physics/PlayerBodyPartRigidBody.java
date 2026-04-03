@@ -34,8 +34,6 @@ import java.util.UUID;
  * @author timtaran
  */
 public class PlayerBodyPartRigidBody extends VxBody {
-    private boolean isIndexSaved = false;
-
     /**
      * The half-extents (dimensions) of this body part.
      */
@@ -48,6 +46,7 @@ public class PlayerBodyPartRigidBody extends VxBody {
      * The UUID of the player who owns this body part.
      */
     public static final VxServerAccessor<UUID> DATA_PLAYER_ID = VxServerAccessor.create(PlayerBodyPartRigidBody.class, VxDataSerializers.UUID);
+    private boolean isIndexSaved = false;
 
     /**
      * Server-side constructor.
@@ -71,13 +70,6 @@ public class PlayerBodyPartRigidBody extends VxBody {
         super(type, id);
     }
 
-    @Override
-    protected void defineSyncData(VxSynchronizedData.Builder builder) {
-        builder.define(DATA_HALF_EXTENTS, new Vec3(0.25f, 0.25f, 0.25f));
-        builder.define(DATA_BODY_PART, PlayerBodyPart.HEAD);
-        builder.define(DATA_PLAYER_ID, UUID.randomUUID());
-    }
-
     public static int createJoltBody(VxBody body, VxRigidBodyFactory factory) {
         PlayerBodyPart partType = body.get(DATA_BODY_PART);
         Vec3 fullSize = partType.getSize();
@@ -90,16 +82,6 @@ public class PlayerBodyPartRigidBody extends VxBody {
         }
     }
 
-    /**
-     * Called during each physics tick.
-     * Override this method in subclasses if additional physics processing is needed.
-     *
-     * @param world the physics world
-     */
-    public void onPhysicsTick(VxPhysicsWorld world) {
-        super.onPhysicsTick(world);
-    }
-
     public static void writePersistenceData(VxBody body, VxByteBuf buf) {
         VxDataSerializers.VEC3.write(buf, body.get(DATA_HALF_EXTENTS));
         DataSerializers.BODY_PART.write(buf, body.get(DATA_BODY_PART));
@@ -110,6 +92,23 @@ public class PlayerBodyPartRigidBody extends VxBody {
         body.setServerData(DATA_HALF_EXTENTS, VxDataSerializers.VEC3.read(buf));
         body.setServerData(DATA_BODY_PART, DataSerializers.BODY_PART.read(buf));
         body.setServerData(DATA_PLAYER_ID, VxDataSerializers.UUID.read(buf));
+    }
+
+    @Override
+    protected void defineSyncData(VxSynchronizedData.Builder builder) {
+        builder.define(DATA_HALF_EXTENTS, new Vec3(0.25f, 0.25f, 0.25f));
+        builder.define(DATA_BODY_PART, PlayerBodyPart.HEAD);
+        builder.define(DATA_PLAYER_ID, UUID.randomUUID());
+    }
+
+    /**
+     * Called during each physics tick.
+     * Override this method in subclasses if additional physics processing is needed.
+     *
+     * @param world the physics world
+     */
+    public void onPhysicsTick(VxPhysicsWorld world) {
+        super.onPhysicsTick(world);
     }
 
     /**
