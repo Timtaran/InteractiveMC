@@ -50,6 +50,7 @@ public class C2SReleasePacket extends HandInteractionPacket {
     @Override
     public void handle(NetworkManager.PacketContext context) {
         VxPhysicsWorld physicsWorld = VxPhysicsWorld.get(context.getPlayer().level().dimension());
+        System.out.println("Handling release with: " + physicsWorld);
         if (physicsWorld != null)
             physicsWorld.execute(() -> PlayerBodyManager.get(physicsWorld).release(context.getPlayer(), getInteractionHand()));
     }

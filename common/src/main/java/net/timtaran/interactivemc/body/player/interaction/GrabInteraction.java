@@ -117,15 +117,17 @@ public class GrabInteraction {
             if (body == null)
                 return EMPTY_GRAB_RESULT;
 
-            worldGrabPoint = getBodyPartGrabPointWorld(lock.getBody(), playerBodyPart);
+            worldGrabPoint = getBodyPartGrabPointWorld(body, playerBodyPart);
         }
+
+        System.out.println("worldGrabPoint_grab: " + worldGrabPoint);
 
         // Performing instant grab checks (body will be teleported and attached)
         GrabResult instantGrabResult = tryInstantGrab(lockInterface, player, grabberBody, worldGrabPoint, playerBodyPart);
         if (instantGrabResult != null)
             return instantGrabResult;
 
-        // No body found around grab point, performing raycast to add body to pull
+        // No bodies available for grabbing at the point, performing raycast to find one to pull
         return tryRemoteGrab(lockInterface, player, grabberBody, worldGrabPoint, playerBodyPart);
     }
 
@@ -141,6 +143,8 @@ public class GrabInteraction {
              BodyFilter bodyFilter = new BodyFilter(); // runtime checks works really strange so we will check body ids below
              SphereShape shape = new SphereShape(GRAB_RADIUS)) {
 
+            System.out.println("instant grab");
+
             RVec3Arg base = new RVec3(0.0f, 0.0f, 0.0f);
 
             VxTransform vxTransform = grabberBody.getTransform();
@@ -149,7 +153,7 @@ public class GrabInteraction {
             List<VxPhysicsIntersector.IntersectShapeResult> intersections = VxPhysicsIntersector.narrowIntersectShape(world, shape, GRAB_SHAPE_SCALE, comTransform, base, bplFilter, olFilter, bodyFilter);
 
             intersections.removeIf(intersection ->
-                    !PlayerBodyDataStore.isPlayerControlledBody(player.getUUID(), intersection.bodyId())
+                    PlayerBodyDataStore.isPlayerControlledBody(player.getUUID(), intersection.bodyId())
             );
             intersections.sort(Comparator.comparingDouble(result -> { // sort by closest intersection point to grab point.
                 Vec3 p = result.bodyContactPoint();
@@ -171,7 +175,7 @@ public class GrabInteraction {
             bodyIds[size] = grabberBody.getBodyId();
 
             try (BodyLockMultiWrite lock = new BodyLockMultiWrite(lockInterface, bodyIds)) {
-                Body grabberJoltBody = lock.getBody(size + 1);
+                Body grabberJoltBody = lock.getBody(size);
 
                 for (int i = 0; i < size; i++) {
                     Body grabbedJoltBody = lock.getBody(i);
@@ -181,6 +185,8 @@ public class GrabInteraction {
 
                     VxPhysicsIntersector.IntersectShapeResult intersection = intersections.get(i);
 
+                    System.out.println(intersection);
+
                     if (grabbedJoltBody.getObjectLayer() != VxPhysicsLayers.TERRAIN) { // Velthoric doesn't have VxBody for terrain, so we separate terrain and other bodies logic here
                         VxBody grabbedBody = world.getBodyManager().getByJoltBodyId(intersection.bodyId());
 
@@ -189,13 +195,19 @@ public class GrabInteraction {
                             continue;
                         }
 
-                        // calculating intersection point in body local space
-                        RVec3 bodyContactPointLocal = Op.minus(intersection.bodyContactPoint().toRVec3(), grabbedJoltBody.getPosition()); // todo: move before physics layer check when terrain grabbing is implemented
+                        // calculating intersection point and body center offset
+                        RVec3 bodyContactPointOffset = Op.minus(intersection.bodyContactPoint().toRVec3(), grabbedJoltBody.getPosition()); // todo: move before physics layer check when terrain grabbing is implemented
                         if (grabbedBody instanceof IGrabbable grabbableBody) {
+                            RVec3 bodyContactPointLocal = new RVec3(bodyContactPointOffset);
+                            bodyContactPointLocal.rotateInPlace(grabbedJoltBody.getRotation().conjugated());
+
                             bodyContactPointLocal = grabbableBody.getGrabPoint(bodyContactPointLocal);
 
                             if (bodyContactPointLocal == null)
                                 continue;
+
+                            bodyContactPointOffset = new RVec3(bodyContactPointLocal);
+                            bodyContactPointOffset.rotateInPlace(grabbedJoltBody.getRotation());
                         }
 
                         VxConstraint constraint;
@@ -205,13 +217,14 @@ public class GrabInteraction {
                         if (grabbedJoltBody.isDynamic() && !PlayerBodyDataStore.isBodyGrabbed(grabberJoltBody.getId())) {
                             // move body to grabber
                             grabbedJoltBody.setPositionAndRotationInternal(
-                                    Op.minus(worldGrabPoint, bodyContactPointLocal),
+                                    Op.minus(worldGrabPoint, bodyContactPointOffset),
                                     grabbedJoltBody.getRotation()
                             );
                             constraint = attach(grabberBody, grabbedBody, worldGrabPoint);
+                            System.out.println("Attaching " + grabbedBody.getClass().getSimpleName() + " to " + grabberBody.getClass().getSimpleName() + " at " + worldGrabPoint);
                         } else {
                             // move grabber to body
-                            RVec3 bodyContactPoint = Op.plus(grabbedJoltBody.getPosition(), bodyContactPointLocal);
+                            RVec3 bodyContactPoint = Op.plus(grabbedJoltBody.getPosition(), bodyContactPointOffset);
 
                             grabberJoltBody.setPositionAndRotationInternal(
                                     Op.minus(
@@ -221,6 +234,7 @@ public class GrabInteraction {
                                     grabberJoltBody.getRotation()
                             );
                             constraint = attach(grabberBody, grabbedBody, bodyContactPoint);
+                            System.out.println("Attaching " + grabbedBody.getClass().getSimpleName() + " to " + grabberBody.getClass().getSimpleName() + " at " + bodyContactPoint);
                         }
 
                         ContactListenerManager.hashMap.add(new ContactListenerManager.Reject(grabberBody.getBodyId(), grabbedBody.getBodyId()));
@@ -353,7 +367,7 @@ public class GrabInteraction {
         // not doing null check because body part data can't be null because handMovement is not null
         net.minecraft.world.phys.Vec3 bodyPartPosition = historicalPoses.getHistoricalData(0).getBodyPartData(playerBodyPart.toVRBodyPart()).getPos();
 
-        double pullAmount = handMovement.dot(lookDirection); // todo remove pulling relative to body
+        double pullAmount = handMovement.dot(lookDirection);
 
         if (pullAmount > PULL_THRESHOLD) {
             PhysicsSystem physicsSystem = world.getPhysicsSystem();
@@ -366,7 +380,7 @@ public class GrabInteraction {
             System.out.println(grabbedBody.getClass().getSimpleName());
             bodyInterface.activateBody(grabbedBody.getBodyId());
             System.out.println(VxJoltBridge.INSTANCE.getJoltBody(world, grabbedBody.getBodyId()).getPosition());
-            System.out.println(world.getBodyManager().getByJoltBodyId(grabbedBody.getBodyId()).getClass().getSimpleName());
+            System.out.println(grabbedBody.getClass().getSimpleName());
 
             // Lock the body for modification.
             try (BodyLockMultiWrite lock = new BodyLockMultiWrite(lockInterface, grabberBody.getBodyId(), grabbedBody.getBodyId())) {
@@ -380,7 +394,7 @@ public class GrabInteraction {
                     RVec3 worldGrabPoint = VxConversions.toJolt(bodyPartPosition.toVector3f()).toRVec3();
                     System.out.println("Difference between transform and controller calculation is: " + Op.minus(worldGrabPoint, worldGrabPoint1));
 
-                    worldGrabPoint = worldGrabPoint1;
+                    // worldGrabPoint = worldGrabPoint1;
 
                     System.out.println("world grab point: " + worldGrabPoint);
 
@@ -469,45 +483,6 @@ public class GrabInteraction {
         }
 
         return false;
-    }
-
-    private RVec3 getBodyPartGrabPointWorld(VxBody body, PlayerBodyPart playerBodyPart) {
-        VxTransform vxTransform = body.getTransform();
-        // todo make static after tests
-
-        PhysicsSystem physicsSystem = world.getPhysicsSystem();
-        if (physicsSystem == null) return null;
-
-//        BodyInterface bodyInterface = physicsSystem.getBodyInterface();
-//        ConstBodyLockInterface lockInterface = physicsSystem.getBodyLockInterface();
-//
-//        RVec3 joltBodyPos = new RVec3();
-//        Quat joltBodyRot = new Quat();
-//
-//        try (BodyLockWrite lock = new BodyLockWrite(lockInterface, body.getBodyId())) {
-//            Body joltBody = lock.getBody();
-//            joltBodyPos = joltBody.getCenterOfMassPosition();
-//            joltBodyRot = joltBody.getRotation();
-//        }
-
-        RVec3 worldGrabPoint = vxTransform.getTranslation();
-        //System.out.println("Center of mass: " + joltBodyPos);
-        //System.out.println("Center of mass and transform difference: " + Op.minus(joltBodyPos, worldGrabPoint));
-        RVec3 localGrabPoint = playerBodyPart.getGrabPoint();
-
-        // Rotate the local grab point by the body's rotation to get the correct world offset.
-        RVec3 localGrabPointRotated = new RVec3(localGrabPoint);
-        localGrabPointRotated.rotateInPlace(vxTransform.getRotation());
-        System.out.println("vxBody rotation: " + vxTransform.getRotation());
-        //System.out.println("body rotation: " + joltBodyRot);
-        System.out.println("rotated grab point: " + localGrabPointRotated);
-
-        // Add the rotated local grab point to the body's position to get the final grab point in world space.
-        worldGrabPoint.addInPlace(localGrabPointRotated.xx(), localGrabPointRotated.yy(), localGrabPointRotated.zz());
-
-        System.out.println("grab point: " + worldGrabPoint);
-
-        return worldGrabPoint;
     }
 
     private RVec3 getBodyPartGrabPointWorld(ConstBodyLockInterface lockInterface, int bodyId, PlayerBodyPart playerBodyPart) {

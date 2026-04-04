@@ -236,6 +236,8 @@ public class PlayerBodyManager {
             );
         }
 
+        System.out.println("grab data: " + playerBodyPartData);
+
         if (playerBodyPartData.grabbedBodyId() != null)
             return null; // already grabbing something
 
@@ -301,19 +303,24 @@ public class PlayerBodyManager {
      */
     public void release(Player player, InteractionHand interactionHand) {
         PlayerBodyPart playerBodyPart = PlayerBodyPart.fromInteractionHand(interactionHand);
+        System.out.println("release playerbodypart: " + playerBodyPart);
         if (playerBodyPart == null)
             return;
 
         EnumMap<PlayerBodyPart, PlayerBodyPartData> playerBodies = PlayerBodyDataStore.playersBodies.get(player.getUUID());
+        System.out.println("release playerbodies: " + playerBodies);
         if (playerBodies == null)
             return;
 
         PlayerBodyPartData playerBodyPartData = playerBodies.get(playerBodyPart);
+        System.out.println("release playerbodypartdata: " + playerBodyPartData);
         if (playerBodyPartData == null) {
             throw new IllegalStateException(
                     "Missing body part " + playerBodyPart + " for player " + player.getUUID()
             );
         }
+
+        System.out.println("release triggered with: " + playerBodyPartData);
 
         if (playerBodyPartData.grabbedBodyId() == null) {
             return;
@@ -334,6 +341,7 @@ public class PlayerBodyManager {
     }
 
     public void processGrabResult(Player player, PlayerBodyPart playerBodyPart, GrabInteraction.GrabResult grabResult) {
+        System.out.println(grabResult);
         EnumMap<PlayerBodyPart, PlayerBodyPartData> playerBodies = PlayerBodyDataStore.playersBodies.get(player.getUUID());
         if (playerBodies == null)
             return;

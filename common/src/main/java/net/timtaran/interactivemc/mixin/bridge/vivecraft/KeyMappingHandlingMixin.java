@@ -43,9 +43,12 @@ public class KeyMappingHandlingMixin {
     @Unique
     private static void interactivemc$updateGrabState(InteractionHand hand, KeyMapping keyMapping) {
         if (keyMapping.consumeClick()) {
+            System.out.println("grabbing, " + ClientPlayerBodyDataStore.grabbedBodies);
             interactivemc$grab(hand);
         } else if (!keyMapping.isDown() && ClientPlayerBodyDataStore.grabbedBodies.get(hand) != null) {
+            System.out.println("releasing, " + ClientPlayerBodyDataStore.grabbedBodies);
             interactivemc$release(hand);
+            ClientPlayerBodyDataStore.grabbedBodies.remove(hand);
         }
     }
 
@@ -59,6 +62,7 @@ public class KeyMappingHandlingMixin {
     @Unique
     private static boolean interactivemc$grab(InteractionHand interactionHand) {
         boolean isGrabbing = GrabInteraction.canGrabClient(interactionHand);
+        System.out.println(isGrabbing);
 
         Networking.sendToServer(new C2SGrabPacket(interactionHand));
         return isGrabbing;

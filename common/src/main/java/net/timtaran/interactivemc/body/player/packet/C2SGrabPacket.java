@@ -51,6 +51,7 @@ public class C2SGrabPacket extends HandInteractionPacket {
     @Override
     public void handle(NetworkManager.PacketContext context) {
         VxPhysicsWorld physicsWorld = VxPhysicsWorld.get(context.getPlayer().level().dimension());
+        System.out.println("Handling grab with: " + physicsWorld);
         if (physicsWorld != null)
             physicsWorld.execute(() ->
                     PlayerBodyManager.get(physicsWorld).grab(context.getPlayer(), getInteractionHand())

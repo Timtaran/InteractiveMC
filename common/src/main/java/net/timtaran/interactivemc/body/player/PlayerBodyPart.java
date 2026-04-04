@@ -102,7 +102,6 @@ public enum PlayerBodyPart {
      *
      * @param interactionHand the interaction hand (main or off-hand)
      * @return the corresponding player body part
-     * @throws NullPointerException if interactionHand is null
      */
     public static PlayerBodyPart fromInteractionHand(InteractionHand interactionHand) {
         return switch (interactionHand) {
