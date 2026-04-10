@@ -10,6 +10,7 @@ import com.github.stephengold.joltjni.enumerate.EAxis;
 import com.github.stephengold.joltjni.enumerate.EConstraintSpace;
 import com.github.stephengold.joltjni.enumerate.EMotionType;
 import com.github.stephengold.joltjni.operator.Op;
+import com.github.stephengold.joltjni.readonly.Vec3Arg;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import net.minecraft.server.level.ServerPlayer;
@@ -92,7 +93,7 @@ public class PlayerBodyManager {
      * @return data about the created body part, including the IDs of both the main and ghost bodies
      */
     private PlayerBodyPartData createBodyPart(PlayerBodyPart partType, Player player) {
-        Vec3 size = partType.getSize();
+        Vec3Arg size = partType.getSize();
         Vec3 halfExtents = Op.star(0.5f, size);
 
         VxTransform transform = new VxTransform(

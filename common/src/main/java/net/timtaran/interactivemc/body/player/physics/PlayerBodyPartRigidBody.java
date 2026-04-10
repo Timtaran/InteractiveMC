@@ -9,6 +9,7 @@ import com.github.stephengold.joltjni.BoxShapeSettings;
 import com.github.stephengold.joltjni.ShapeSettings;
 import com.github.stephengold.joltjni.Vec3;
 import com.github.stephengold.joltjni.enumerate.EMotionType;
+import com.github.stephengold.joltjni.readonly.Vec3Arg;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -72,7 +73,7 @@ public class PlayerBodyPartRigidBody extends VxBody {
 
     public static int createJoltBody(VxBody body, VxRigidBodyFactory factory) {
         PlayerBodyPart partType = body.get(DATA_BODY_PART);
-        Vec3 fullSize = partType.getSize();
+        Vec3Arg fullSize = partType.getSize();
 
         try (ShapeSettings shapeSettings = new BoxShapeSettings(new Vec3(fullSize.getX() / 2, fullSize.getY() / 2, fullSize.getZ() / 2)); BodyCreationSettings bcs = new BodyCreationSettings()) {
             bcs.setMotionType(EMotionType.Dynamic);

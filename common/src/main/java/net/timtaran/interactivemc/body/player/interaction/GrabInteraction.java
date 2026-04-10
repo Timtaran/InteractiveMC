@@ -39,6 +39,7 @@ import net.xmx.velthoric.math.VxTransform;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
+import org.joml.Vector3fc;
 import org.vivecraft.api.VRAPI;
 import org.vivecraft.api.data.VRBodyPart;
 import org.vivecraft.api.data.VRBodyPartData;
@@ -476,7 +477,7 @@ public class GrabInteraction {
         if (ClientPlayerBodyDataStore.currentPose == null)
             return false;
 
-        Vector3f localGrabOffset = PlayerBodyPart.fromInteractionHand(interactionHand).getGrabPointVec3f();
+        Vector3fc localGrabOffset = PlayerBodyPart.fromInteractionHand(interactionHand).getGrabPointVec3f();
         VRBodyPartData bodyPartData = ClientPlayerBodyDataStore.currentPose.getBodyPartData(VRBodyPart.fromInteractionHand(interactionHand));
         if (bodyPartData != null) {
             Quaternionf targetRot = new Quaternionf(bodyPartData.getRotation());

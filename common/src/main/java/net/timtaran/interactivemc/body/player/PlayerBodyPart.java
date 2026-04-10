@@ -6,10 +6,13 @@ package net.timtaran.interactivemc.body.player;
 
 import com.github.stephengold.joltjni.RVec3;
 import com.github.stephengold.joltjni.Vec3;
+import com.github.stephengold.joltjni.readonly.RVec3Arg;
+import com.github.stephengold.joltjni.readonly.Vec3Arg;
 import net.minecraft.world.InteractionHand;
 import net.timtaran.interactivemc.body.player.physics.PlayerBodyPartGhostRigidBody;
 import net.timtaran.interactivemc.body.player.physics.PlayerBodyPartRigidBody;
 import org.joml.Vector3f;
+import org.joml.Vector3fc;
 import org.vivecraft.api.data.VRBodyPart;
 
 /**
@@ -49,7 +52,7 @@ public enum PlayerBodyPart {
     /**
      * The full size (width, height, depth) of the physics shape for this body part.
      */
-    private final Vec3 size;
+    private final Vec3Arg size;
 
     /**
      * The local pivot point on this body part for its joint connection.
@@ -65,7 +68,7 @@ public enum PlayerBodyPart {
      * the actual body part should be physically located.
      * </p>
      */
-    private final RVec3 trackingOffset;
+    private final RVec3Arg trackingOffset;
 
     /**
      * The local grab point on this body part in RVec3 format.
@@ -74,7 +77,7 @@ public enum PlayerBodyPart {
      * with this body part. For hands, it's at the tip.
      * </p>
      */
-    private final RVec3 grabPoint;
+    private final RVec3Arg grabPoint;
 
     /**
      * Constructs a new player body part with the specified properties.
@@ -119,7 +122,7 @@ public enum PlayerBodyPart {
      *
      * @return a vector representing the width, height, and depth
      */
-    public Vec3 getSize() {
+    public Vec3Arg getSize() {
         return size;
     }
 
@@ -136,11 +139,11 @@ public enum PlayerBodyPart {
      *
      * @return a vector in local space representing the grab point (RVec3 format)
      */
-    public RVec3 getGrabPoint() {
+    public RVec3Arg getGrabPoint() {
         return grabPoint;
     }
 
-    public Vector3f getGrabPointVec3f() {
+    public Vector3fc getGrabPointVec3f() {
         // todo decide do we actually need this method
         // vivecraft stores player hand position at the tip, so vec3f grab point is trackingOffset + rvec3 grab point, which is very close to zero
         return switch (this) {
@@ -149,7 +152,7 @@ public enum PlayerBodyPart {
         };
     }
 
-    public RVec3 getTrackingOffset() {
+    public RVec3Arg getTrackingOffset() {
         return trackingOffset;
     }
 

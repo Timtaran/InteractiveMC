@@ -6,6 +6,7 @@ package net.timtaran.interactivemc.body.player.physics;
 
 import com.github.stephengold.joltjni.*;
 import com.github.stephengold.joltjni.enumerate.EMotionType;
+import com.github.stephengold.joltjni.readonly.Vec3Arg;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -104,7 +105,7 @@ public class PlayerBodyPartGhostRigidBody extends VxBody {
         }
 
         PlayerBodyPart partType = body.get(DATA_BODY_PART);
-        Vec3 fullSize = partType.getSize();
+        Vec3Arg fullSize = partType.getSize();
 
         try (
                 ShapeSettings shapeSettings = new BoxShapeSettings(new Vec3(fullSize.getX() / 2, fullSize.getY() / 2, fullSize.getZ() / 2));
