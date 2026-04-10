@@ -17,10 +17,12 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.timtaran.interactivemc.body.player.interaction.GrabInteraction;
+import net.timtaran.interactivemc.body.player.interaction.TriggerState;
 import net.timtaran.interactivemc.body.player.packet.S2CGrabResultPacket;
 import net.timtaran.interactivemc.body.player.physics.PlayerBodyPartGhostRigidBody;
 import net.timtaran.interactivemc.body.player.physics.PlayerBodyPartRigidBody;
 import net.timtaran.interactivemc.body.player.store.PlayerBodyDataStore;
+import net.timtaran.interactivemc.body.type.IGrabbable;
 import net.timtaran.interactivemc.init.InteractiveMC;
 import net.timtaran.interactivemc.init.registry.BodyRegistry;
 import net.timtaran.interactivemc.network.Networking;
@@ -154,7 +156,7 @@ public class PlayerBodyManager {
             world.getConstraintManager().createConstraint(settings, bodyPartGhost.getPhysicsId(), bodyPart.getPhysicsId()).setPersistent(false);
         }
 
-        return new PlayerBodyPartData(bodyPart.getPhysicsId(), bodyPartGhost.getPhysicsId(), null, null);
+        return new PlayerBodyPartData(bodyPart.getPhysicsId(), bodyPartGhost.getPhysicsId(), TriggerState.RELEASE, null, null);
     }
 
     /**
@@ -315,9 +317,7 @@ public class PlayerBodyManager {
         PlayerBodyPartData playerBodyPartData = playerBodies.get(playerBodyPart);
         System.out.println("release playerbodypartdata: " + playerBodyPartData);
         if (playerBodyPartData == null) {
-            throw new IllegalStateException(
-                    "Missing body part " + playerBodyPart + " for player " + player.getUUID()
-            );
+            return;
         }
 
         System.out.println("release triggered with: " + playerBodyPartData);
@@ -330,14 +330,39 @@ public class PlayerBodyManager {
 
         VxBody grabbedBody = world.getBodyManager().getVxBody(playerBodyPartData.grabbedBodyId());
         if (grabbedBody != null) {
-            if (PlayerBodyDataStore.grabbedBodies.contains(grabbedBody.getBodyId()))
-                return;
-
             PlayerBodyDataStore.grabbedBodies.remove(grabbedBody.getBodyId());
         }
 
-        playerBodies.put(playerBodyPart, new PlayerBodyPartData(playerBodyPartData.bodyPartId(), playerBodyPartData.ghostBodyPartId(), null, null));
+        playerBodies.put(playerBodyPart, new PlayerBodyPartData(playerBodyPartData.bodyPartId(), playerBodyPartData.ghostBodyPartId(), playerBodyPartData.triggerState(), null, null));
         System.out.println("released body");
+    }
+
+    public void updateTriggerState(Player player, InteractionHand interactionHand, TriggerState triggerState) {
+        PlayerBodyPart playerBodyPart = PlayerBodyPart.fromInteractionHand(interactionHand);
+        System.out.println("release playerbodypart: " + playerBodyPart);
+        if (playerBodyPart == null)
+            return;
+
+        EnumMap<PlayerBodyPart, PlayerBodyPartData> playerBodies = PlayerBodyDataStore.playersBodies.get(player.getUUID());
+        System.out.println("release playerbodies: " + playerBodies);
+        if (playerBodies == null)
+            return;
+
+        PlayerBodyPartData playerBodyPartData = playerBodies.get(playerBodyPart);
+        System.out.println("release playerbodypartdata: " + playerBodyPartData);
+        if (playerBodyPartData == null) {
+            return;
+        }
+
+        if (playerBodyPartData.grabbedBodyId() == null) {
+            return;
+        }
+
+        VxBody grabbedBody = world.getBodyManager().getVxBody(playerBodyPartData.grabbedBodyId());
+
+        if (grabbedBody instanceof IGrabbable grabbable) {
+            grabbable.onTriggerStateUpdate(player, playerBodyPart, triggerState);
+        }
     }
 
     public void processGrabResult(Player player, PlayerBodyPart playerBodyPart, GrabInteraction.GrabResult grabResult) {
@@ -352,7 +377,7 @@ public class PlayerBodyManager {
         }
 
         playerBodies.put(playerBodyPart, new PlayerBodyPartData(
-                playerBodyPartData.bodyPartId(), playerBodyPartData.ghostBodyPartId(),
+                playerBodyPartData.bodyPartId(), playerBodyPartData.ghostBodyPartId(), playerBodyPartData.triggerState(),
                 grabResult.grabbedBody() != null ? grabResult.grabbedBody().getPhysicsId() : null,
                 grabResult.grabConstraint() != null ? grabResult.grabConstraint().getConstraintId() : null
         ));

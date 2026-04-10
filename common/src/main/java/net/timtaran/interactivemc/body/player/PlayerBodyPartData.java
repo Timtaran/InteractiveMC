@@ -4,6 +4,7 @@
  */
 package net.timtaran.interactivemc.body.player;
 
+import net.timtaran.interactivemc.body.player.interaction.TriggerState;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
@@ -19,10 +20,11 @@ import java.util.UUID;
  *
  * @param bodyPartId       ID of dynamic body part
  * @param ghostBodyPartId  ID of the ghost body part
+ * @param triggerState     Current trigger state
  * @param grabbedBodyId    ID of the grabbed/pulled body ({@code null} if body not grabbing anything)
  * @param grabConstraintId ID of the grab constraint ({@code null} if not attached)
  * @author timtaran
  */
-public record PlayerBodyPartData(UUID bodyPartId, UUID ghostBodyPartId, @Nullable UUID grabbedBodyId,
+public record PlayerBodyPartData(UUID bodyPartId, UUID ghostBodyPartId, TriggerState triggerState, @Nullable UUID grabbedBodyId,
                                  @Nullable UUID grabConstraintId) {
 }

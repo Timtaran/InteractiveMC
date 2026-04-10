@@ -11,6 +11,7 @@ import net.timtaran.interactivemc.body.player.PlayerBodyPartData;
 import org.vivecraft.api.data.VRPose;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Global storage for player-related physics body data and VR pose information.
@@ -31,22 +32,22 @@ public class PlayerBodyDataStore {
     /**
      * Contains all bodies associated with each player, indexed by their UUID.
      */
-    public static final HashMap<UUID, EnumMap<PlayerBodyPart, PlayerBodyPartData>> playersBodies = new HashMap<>();
+    public static final Map<UUID, EnumMap<PlayerBodyPart, PlayerBodyPartData>> playersBodies = new HashMap<>(); // read/write in physics thread
 
     /**
      * Contains the Jolt body IDs of all player bodies for quick lookup during interactions.
      */
-    public static final HashMap<UUID, Set<Integer>> playersJoltBodies = new HashMap<>();
+    public static final Map<UUID, Set<Integer>> playersJoltBodies = new HashMap<>(); // read/write in physics thread
 
     /**
      * Contains the Jolt body IDs of all grabbed player bodies for quick lookup during interactions.
      */
-    public static final IntSet grabbedBodies = new IntOpenHashSet();
+    public static final IntSet grabbedBodies = new IntOpenHashSet();  // read/write in physics thread
 
     /**
      * The VR poses of the players by UUID.
      */
-    public static Map<UUID, VRPose> vrPoses = new HashMap<>();
+    public static Map<UUID, VRPose> vrPoses = new ConcurrentHashMap<>(); // read/write in networking and physics threads, so using ConcurrentHashMap
 
     public static boolean isPlayerControlledBody(UUID playerId, int bodyId) {
         Set<Integer> bodies = playersJoltBodies.get(playerId);

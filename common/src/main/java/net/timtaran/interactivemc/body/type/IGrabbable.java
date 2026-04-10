@@ -8,6 +8,7 @@ import com.github.stephengold.joltjni.RVec3;
 import com.github.stephengold.joltjni.Vec3;
 import net.minecraft.world.entity.player.Player;
 import net.timtaran.interactivemc.body.player.PlayerBodyPart;
+import net.timtaran.interactivemc.body.player.interaction.TriggerState;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -40,28 +41,35 @@ public interface IGrabbable {
      * <p>
      * Defines where a grabber attaches to the body during a remote grab.
      *
+     * @param intersectionPoint the intersection point between the grabber and the body.
+     *
      * @return the local position of the grab point, or {@code null} to prevent grabbing.
+     * @see IGrabbable#getGrabPoint(RVec3)
      */
     @Nullable
-    Vec3 getRemoteGrabPoint();
+    RVec3 getRemoteGrabPoint(RVec3 intersectionPoint);
 
     /**
      * Method called when body is being interacted.
      *
-     * @param player   the player interacting with the body
-     * @param bodyPart player body part interacting with the body
+     * @param player       the player interacting with the body
+     * @param bodyPart     player body part interacting with the body
+     * @param triggerState the trigger state of body part
      */
-    default void onInteract(Player player, PlayerBodyPart bodyPart) {
+    default void onTriggerStateUpdate(Player player, PlayerBodyPart bodyPart, TriggerState triggerState) {
     }
 
     /**
      * Method called when the body is grabbed.
+     * <p>
+     *
      *
      * @param player     the player grabbing the body
      * @param bodyPart   player body part grabbing the body
      * @param isAttached {@code true} if the body is attached to the player body part, {@code false} otherwise
      */
     default void onGrab(Player player, PlayerBodyPart bodyPart, boolean isAttached) {
+        // todo: mention double call when remote grabbing body (on raycast and mount), implement
     }
 
     /**
@@ -73,12 +81,15 @@ public interface IGrabbable {
     default void onPull(Player player, PlayerBodyPart bodyPart) {
     }
 
+    // todo implement
     /**
      * Method called when the body is released.
      *
      * @param player   the player releasing the body
      * @param bodyPart player body part releasing the body
+     * @return {@code true} to allow releasing body, {@code false} otherwise
      */
-    default void onRelease(Player player, PlayerBodyPart bodyPart) {
+    default boolean onRelease(Player player, PlayerBodyPart bodyPart) {
+        return true;
     }
 }

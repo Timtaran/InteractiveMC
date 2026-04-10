@@ -77,7 +77,6 @@ public class PlayerBodyPartRigidBody extends VxBody {
         try (ShapeSettings shapeSettings = new BoxShapeSettings(new Vec3(fullSize.getX() / 2, fullSize.getY() / 2, fullSize.getZ() / 2)); BodyCreationSettings bcs = new BodyCreationSettings()) {
             bcs.setMotionType(EMotionType.Dynamic);
             bcs.setObjectLayer(VxPhysicsLayers.MOVING);
-            // bcs.setCollisionGroup(new CollisionGroup(GroupFilters.PLAYER_BODY_FILTER, 0, getSubGroupId()));
             return factory.create(shapeSettings, bcs);
         }
     }

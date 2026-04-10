@@ -1,11 +1,13 @@
 /*
- * This file is part of Velthoric.
+ * This file is part of InteractiveMC.
  * Licensed under LGPL 3.0.
  */
 package net.timtaran.interactivemc.init.registry;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.timtaran.interactivemc.body.duck.TestDuckRigidBody;
+import net.timtaran.interactivemc.body.duck.TestDuckRigidBodyRenderer;
 import net.timtaran.interactivemc.body.player.physics.PlayerBodyPartGhostRigidBody;
 import net.timtaran.interactivemc.body.player.physics.PlayerBodyPartRigidBody;
 import net.timtaran.interactivemc.body.player.renderer.PlayerBodyPartGhostRenderer;
@@ -45,12 +47,20 @@ public class BodyRegistry {
             .persistence(PlayerBodyPartGhostRigidBody::writePersistenceData, PlayerBodyPartGhostRigidBody::readPersistenceData)
             .build(InteractiveMCIdentifier.get("player_ghost_body_part"));
 
+    public static final VxBodyType TEST_DUCK = VxBodyType.Builder
+            .create(TestDuckRigidBody::new)
+            .rigidProvider(TestDuckRigidBody::createJoltBody)
+            .netSync()
+            .setPersistent(true)
+            .build(InteractiveMCIdentifier.get("test_duck"));
+
     /**
      * Registers all body types on the server side.
      */
     public static void register() {
         VxBodyRegistry.getInstance().register(PLAYER_BODY_PART);
         VxBodyRegistry.getInstance().register(PLAYER_BODY_PART_GHOST);
+        VxBodyRegistry.getInstance().register(TEST_DUCK);
     }
 
     /**
@@ -63,9 +73,11 @@ public class BodyRegistry {
         // Client-side factory registration
         registry.registerClientFactory(PLAYER_BODY_PART.getTypeId(), PlayerBodyPartRigidBody::new);
         registry.registerClientFactory(PLAYER_BODY_PART_GHOST.getTypeId(), PlayerBodyPartGhostRigidBody::new);
+        registry.registerClientFactory(TEST_DUCK.getTypeId(), TestDuckRigidBody::new);
 
         // Client-side renderer registration
         registry.registerClientRenderer(PLAYER_BODY_PART.getTypeId(), new PlayerBodyPartRenderer());
         registry.registerClientRenderer(PLAYER_BODY_PART_GHOST.getTypeId(), new PlayerBodyPartGhostRenderer());
+        registry.registerClientRenderer(TEST_DUCK.getTypeId(), new TestDuckRigidBodyRenderer());
     }
 }

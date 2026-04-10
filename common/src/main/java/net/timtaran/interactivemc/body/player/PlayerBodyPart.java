@@ -28,20 +28,20 @@ public enum PlayerBodyPart {
     HEAD(
             new Vec3(0.5f, 0.5f, 0.5f),
             new net.minecraft.world.phys.Vec3(0f, -0.1f, -0.1f),
-            new Vector3f(0f, 0.035f, 0.1f),
+            new RVec3(0d, 0.035d, 0.1d),
             new RVec3(0d, 0d, 0d)
     ),
 
     MAIN_HAND(
             new Vec3(0.25f, 0.25f, 0.75f),
             new net.minecraft.world.phys.Vec3(0.5f, 0f, -0.2f),
-            new Vector3f(0, 0, 0.35f),
+            new RVec3(0d, 0d, 0.35d),
             new RVec3(0d, 0d, -0.34d)
     ),
     OFF_HAND(
             new Vec3(0.25f, 0.25f, 0.75f),
             new net.minecraft.world.phys.Vec3(-0.5f, 0f, -0.2f),
-            new Vector3f(0, 0, 0.35f),
+            new RVec3(0d, 0d, 0.35d),
             new RVec3(0d, 0d, -0.34d)
     );
     // todo add elbow
@@ -65,7 +65,7 @@ public enum PlayerBodyPart {
      * the actual body part should be physically located.
      * </p>
      */
-    private final Vector3f trackingOffset;
+    private final RVec3 trackingOffset;
 
     /**
      * The local grab point on this body part in RVec3 format.
@@ -84,7 +84,7 @@ public enum PlayerBodyPart {
     PlayerBodyPart(
             Vec3 size,
             net.minecraft.world.phys.Vec3 localPivot,
-            Vector3f trackingOffset,
+            RVec3 trackingOffset,
             RVec3 grabPoint
     ) {
         this.size = size;
@@ -137,10 +137,7 @@ public enum PlayerBodyPart {
      * @return a vector in local space representing the grab point (RVec3 format)
      */
     public RVec3 getGrabPoint() {
-        return switch (this) {
-            case HEAD -> new RVec3(0f, 0f, 0f);
-            case MAIN_HAND, OFF_HAND -> new RVec3(0, 0f, -0.34f);
-        };
+        return grabPoint;
     }
 
     public Vector3f getGrabPointVec3f() {
@@ -152,11 +149,8 @@ public enum PlayerBodyPart {
         };
     }
 
-    public Vector3f getTrackingOffset() {
-        return switch (this) {
-            case HEAD -> new Vector3f(0f, 0.035f, 0.1f);
-            case MAIN_HAND, OFF_HAND -> new Vector3f(0f, 0f, 0.35f);
-        };
+    public RVec3 getTrackingOffset() {
+        return trackingOffset;
     }
 
     public InteractionHand toInteractionHand() {

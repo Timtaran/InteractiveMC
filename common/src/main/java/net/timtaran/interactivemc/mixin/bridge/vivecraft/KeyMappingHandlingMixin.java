@@ -7,8 +7,10 @@ package net.timtaran.interactivemc.mixin.bridge.vivecraft;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.world.InteractionHand;
 import net.timtaran.interactivemc.body.player.interaction.GrabInteraction;
+import net.timtaran.interactivemc.body.player.interaction.TriggerState;
 import net.timtaran.interactivemc.body.player.packet.C2SGrabPacket;
 import net.timtaran.interactivemc.body.player.packet.C2SReleasePacket;
+import net.timtaran.interactivemc.body.player.packet.C2STriggerStatePacket;
 import net.timtaran.interactivemc.body.player.store.ClientPlayerBodyDataStore;
 import net.timtaran.interactivemc.init.registry.KeyMapRegistry;
 import net.timtaran.interactivemc.network.Networking;
@@ -31,6 +33,24 @@ import org.vivecraft.client_vr.provider.MCVR;
 @Mixin(value = MCVR.class, remap = false)
 public class KeyMappingHandlingMixin {
     /**
+     * Injects into the processBindings method to handle grab/release keymappings.
+     * <p>
+     * This method is called at the very beginning of processBindings, before
+     * Vivecraft's default key handling.
+     * </p>
+     *
+     * @param ci the callback info for the mixin injection
+     */
+    @Inject(
+            method = "processBindings",
+            at = @At("HEAD")
+    )
+    private void interactivemc$processKeymappings(CallbackInfo ci) {
+        interactivemc$updateGrabState(InteractionHand.MAIN_HAND, KeyMapRegistry.MAIN_GRAB_KEYMAPPING);
+        interactivemc$updateGrabState(InteractionHand.OFF_HAND, KeyMapRegistry.OFF_GRAB_KEYMAPPING);
+    }
+
+    /**
      * Updates the grab/release state for a single hand based on key state.
      * <p>
      * If the grab key is pressed, attempts to grab an object. If the key is released
@@ -43,12 +63,10 @@ public class KeyMappingHandlingMixin {
     @Unique
     private static void interactivemc$updateGrabState(InteractionHand hand, KeyMapping keyMapping) {
         if (keyMapping.consumeClick()) {
-            System.out.println("grabbing, " + ClientPlayerBodyDataStore.grabbedBodies);
             interactivemc$grab(hand);
         } else if (!keyMapping.isDown() && ClientPlayerBodyDataStore.grabbedBodies.get(hand) != null) {
-            System.out.println("releasing, " + ClientPlayerBodyDataStore.grabbedBodies);
             interactivemc$release(hand);
-            ClientPlayerBodyDataStore.grabbedBodies.remove(hand);
+            ClientPlayerBodyDataStore.grabbedBodies.remove(hand); // todo replace with waiting for server response
         }
     }
 
@@ -78,22 +96,23 @@ public class KeyMappingHandlingMixin {
         Networking.sendToServer(new C2SReleasePacket(interactionHand));
     }
 
-    /**
-     * Injects into the processBindings method to handle grab/release keymappings.
-     * <p>
-     * This method is called at the very beginning of processBindings, before
-     * Vivecraft's default key handling.
-     * </p>
-     *
-     * @param ci the callback info for the mixin injection
-     */
-    @Inject(
-            method = "processBindings",
-            at = @At("HEAD")
-    )
-    private void interactivemc$processKeymappings(CallbackInfo ci) {
-        interactivemc$updateGrabState(InteractionHand.MAIN_HAND, KeyMapRegistry.MAIN_GRAB_KEYMAPPING);
-        interactivemc$updateGrabState(InteractionHand.OFF_HAND, KeyMapRegistry.OFF_GRAB_KEYMAPPING);
+    @Unique
+    private static void interactivemc$updateTriggerState(InteractionHand hand, KeyMapping touchKeyMapping, KeyMapping pressKeyMapping) {
+        TriggerState triggerState;
+
+        if (pressKeyMapping.consumeClick() || pressKeyMapping.isDown()) {
+            triggerState = TriggerState.PRESS;
+        } else if (touchKeyMapping.consumeClick() || pressKeyMapping.isDown()) {
+            triggerState = TriggerState.TOUCH;
+        } else {
+            triggerState = TriggerState.RELEASE;
+        }
+
+        TriggerState previousTriggerState = ClientPlayerBodyDataStore.triggerStates.put(hand, triggerState);
+
+        if (!triggerState.equals(previousTriggerState)) {
+            Networking.sendToServer(new C2STriggerStatePacket(hand, triggerState));
+        }
     }
 
 //    @ModifyExpressionValue(

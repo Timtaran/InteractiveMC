@@ -22,7 +22,7 @@ import java.util.EnumMap;
 import java.util.Map;
 
 /**
- * Client-to-Server packet containing the player's current VR pose.
+ * Client-to-Server packet for updaTING the player's VR pose.
  * <p>
  * This packet is sent every frame from the client to transmit the current position
  * and rotation data for all VR body parts. The server stores this data for physics

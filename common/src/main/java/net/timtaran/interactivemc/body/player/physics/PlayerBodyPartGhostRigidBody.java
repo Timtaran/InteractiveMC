@@ -4,10 +4,7 @@
  */
 package net.timtaran.interactivemc.body.player.physics;
 
-import com.github.stephengold.joltjni.BodyCreationSettings;
-import com.github.stephengold.joltjni.BoxShapeSettings;
-import com.github.stephengold.joltjni.ShapeSettings;
-import com.github.stephengold.joltjni.Vec3;
+import com.github.stephengold.joltjni.*;
 import com.github.stephengold.joltjni.enumerate.EMotionType;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -16,6 +13,7 @@ import net.timtaran.interactivemc.body.player.PlayerBodyPart;
 import net.timtaran.interactivemc.body.player.store.ClientPlayerBodyDataStore;
 import net.timtaran.interactivemc.body.player.store.PlayerBodyDataStore;
 import net.timtaran.interactivemc.network.sync.DataSerializers;
+import net.timtaran.interactivemc.util.PlayerBodyPartTransforms;
 import net.xmx.velthoric.core.body.VxBody;
 import net.xmx.velthoric.core.body.VxBodyType;
 import net.xmx.velthoric.core.body.client.VxClientBodyManager;
@@ -29,7 +27,6 @@ import net.xmx.velthoric.core.physics.world.VxPhysicsWorld;
 import net.xmx.velthoric.math.VxConversions;
 import net.xmx.velthoric.network.VxByteBuf;
 import org.joml.Quaternionf;
-import org.joml.Vector3f;
 import org.vivecraft.api.data.VRBodyPartData;
 import org.vivecraft.api.data.VRPose;
 
@@ -148,18 +145,12 @@ public class PlayerBodyPartGhostRigidBody extends VxBody {
         VRBodyPartData bodyPartData = pose.getBodyPartData(bodyPart.toVRBodyPart());
         if (bodyPartData == null) return;
 
-        Quaternionf targetRot = new Quaternionf(bodyPartData.getRotation());
-
-        Vector3f controllerPos = new Vector3f(bodyPartData.getPos().toVector3f());
-        Vector3f offset = bodyPart.getTrackingOffset();
-
-        targetRot.transform(offset);
-
-        Vector3f targetPos = controllerPos.add(offset);
+        Quat rotation = VxConversions.toJolt(new Quaternionf(bodyPartData.getRotation()));
+        RVec3 position = PlayerBodyPartTransforms.getTrackingOffsetWorld(VxConversions.toJolt(bodyPartData.getPos()), rotation, bodyPart);
 
         VxJoltBridge.INSTANCE.getJoltBody(world, this).moveKinematic(
-                VxConversions.toJolt(targetPos).toRVec3(),
-                VxConversions.toJolt(targetRot),
+                position,
+                rotation,
                 FIXED_TIME_STEP
         );
     }

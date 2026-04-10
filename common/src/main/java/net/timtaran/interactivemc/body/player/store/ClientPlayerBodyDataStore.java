@@ -6,6 +6,7 @@ package net.timtaran.interactivemc.body.player.store;
 
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import net.minecraft.world.InteractionHand;
+import net.timtaran.interactivemc.body.player.interaction.TriggerState;
 import org.vivecraft.api.data.VRPose;
 
 import java.util.EnumMap;
@@ -28,6 +29,11 @@ public final class ClientPlayerBodyDataStore {
     public static EnumMap<InteractionHand, UUID> grabbedBodies = new EnumMap<>(Map.of(
             InteractionHand.MAIN_HAND, UUID.randomUUID(),
             InteractionHand.OFF_HAND, UUID.randomUUID()
+    ));
+
+    public static EnumMap<InteractionHand, TriggerState> triggerStates = new EnumMap<>(Map.of(
+            InteractionHand.MAIN_HAND, TriggerState.RELEASE,
+            InteractionHand.OFF_HAND, TriggerState.RELEASE
     ));
 
     /**
