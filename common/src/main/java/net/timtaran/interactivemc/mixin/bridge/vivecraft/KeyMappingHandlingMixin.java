@@ -48,6 +48,8 @@ public class KeyMappingHandlingMixin {
     private void interactivemc$processKeymappings(CallbackInfo ci) {
         interactivemc$updateGrabState(InteractionHand.MAIN_HAND, KeyMapRegistry.MAIN_GRAB_KEYMAPPING);
         interactivemc$updateGrabState(InteractionHand.OFF_HAND, KeyMapRegistry.OFF_GRAB_KEYMAPPING);
+        interactivemc$updateTriggerState(InteractionHand.MAIN_HAND, KeyMapRegistry.MAIN_TRIGGER_TOUCH_KEYMAPPING, KeyMapRegistry.MAIN_TRIGGER_KEYMAPPING);
+        interactivemc$updateTriggerState(InteractionHand.OFF_HAND, KeyMapRegistry.OFF_TRIGGER_TOUCH_KEYMAPPING, KeyMapRegistry.OFF_TRIGGER_KEYMAPPING);
     }
 
     /**
@@ -65,8 +67,8 @@ public class KeyMappingHandlingMixin {
         if (keyMapping.consumeClick()) {
             interactivemc$grab(hand);
         } else if (!keyMapping.isDown() && ClientPlayerBodyDataStore.grabbedBodies.get(hand) != null) {
+            System.out.println("client release");
             interactivemc$release(hand);
-            ClientPlayerBodyDataStore.grabbedBodies.remove(hand); // todo replace with waiting for server response
         }
     }
 
@@ -80,7 +82,7 @@ public class KeyMappingHandlingMixin {
     @Unique
     private static boolean interactivemc$grab(InteractionHand interactionHand) {
         boolean isGrabbing = GrabInteraction.canGrabClient(interactionHand);
-        System.out.println(isGrabbing);
+        System.out.println("isGrabbing:" + isGrabbing);
 
         Networking.sendToServer(new C2SGrabPacket(interactionHand));
         return isGrabbing;
@@ -102,7 +104,7 @@ public class KeyMappingHandlingMixin {
 
         if (pressKeyMapping.consumeClick() || pressKeyMapping.isDown()) {
             triggerState = TriggerState.PRESS;
-        } else if (touchKeyMapping.consumeClick() || pressKeyMapping.isDown()) {
+        } else if (touchKeyMapping.consumeClick() || touchKeyMapping.isDown()) {
             triggerState = TriggerState.TOUCH;
         } else {
             triggerState = TriggerState.RELEASE;

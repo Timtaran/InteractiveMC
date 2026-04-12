@@ -9,10 +9,7 @@
 package net.timtaran.interactivemc.network;
 
 import dev.architectury.networking.NetworkManager;
-import net.timtaran.interactivemc.body.player.packet.C2SFrameVRPosePacket;
-import net.timtaran.interactivemc.body.player.packet.C2SGrabPacket;
-import net.timtaran.interactivemc.body.player.packet.C2SReleasePacket;
-import net.timtaran.interactivemc.body.player.packet.S2CGrabResultPacket;
+import net.timtaran.interactivemc.body.player.packet.*;
 import net.xmx.velthoric.network.IVxNetPacket;
 import net.xmx.velthoric.network.VxByteBuf;
 
@@ -63,6 +60,11 @@ public class PacketRegistry {
         registerC2S(
                 C2SReleasePacket.class,
                 C2SReleasePacket::decode
+        );
+
+        registerC2S(
+                C2STriggerStatePacket.class,
+                C2STriggerStatePacket::decode
         );
 
         // --- Server to Client Packets (S2C) ---

@@ -30,6 +30,12 @@ public class KeyMapRegistry {
             KeyMapping.CATEGORY_GAMEPLAY
     );
 
+    public static final KeyMapping MAIN_TRIGGER_TOUCH_KEYMAPPING = new KeyMapping(
+            InteractiveMCIdentifier.getTranslationKey("key", "mtouch"),
+            -1,
+            KeyMapping.CATEGORY_GAMEPLAY
+    );
+
     /**
      * Main-Hand Grab
      */
@@ -44,6 +50,12 @@ public class KeyMapRegistry {
      */
     public static final KeyMapping OFF_TRIGGER_KEYMAPPING = new KeyMapping(
             InteractiveMCIdentifier.getTranslationKey("key", "otrigger"),
+            -1,
+            KeyMapping.CATEGORY_GAMEPLAY
+    );
+
+    public static final KeyMapping OFF_TRIGGER_TOUCH_KEYMAPPING = new KeyMapping(
+            InteractiveMCIdentifier.getTranslationKey("key", "otouch"),
             -1,
             KeyMapping.CATEGORY_GAMEPLAY
     );

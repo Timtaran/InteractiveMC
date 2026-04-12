@@ -18,12 +18,12 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.timtaran.interactivemc.body.player.interaction.GrabInteraction;
+import net.timtaran.interactivemc.body.player.interaction.TriggerInteraction;
 import net.timtaran.interactivemc.body.player.interaction.TriggerState;
 import net.timtaran.interactivemc.body.player.packet.S2CGrabResultPacket;
 import net.timtaran.interactivemc.body.player.physics.PlayerBodyPartGhostRigidBody;
 import net.timtaran.interactivemc.body.player.physics.PlayerBodyPartRigidBody;
 import net.timtaran.interactivemc.body.player.store.PlayerBodyDataStore;
-import net.timtaran.interactivemc.body.type.IGrabbable;
 import net.timtaran.interactivemc.init.InteractiveMC;
 import net.timtaran.interactivemc.init.registry.BodyRegistry;
 import net.timtaran.interactivemc.network.Networking;
@@ -58,10 +58,12 @@ public class PlayerBodyManager {
 
     private final VxPhysicsWorld world;
     private final GrabInteraction grabInteraction;
+    private final TriggerInteraction triggerInteraction;
 
     private PlayerBodyManager(VxPhysicsWorld world) {
         this.world = world;
         this.grabInteraction = new GrabInteraction(world, this);
+        this.triggerInteraction = new TriggerInteraction();
         ContactListenerManager.init(world); // todo delete this
     }
 
@@ -331,39 +333,46 @@ public class PlayerBodyManager {
 
         VxBody grabbedBody = world.getBodyManager().getVxBody(playerBodyPartData.grabbedBodyId());
         if (grabbedBody != null) {
-            PlayerBodyDataStore.grabbedBodies.remove(grabbedBody.getBodyId());
+            // remove only first found body because multiple bodies can grab single body
+            PlayerBodyDataStore.grabbedBodies.rem(grabbedBody.getBodyId());
         }
 
         playerBodies.put(playerBodyPart, new PlayerBodyPartData(playerBodyPartData.bodyPartId(), playerBodyPartData.ghostBodyPartId(), playerBodyPartData.triggerState(), null, null));
+        if (player instanceof ServerPlayer serverPlayer) {
+            player.getServer().execute(() ->
+                    Networking.sendToPlayer(
+                            serverPlayer,
+                            new S2CGrabResultPacket(
+                                    interactionHand,
+                                    null
+                            )
+                    )
+            );
+        }
         System.out.println("released body");
     }
 
     public void updateTriggerState(Player player, InteractionHand interactionHand, TriggerState triggerState) {
         PlayerBodyPart playerBodyPart = PlayerBodyPart.fromInteractionHand(interactionHand);
-        System.out.println("release playerbodypart: " + playerBodyPart);
         if (playerBodyPart == null)
             return;
 
         EnumMap<PlayerBodyPart, PlayerBodyPartData> playerBodies = PlayerBodyDataStore.playersBodies.get(player.getUUID());
-        System.out.println("release playerbodies: " + playerBodies);
         if (playerBodies == null)
             return;
 
         PlayerBodyPartData playerBodyPartData = playerBodies.get(playerBodyPart);
-        System.out.println("release playerbodypartdata: " + playerBodyPartData);
         if (playerBodyPartData == null) {
             return;
         }
 
-        if (playerBodyPartData.grabbedBodyId() == null) {
+        if (playerBodyPartData.grabbedBodyId() == null || playerBodyPartData.grabConstraintId() == null) {
             return;
         }
 
         VxBody grabbedBody = world.getBodyManager().getVxBody(playerBodyPartData.grabbedBodyId());
 
-        if (grabbedBody instanceof IGrabbable grabbable) {
-            grabbable.onTriggerStateUpdate(player, playerBodyPart, triggerState);
-        }
+        triggerInteraction.updateGrabState(player, grabbedBody, playerBodyPart, triggerState);
     }
 
     public void processGrabResult(Player player, PlayerBodyPart playerBodyPart, GrabInteraction.GrabResult grabResult) {
@@ -376,6 +385,7 @@ public class PlayerBodyManager {
         if (playerBodyPartData == null) {
             return;
         }
+        System.out.println(playerBodyPartData);
 
         playerBodies.put(playerBodyPart, new PlayerBodyPartData(
                 playerBodyPartData.bodyPartId(), playerBodyPartData.ghostBodyPartId(), playerBodyPartData.triggerState(),
@@ -383,11 +393,7 @@ public class PlayerBodyManager {
                 grabResult.grabConstraint() != null ? grabResult.grabConstraint().getConstraintId() : null
         ));
 
-
         if (grabResult.grabbedBody() != null) {
-            if (PlayerBodyDataStore.grabbedBodies.contains(grabResult.grabbedBody().getBodyId()))
-                return;
-
             PlayerBodyDataStore.grabbedBodies.add(grabResult.grabbedBody().getBodyId());
         }
 
@@ -401,8 +407,7 @@ public class PlayerBodyManager {
                             serverPlayer,
                             new S2CGrabResultPacket(
                                     interactionHand,
-                                    grabResult.grabbedBody() == null ? UUID.randomUUID() : grabResult.grabbedBody().getPhysicsId()
-                                    // todo: replace (I forgot with what, but random uuid is used here because passing null values causes NPE)
+                                    grabResult.grabbedBody() == null ? null : grabResult.grabbedBody().getPhysicsId()
                             )
                     )
             );

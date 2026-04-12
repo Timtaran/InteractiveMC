@@ -26,10 +26,7 @@ public final class ClientPlayerBodyDataStore {
     /**
      * Maps from {@link InteractionHand} to the UUID of the grabbed body.
      */
-    public static EnumMap<InteractionHand, UUID> grabbedBodies = new EnumMap<>(Map.of(
-            InteractionHand.MAIN_HAND, UUID.randomUUID(),
-            InteractionHand.OFF_HAND, UUID.randomUUID()
-    ));
+    public static EnumMap<InteractionHand, UUID> grabbedBodies = new EnumMap<>(InteractionHand.class);
 
     public static EnumMap<InteractionHand, TriggerState> triggerStates = new EnumMap<>(Map.of(
             InteractionHand.MAIN_HAND, TriggerState.RELEASE,

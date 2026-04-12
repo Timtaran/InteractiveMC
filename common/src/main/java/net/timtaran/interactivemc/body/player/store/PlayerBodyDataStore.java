@@ -4,8 +4,8 @@
  */
 package net.timtaran.interactivemc.body.player.store;
 
-import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
-import it.unimi.dsi.fastutil.ints.IntSet;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntList;
 import net.timtaran.interactivemc.body.player.PlayerBodyPart;
 import net.timtaran.interactivemc.body.player.PlayerBodyPartData;
 import org.vivecraft.api.data.VRPose;
@@ -42,7 +42,7 @@ public class PlayerBodyDataStore {
     /**
      * Contains the Jolt body IDs of all grabbed player bodies for quick lookup during interactions.
      */
-    public static final IntSet grabbedBodies = new IntOpenHashSet();  // read/write in physics thread
+    public static final IntList grabbedBodies = new IntArrayList();  // read/write in physics thread
 
     /**
      * The VR poses of the players by UUID.
