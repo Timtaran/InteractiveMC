@@ -74,3 +74,15 @@ shadowJar {
 remapJar {
     inputFile.set shadowJar.archiveFile
 }
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId = rootProject.mod_group
+            artifactId = rootProject.mod_id
+            version = rootProject.mod_version
+
+            from components.java
+        }
+    }
+}
