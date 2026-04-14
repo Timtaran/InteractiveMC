@@ -8,6 +8,7 @@ import com.github.stephengold.joltjni.*;
 import com.github.stephengold.joltjni.enumerate.EMotionType;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.timtaran.interactivemc.body.player.PlayerBodyPart;
 import net.timtaran.interactivemc.body.player.interaction.TriggerState;
@@ -85,8 +86,23 @@ public class TestDuckRigidBody extends VxBody implements IGrabbable {
     }
 
     @Override
-    public boolean onRelease(Player player, PlayerBodyPart bodyPart) {
+    public void onRelease(Player player, PlayerBodyPart bodyPart, boolean isAttached) {
         System.out.println("on release");
-        return IGrabbable.super.onRelease(player, bodyPart);
+    }
+
+    @Override
+    public boolean canRelease(Player player, PlayerBodyPart bodyPart) {
+        System.out.println("can release");
+        return IGrabbable.super.canRelease(player, bodyPart);
+    }
+
+    @Override
+    public void onGrabClient(Player player, InteractionHand interactionHand, boolean isAttached) {
+        System.out.println("on grab client");
+    }
+
+    @Override
+    public void onReleaseClient(Player player, InteractionHand interactionHand, boolean isAttached) {
+        System.out.println("on release client");
     }
 }

@@ -7,9 +7,13 @@ package net.timtaran.interactivemc.body.player.packet;
 import dev.architectury.networking.NetworkManager;
 import net.minecraft.world.InteractionHand;
 import net.timtaran.interactivemc.body.player.store.ClientPlayerBodyDataStore;
+import net.timtaran.interactivemc.body.type.IGrabbable;
+import net.xmx.velthoric.core.body.VxBody;
+import net.xmx.velthoric.core.body.client.VxClientBodyManager;
 import net.xmx.velthoric.network.VxByteBuf;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -34,12 +38,17 @@ public class S2CGrabResultPacket extends HandInteractionPacket {
     private final UUID grabbedBodyUUID;
 
     /**
+     * Whether the grabbed body is attached to the player or not.
+     */
+    private final boolean isAttached;
+
+    /**
      * Constructs a new grab result packet.
      *
      * @param interactionHand the hand that performed the grab
      * @param grabbedBodyUUID the UUID of the grabbed body, or null if grab failed
      */
-    public S2CGrabResultPacket(InteractionHand interactionHand, @Nullable UUID grabbedBodyUUID) {
+    public S2CGrabResultPacket(InteractionHand interactionHand, @Nullable UUID grabbedBodyUUID, boolean isAttached) {
         super(interactionHand);
 
         if (grabbedBodyUUID == null) {
@@ -50,6 +59,8 @@ public class S2CGrabResultPacket extends HandInteractionPacket {
             isBodyPresent = true;
             this.grabbedBodyUUID = grabbedBodyUUID;
         }
+
+        this.isAttached = isAttached;
     }
 
     /**
@@ -63,10 +74,12 @@ public class S2CGrabResultPacket extends HandInteractionPacket {
 
         boolean isBodyPresent = buf.readBoolean();
 
-        if (isBodyPresent)
-            return new S2CGrabResultPacket(interactionHand, buf.readUUID());
-        else
-            return new S2CGrabResultPacket(interactionHand, null);
+        if (isBodyPresent) {
+            return new S2CGrabResultPacket(interactionHand, buf.readUUID(), buf.readBoolean());
+        }
+        else {
+            return new S2CGrabResultPacket(interactionHand, null, buf.readBoolean());
+        }
     }
 
     /**
@@ -80,8 +93,11 @@ public class S2CGrabResultPacket extends HandInteractionPacket {
 
         buf.writeBoolean(isBodyPresent);
 
-        if (isBodyPresent)
+        if (isBodyPresent) {
             buf.writeUUID(grabbedBodyUUID);
+        }
+
+        buf.writeBoolean(isAttached);
     }
 
 
@@ -103,6 +119,24 @@ public class S2CGrabResultPacket extends HandInteractionPacket {
      */
     @Override
     public void handle(NetworkManager.PacketContext context) {
-        ClientPlayerBodyDataStore.grabbedBodies.put(getInteractionHand(), getGrabbedBodyUUID());
+        InteractionHand hand = getInteractionHand();
+        UUID currentId = getGrabbedBodyUUID();
+
+        UUID previousId = ClientPlayerBodyDataStore.grabbedBodies.put(hand, currentId);
+
+        if (Objects.equals(previousId, currentId)) {
+            return;
+        }
+
+        VxBody grabbedBody = VxClientBodyManager.getInstance().getVxBody(Objects.requireNonNullElse(currentId, previousId));
+        if (!(grabbedBody instanceof IGrabbable grabbable)) {
+            return;
+        }
+
+        if (currentId != null) {
+            grabbable.onGrabClient(context.getPlayer(), hand, isAttached);
+        } else {
+            grabbable.onReleaseClient(context.getPlayer(), hand, isAttached);
+        }
     }
 }

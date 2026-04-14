@@ -304,7 +304,7 @@ public class PlayerBodyManager {
      *
      * @param player          the player releasing the grab
      * @param interactionHand the hand to release (main or off-hand)
-     * @see GrabInteraction#release(PlayerBodyPartData)
+     * @see GrabInteraction#release(Player, PlayerBodyPart, PlayerBodyPartData)
      */
     public void release(Player player, InteractionHand interactionHand) {
         PlayerBodyPart playerBodyPart = PlayerBodyPart.fromInteractionHand(interactionHand);
@@ -329,13 +329,15 @@ public class PlayerBodyManager {
             return;
         }
 
-        grabInteraction.release(playerBodyPartData);
+        grabInteraction.release(player, playerBodyPart, playerBodyPartData);
 
         VxBody grabbedBody = world.getBodyManager().getVxBody(playerBodyPartData.grabbedBodyId());
         if (grabbedBody != null) {
             // remove only first found body because multiple bodies can grab single body
             PlayerBodyDataStore.grabbedBodies.rem(grabbedBody.getBodyId());
         }
+
+        boolean isGrabConstraint = playerBodyPartData.grabConstraintId() != null;
 
         playerBodies.put(playerBodyPart, new PlayerBodyPartData(playerBodyPartData.bodyPartId(), playerBodyPartData.ghostBodyPartId(), playerBodyPartData.triggerState(), null, null));
         if (player instanceof ServerPlayer serverPlayer) {
@@ -344,7 +346,8 @@ public class PlayerBodyManager {
                             serverPlayer,
                             new S2CGrabResultPacket(
                                     interactionHand,
-                                    null
+                                    null,
+                                    isGrabConstraint
                             )
                     )
             );
@@ -387,10 +390,12 @@ public class PlayerBodyManager {
         }
         System.out.println(playerBodyPartData);
 
+        UUID grabbedBody = grabResult.grabbedBody() != null ? grabResult.grabbedBody().getPhysicsId() : null;
+        UUID grabbedConstraint = grabResult.grabConstraint() != null ? grabResult.grabConstraint().getConstraintId() : null;
+
         playerBodies.put(playerBodyPart, new PlayerBodyPartData(
                 playerBodyPartData.bodyPartId(), playerBodyPartData.ghostBodyPartId(), playerBodyPartData.triggerState(),
-                grabResult.grabbedBody() != null ? grabResult.grabbedBody().getPhysicsId() : null,
-                grabResult.grabConstraint() != null ? grabResult.grabConstraint().getConstraintId() : null
+                grabbedBody, grabbedConstraint
         ));
 
         if (grabResult.grabbedBody() != null) {
@@ -407,7 +412,8 @@ public class PlayerBodyManager {
                             serverPlayer,
                             new S2CGrabResultPacket(
                                     interactionHand,
-                                    grabResult.grabbedBody() == null ? null : grabResult.grabbedBody().getPhysicsId()
+                                    grabbedBody,
+                                    grabbedConstraint != null
                             )
                     )
             );

@@ -138,7 +138,7 @@ public class GrabInteraction {
     }
 
     @Nullable
-    private GrabResult tryInstantGrab(ConstBodyLockInterface lockInterface, Player player, VxBody grabberBody, RVec3 worldGrabPoint, PlayerBodyPart bodyPart) {
+    private GrabResult tryInstantGrab(ConstBodyLockInterface lockInterface, Player player, VxBody grabberBody, RVec3 worldGrabPoint, PlayerBodyPart playerBodyPart) {
         try (ObjectLayerFilter olFilter = new ObjectLayerFilter() {
             @Override
             public boolean shouldCollide(int objectLayer) {
@@ -226,7 +226,7 @@ public class GrabInteraction {
                                     Op.minus(worldGrabPoint, bodyContactPointOffset),
                                     grabbedJoltBody.getRotation()
                             );
-                            constraint = attach(grabberBody, grabbedBody, worldGrabPoint);
+                            constraint = attach(grabberBody, grabbedBody, worldGrabPoint, player, playerBodyPart);
                             System.out.println("Attaching " + grabbedBody.getClass().getSimpleName() + " to " + grabberBody.getClass().getSimpleName() + " at " + worldGrabPoint);
                         } else {
                             // move grabber to body
@@ -235,11 +235,11 @@ public class GrabInteraction {
                             grabberJoltBody.setPositionAndRotationInternal(
                                     Op.minus(
                                             bodyContactPoint,
-                                            PlayerBodyPartTransforms.getGrabPointRotatedLocal(grabberJoltBody.getRotation(), bodyPart)
+                                            PlayerBodyPartTransforms.getGrabPointRotatedLocal(grabberJoltBody.getRotation(), playerBodyPart)
                                     ),
                                     grabberJoltBody.getRotation()
                             );
-                            constraint = attach(grabberBody, grabbedBody, bodyContactPoint);
+                            constraint = attach(grabberBody, grabbedBody, bodyContactPoint, player, playerBodyPart);
                             System.out.println("Attaching " + grabbedBody.getClass().getSimpleName() + " to " + grabberBody.getClass().getSimpleName() + " at " + bodyContactPoint);
                         }
 
@@ -335,7 +335,7 @@ public class GrabInteraction {
                                                 body.setPositionAndRotationInternal(Op.minus(worldRemoteGrabPoint, grabPointRelativeToBody), body.getRotation());
                                             }
 
-                                            VxConstraint constraint = attach(grabberBody, world.getBodyManager().getByJoltBodyId(body2), worldRemoteGrabPoint);
+                                            VxConstraint constraint = attach(grabberBody, world.getBodyManager().getByJoltBodyId(body2), worldRemoteGrabPoint, player, playerBodyPart);
 
                                             world.getLevel().getServer().execute(() -> playerBodyManager.processGrabResult(player, playerBodyPart, new GrabResult(grabbedBody, constraint)));
                                         })
@@ -348,7 +348,7 @@ public class GrabInteraction {
     }
 
     @Nullable
-    public VxConstraint attach(VxBody grabberBody, VxBody grabbedBody, RVec3Arg worldGrabPoint) {
+    public VxConstraint attach(VxBody grabberBody, VxBody grabbedBody, RVec3Arg worldGrabPoint, Player player, PlayerBodyPart playerBodyPart) {
         if (worldGrabPoint == null)
             return null;
         try (FixedConstraintSettings settings = new FixedConstraintSettings()) {
@@ -361,6 +361,10 @@ public class GrabInteraction {
             VxConstraint constraint = constraintManager.createConstraint(settings, grabberBody.getPhysicsId(), grabbedBody.getPhysicsId());
             if (constraint != null)
                 constraint.setPersistent(false);
+
+            if (grabbedBody instanceof IGrabbable grabbableBody) {
+                grabbableBody.onGrab(player, playerBodyPart, true);
+            }
 
             return constraint;
         }
@@ -424,6 +428,10 @@ public class GrabInteraction {
                         float MAX_TIME = 2.0f;
                         time = Math.max(MIN_TIME, Math.min(MAX_TIME, time));
 
+                        if (grabbedBody instanceof IGrabbable grabbableBody) {
+                            grabbableBody.onPull(player, playerBodyPart);
+                        }
+
                         Vec3 direction = vectorToTarget.toVec3().normalized();
                         System.out.println(direction);
                         float magnitude = (1.0f / time) * (float) distance * PULL_MAGNITUDE_MULTIPLIER;
@@ -444,13 +452,20 @@ public class GrabInteraction {
      * </p>
      *
      * @param playerBodyPartData the player's body part data
+     * @return {@code true} if the body was successfully released, {@code false} otherwise
      */
-    public void release(PlayerBodyPartData playerBodyPartData) {
+    public boolean release(Player player, PlayerBodyPart playerBodyPart, PlayerBodyPartData playerBodyPartData) {
         VxBody grabberBody = world.getBodyManager().getVxBody(playerBodyPartData.bodyPartId());
         VxBody grabbedBody = world.getBodyManager().getVxBody(playerBodyPartData.grabbedBodyId());
 
         if (grabberBody == null || grabbedBody == null)
-            return;
+            return true; // bodies doesn't exist anymore, returning true, so PlayerBodyManager remove grab data from datastore
+
+        if (grabbedBody instanceof IGrabbable grabbableBody) {
+            boolean isReleaseAllowed = grabbableBody.canRelease(player, playerBodyPart);
+            if (!isReleaseAllowed)
+                return false;
+        }
 
         ContactListenerManager.notifyList.removeIf((reject ->
                 reject.body1() == grabberBody.getBodyId() &&
@@ -462,8 +477,16 @@ public class GrabInteraction {
                         reject.body2() == grabbedBody.getBodyId()
         ));
 
-        if (playerBodyPartData.grabConstraintId() != null)
+        boolean isGrabConstraint = playerBodyPartData.grabConstraintId() != null;
+
+        if (isGrabConstraint)
             world.getConstraintManager().removeConstraint(playerBodyPartData.grabConstraintId());
+
+        if (grabbedBody instanceof IGrabbable grabbableBody) {
+            grabbableBody.onRelease(player, playerBodyPart, isGrabConstraint);
+        }
+
+        return true;
     }
 
     /**
