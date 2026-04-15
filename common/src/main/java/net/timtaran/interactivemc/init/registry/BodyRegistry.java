@@ -13,8 +13,11 @@ import net.timtaran.interactivemc.body.player.physics.PlayerBodyPartRigidBody;
 import net.timtaran.interactivemc.body.player.renderer.PlayerBodyPartGhostRenderer;
 import net.timtaran.interactivemc.body.player.renderer.PlayerBodyPartRenderer;
 import net.timtaran.interactivemc.util.InteractiveMCIdentifier;
+import net.xmx.velthoric.core.behavior.impl.VxTickBehavior;
 import net.xmx.velthoric.core.body.VxBodyType;
 import net.xmx.velthoric.core.body.registry.VxBodyRegistry;
+import net.xmx.velthoric.core.network.internal.behavior.VxNetSyncBehavior;
+import net.xmx.velthoric.core.network.synchronization.behavior.VxSyncBehavior;
 
 /**
  * Registry for physics body types used in the mod.
@@ -31,7 +34,8 @@ public class BodyRegistry {
             .create(PlayerBodyPartRigidBody::new)
             .rigidProvider(PlayerBodyPartRigidBody::createJoltBody)
             .noSummon()
-            .netSync()
+            .behavior(VxNetSyncBehavior.ID)
+            .behavior(VxSyncBehavior.ID)
             .setPersistent(false)
             .persistence(PlayerBodyPartRigidBody::writePersistenceData, PlayerBodyPartRigidBody::readPersistenceData)
             .build(InteractiveMCIdentifier.get("player_body_part"));
@@ -42,6 +46,9 @@ public class BodyRegistry {
     public static final VxBodyType PLAYER_BODY_PART_GHOST = VxBodyType.Builder
             .create(PlayerBodyPartGhostRigidBody::new)
             .rigidProvider(PlayerBodyPartGhostRigidBody::createJoltBody)
+            // .behavior(VxNetSyncBehavior.ID)
+            // .behavior(VxSyncBehavior.ID)
+            .behavior(VxTickBehavior.ID)
             .noSummon()
             .setPersistent(false)
             .persistence(PlayerBodyPartGhostRigidBody::writePersistenceData, PlayerBodyPartGhostRigidBody::readPersistenceData)
@@ -50,7 +57,7 @@ public class BodyRegistry {
     public static final VxBodyType TEST_DUCK = VxBodyType.Builder
             .create(TestDuckRigidBody::new)
             .rigidProvider(TestDuckRigidBody::createJoltBody)
-            .netSync()
+            .behavior(VxNetSyncBehavior.ID)
             .setPersistent(true)
             .build(InteractiveMCIdentifier.get("test_duck"));
 

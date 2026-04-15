@@ -6,7 +6,7 @@ package net.timtaran.interactivemc.util.velthoric;
 
 import com.github.stephengold.joltjni.RVec3;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
-import net.xmx.velthoric.core.body.client.VxClientBodyDataStore;
+import net.xmx.velthoric.core.body.client.VxClientBodyDataContainer;
 import net.xmx.velthoric.core.body.client.VxClientBodyManager;
 
 import java.util.List;
@@ -45,7 +45,7 @@ public class VelthoricClientUtils {
         double squaredRadius = radius * radius;
 
         List<Integer> result = new IntArrayList();
-        VxClientBodyDataStore dataStore = VxClientBodyManager.getInstance().getStore();
+        VxClientBodyDataContainer dataStore = VxClientBodyManager.getInstance().getStore().clientCurrent();
 
         for (int i = 0; i < dataStore.lastKnownPosition.length; i++) {
             RVec3 bodyPosition = dataStore.lastKnownPosition[i];

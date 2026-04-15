@@ -41,7 +41,7 @@ dependencies {
     shadowBundle project(path: ':common', configuration: 'transformProductionNeoForge')
 
     // Required dependencies
-    // modImplementation "com.github.ttrndev.Velthoric:velthoric-neoforge:$rootProject.velthoric_version" // wait until remap error will be fixed
+    // modImplementation "com.github.Timtaran.Velthoric:velthoric-neoforge:$rootProject.velthoric_version" // wait until remap error will be fixed
 
     modApi "maven.modrinth:vivecraft:$rootProject.vivecraft_version-neoforge"
     runtimeOnly "com.illposed.osc:javaosc-core:0.9"
