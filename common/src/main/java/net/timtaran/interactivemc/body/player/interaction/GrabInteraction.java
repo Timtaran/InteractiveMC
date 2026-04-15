@@ -546,9 +546,8 @@ public class GrabInteraction {
     }
 
     private RVec3 getBodyPartGrabPointWorld(VRBodyPartData bodyPartData, PlayerBodyPart playerBodyPart) {
-        // todo: remove Quaternionf creation when https://github.com/xI-Mx-Ix/Velthoric/pull/46 is merged
         RVec3 position = VxConversions.toJolt(bodyPartData.getPos());
-        Quat rotation = VxConversions.toJolt(new Quaternionf(bodyPartData.getRotation()));
+        Quat rotation = VxConversions.toJolt(bodyPartData.getRotation());
         return Op.plus(
                 PlayerBodyPartTransforms.getTrackingOffsetLocal(rotation, playerBodyPart),
                 PlayerBodyPartTransforms.getGrabPointRotatedWorld(position, rotation, playerBodyPart)
