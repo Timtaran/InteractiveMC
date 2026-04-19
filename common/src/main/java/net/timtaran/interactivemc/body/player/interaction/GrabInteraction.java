@@ -207,12 +207,12 @@ public class GrabInteraction {
                             RVec3 bodyContactPointLocal = new RVec3(bodyContactPointOffset);
                             bodyContactPointLocal.rotateInPlace(grabbedJoltBody.getRotation().conjugated());
 
-                            bodyContactPointLocal = grabbableBody.getGrabPoint(bodyContactPointLocal);
+                            RVec3Arg bodyAttachPointLocal = grabbableBody.getGrabPoint(bodyContactPointLocal);
 
-                            if (bodyContactPointLocal == null)
+                            if (bodyAttachPointLocal == null)
                                 continue;
 
-                            bodyContactPointOffset = new RVec3(bodyContactPointLocal);
+                            bodyContactPointOffset = new RVec3(bodyAttachPointLocal);
                             bodyContactPointOffset.rotateInPlace(grabbedJoltBody.getRotation());
                         }
 
@@ -297,7 +297,7 @@ public class GrabInteraction {
                     hitPointOnBody.rotateInPlace(grabbedJoltBody.getRotation().conjugated());
                 }
 
-                final RVec3 grabPointOnBody;
+                final RVec3Arg grabPointOnBody;
 
                 if (grabbedBody instanceof IGrabbable grabbableBody)
                     grabPointOnBody = grabbableBody.getRemoteGrabPoint(hitPointOnBody);

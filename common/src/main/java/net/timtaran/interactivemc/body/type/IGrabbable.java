@@ -5,6 +5,7 @@
 package net.timtaran.interactivemc.body.type;
 
 import com.github.stephengold.joltjni.RVec3;
+import com.github.stephengold.joltjni.readonly.RVec3Arg;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.world.InteractionHand;
@@ -36,7 +37,7 @@ public interface IGrabbable {
      * @return the local position of the grab point, or {@code null} to prevent grabbing.
      */
     @Nullable
-    RVec3 getGrabPoint(RVec3 intersectionPoint);
+    RVec3Arg getGrabPoint(RVec3 intersectionPoint);
 
     /**
      * Gets the grab point position in the local space.
@@ -48,7 +49,7 @@ public interface IGrabbable {
      * @see IGrabbable#getGrabPoint(RVec3)
      */
     @Nullable
-    RVec3 getRemoteGrabPoint(RVec3 intersectionPoint);
+    RVec3Arg getRemoteGrabPoint(RVec3 intersectionPoint);
 
     /**
      * Method called when body is being interacted.
