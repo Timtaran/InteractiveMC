@@ -4,7 +4,7 @@
  */
 package net.timtaran.interactivemc.body.type;
 
-import com.github.stephengold.joltjni.RVec3;
+import com.github.stephengold.joltjni.readonly.QuatArg;
 import com.github.stephengold.joltjni.readonly.RVec3Arg;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -24,20 +24,23 @@ import org.jetbrains.annotations.Nullable;
  */
 public interface IGrabbable {
     /**
-     * Gets the grab point position in the local space.
-     * <p>
      * Defines where on the body a grabber attaches.
      *
-     * @param intersectionPoint the intersection point between the grabber and the body,
-     *                          relative to the body position (not center of mass).
-     *                          Implementations may use this to determine the closest
-     *                          valid grab point.
-     *                          If the grab point is arbitrary, return
-     *                          {@code intersectionPoint}.
-     * @return the local position of the grab point, or {@code null} to prevent grabbing.
+     * @param player             the player interacting with the body
+     * @param bodyPart           player body part interacting with the body
+     * @param intersectionPoint  the intersection point between the grabber and the body,
+     *                           relative to the body position (not center of mass).
+     *                           Implementations may use this to determine the closest
+     *                           valid grab point.
+     *                           If the grab point is arbitrary, set {@link GrabPoint} position to
+     *                           {@code intersectionPoint}.
+     * @param rotationDifference the rotation difference between the grabber and the body.
+     *                           If body shouldn't move, set {@link GrabPoint} rotation to
+     *                           {@code rotationDifference}.
+     * @return {@link GrabPoint}, or {@code null} to prevent grabbing.
      */
     @Nullable
-    RVec3Arg getGrabPoint(RVec3 intersectionPoint);
+    GrabPoint getGrabPoint(Player player, PlayerBodyPart bodyPart, RVec3Arg intersectionPoint, QuatArg rotationDifference);
 
     /**
      * Gets the grab point position in the local space.
@@ -46,10 +49,10 @@ public interface IGrabbable {
      *
      * @param intersectionPoint the intersection point between the grabber and the body.
      * @return the local position of the grab point, or {@code null} to prevent grabbing.
-     * @see IGrabbable#getGrabPoint(RVec3)
+     * @see IGrabbable#getGrabPoint(Player, PlayerBodyPart, RVec3Arg, QuatArg)
      */
     @Nullable
-    RVec3Arg getRemoteGrabPoint(RVec3 intersectionPoint);
+    GrabPoint getRemoteGrabPoint(Player player, PlayerBodyPart bodyPart, RVec3Arg intersectionPoint);
 
     /**
      * Method called when body is being interacted.
@@ -109,8 +112,8 @@ public interface IGrabbable {
     /**
      * Method called when the body is released.
      *
-     * @param player   the player releasing the body
-     * @param bodyPart player body part releasing the body
+     * @param player     the player releasing the body
+     * @param bodyPart   player body part releasing the body
      * @param isAttached {@code true} if the body was attached to the player body part, {@code false} otherwise
      */
     default void onRelease(Player player, PlayerBodyPart bodyPart, boolean isAttached) {

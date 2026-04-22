@@ -10,6 +10,7 @@ import com.github.stephengold.joltjni.enumerate.EConstraintSpace;
 import com.github.stephengold.joltjni.operator.Op;
 import com.github.stephengold.joltjni.readonly.ConstBody;
 import com.github.stephengold.joltjni.readonly.ConstBodyLockInterface;
+import com.github.stephengold.joltjni.readonly.QuatArg;
 import com.github.stephengold.joltjni.readonly.RVec3Arg;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -21,6 +22,7 @@ import net.timtaran.interactivemc.body.player.PlayerBodyPart;
 import net.timtaran.interactivemc.body.player.PlayerBodyPartData;
 import net.timtaran.interactivemc.body.player.store.ClientPlayerBodyDataStore;
 import net.timtaran.interactivemc.body.player.store.PlayerBodyDataStore;
+import net.timtaran.interactivemc.body.type.GrabPoint;
 import net.timtaran.interactivemc.body.type.IGrabbable;
 import net.timtaran.interactivemc.init.InteractiveMC;
 import net.timtaran.interactivemc.util.PlayerBodyPartTransforms;
@@ -79,6 +81,8 @@ public class GrabInteraction {
     private static final float PULL_MAGNITUDE_MULTIPLIER = 1000f;
 
     private static final GrabResult EMPTY_GRAB_RESULT = new GrabResult(null, null);
+
+    private static final GrabPoint PLACEHOLDER_GRAB_POINT = new GrabPoint(new RVec3(), new Quat());
 
     private final VxPhysicsWorld world;
     private final PlayerBodyManager playerBodyManager;
@@ -203,16 +207,21 @@ public class GrabInteraction {
 
                         // calculating intersection point and body center offset
                         RVec3 bodyContactPointOffset = Op.minus(intersection.bodyContactPoint().toRVec3(), grabbedJoltBody.getPosition()); // todo: move before physics layer check when terrain grabbing is implemented
-                        if (grabbedBody instanceof IGrabbable grabbableBody) {
+                        GrabPoint grabPoint = PLACEHOLDER_GRAB_POINT;
+                        boolean isGrabbable = grabbedBody instanceof IGrabbable;
+
+                        if (isGrabbable) {
                             RVec3 bodyContactPointLocal = new RVec3(bodyContactPointOffset);
                             bodyContactPointLocal.rotateInPlace(grabbedJoltBody.getRotation().conjugated());
 
-                            RVec3Arg bodyAttachPointLocal = grabbableBody.getGrabPoint(bodyContactPointLocal);
+                            QuatArg rotationDifference = Op.star(grabberJoltBody.getRotation().conjugated(), grabbedJoltBody.getRotation());
 
-                            if (bodyAttachPointLocal == null)
+                            grabPoint = ((IGrabbable) grabbedBody).getGrabPoint(player, playerBodyPart, bodyContactPointLocal, rotationDifference);
+
+                            if (grabPoint == null)
                                 continue;
 
-                            bodyContactPointOffset = new RVec3(bodyAttachPointLocal);
+                            bodyContactPointOffset = new RVec3(grabPoint.position());
                             bodyContactPointOffset.rotateInPlace(grabbedJoltBody.getRotation());
                         }
 
@@ -224,7 +233,7 @@ public class GrabInteraction {
                             // move body to grabber
                             grabbedJoltBody.setPositionAndRotationInternal(
                                     Op.minus(worldGrabPoint, bodyContactPointOffset),
-                                    grabbedJoltBody.getRotation()
+                                    isGrabbable ? Op.star(grabberJoltBody.getRotation(), grabPoint.rotation()) : grabbedJoltBody.getRotation()
                             );
                             constraint = attach(grabberBody, grabbedBody, worldGrabPoint, player, playerBodyPart);
                             System.out.println("Attaching " + grabbedBody.getClass().getSimpleName() + " to " + grabberBody.getClass().getSimpleName() + " at " + worldGrabPoint);
@@ -237,7 +246,7 @@ public class GrabInteraction {
                                             bodyContactPoint,
                                             PlayerBodyPartTransforms.getGrabPointRotatedLocal(grabberJoltBody.getRotation(), playerBodyPart)
                                     ),
-                                    grabberJoltBody.getRotation()
+                                    isGrabbable ? Op.star(grabbedJoltBody.getRotation(), grabPoint.rotation().conjugated()) : grabberJoltBody.getRotation()
                             );
                             constraint = attach(grabberBody, grabbedBody, bodyContactPoint, player, playerBodyPart);
                             System.out.println("Attaching " + grabbedBody.getClass().getSimpleName() + " to " + grabberBody.getClass().getSimpleName() + " at " + bodyContactPoint);
@@ -297,14 +306,16 @@ public class GrabInteraction {
                     hitPointOnBody.rotateInPlace(grabbedJoltBody.getRotation().conjugated());
                 }
 
-                final RVec3Arg grabPointOnBody;
+                final GrabPoint grabPoint;
+                final boolean isGrabbable = grabbedBody instanceof IGrabbable;
 
-                if (grabbedBody instanceof IGrabbable grabbableBody)
-                    grabPointOnBody = grabbableBody.getRemoteGrabPoint(hitPointOnBody);
-                else
-                    grabPointOnBody = hitPointOnBody;
+                if (isGrabbable) {
+                    grabPoint = ((IGrabbable) grabbedBody).getRemoteGrabPoint(player, playerBodyPart, hitPointOnBody);
+                } else {
+                    grabPoint = new GrabPoint(hitPointOnBody, new Quat());
+                }
 
-                if (grabPointOnBody == null)
+                if (grabPoint == null)
                     continue;
 
                 ContactListenerManager.notifyList.add(
@@ -322,17 +333,23 @@ public class GrabInteraction {
                                             if (worldRemoteGrabPoint == null)
                                                 return;
 
-                                            try (BodyLockWrite lock = new BodyLockWrite(lockInterface, body2)) {
-                                                if (!lock.succeededAndIsInBroadPhase())
+                                            try (BodyLockMultiWrite lock = new BodyLockMultiWrite(lockInterface, body1, body2)) {
+                                                Body grabberJoltBody = lock.getBody(0);
+                                                if (grabberJoltBody == null || !grabberJoltBody.isInBroadPhase())
                                                     return;
 
-                                                Body body = lock.getBody();
+                                                Body grabbedJoltBody = lock.getBody(1);
+                                                if (grabbedJoltBody == null || !grabbedJoltBody.isInBroadPhase())
+                                                    return;
 
                                                 // Calculate a new world-space position for the body so that the local contact point
                                                 // aligns exactly with the desired grab point in world space.
-                                                RVec3 grabPointRelativeToBody = new RVec3(grabPointOnBody);
-                                                grabPointRelativeToBody.rotateInPlace(body.getRotation());
-                                                body.setPositionAndRotationInternal(Op.minus(worldRemoteGrabPoint, grabPointRelativeToBody), body.getRotation());
+                                                RVec3 grabPointRelativeToBody = new RVec3(grabPoint.position());
+                                                grabPointRelativeToBody.rotateInPlace(grabbedJoltBody.getRotation());
+                                                grabbedJoltBody.setPositionAndRotationInternal(
+                                                        Op.minus(worldRemoteGrabPoint, grabPointRelativeToBody),
+                                                        isGrabbable ? Op.star(grabberJoltBody.getRotation(), grabPoint.rotation()) : grabbedJoltBody.getRotation()
+                                                );
                                             }
 
                                             VxConstraint constraint = attach(grabberBody, world.getBodyManager().getByJoltBodyId(body2), worldRemoteGrabPoint, player, playerBodyPart);

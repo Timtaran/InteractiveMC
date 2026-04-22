@@ -6,12 +6,15 @@ package net.timtaran.interactivemc.body.duck;
 
 import com.github.stephengold.joltjni.*;
 import com.github.stephengold.joltjni.enumerate.EMotionType;
+import com.github.stephengold.joltjni.readonly.QuatArg;
+import com.github.stephengold.joltjni.readonly.RVec3Arg;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.timtaran.interactivemc.body.player.PlayerBodyPart;
 import net.timtaran.interactivemc.body.player.interaction.TriggerState;
+import net.timtaran.interactivemc.body.type.GrabPoint;
 import net.timtaran.interactivemc.body.type.IGrabbable;
 import net.xmx.velthoric.core.body.VxBody;
 import net.xmx.velthoric.core.body.VxBodyType;
@@ -61,13 +64,13 @@ public class TestDuckRigidBody extends VxBody implements IGrabbable {
     }
 
     @Override
-    public @Nullable RVec3 getGrabPoint(RVec3 intersectionPoint) {
-        return intersectionPoint;
+    public @Nullable GrabPoint getGrabPoint(Player player, PlayerBodyPart bodyPart, RVec3Arg intersectionPoint, QuatArg rotationDifference) {
+        return new GrabPoint(intersectionPoint, rotationDifference);
     }
 
     @Override
-    public @Nullable RVec3 getRemoteGrabPoint(RVec3 intersectionPoint) {
-        return intersectionPoint;
+    public @Nullable GrabPoint getRemoteGrabPoint(Player player, PlayerBodyPart bodyPart, RVec3Arg intersectionPoint) {
+        return new GrabPoint(intersectionPoint, new Quat());
     }
 
     @Override
