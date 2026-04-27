@@ -75,14 +75,21 @@ remapJar {
     inputFile.set shadowJar.archiveFile
 }
 
+tasks.named("remapSourcesJar") {
+    dependsOn project(":common").tasks.named("sourcesJar")
+
+    from {
+        project(":common").tasks.named("sourcesJar").get().archiveFile.map { zipTree(it) }
+    }
+}
+
 publishing {
     publications {
         maven(MavenPublication) {
-            groupId = rootProject.mod_group
             artifactId = rootProject.mod_id
-            version = rootProject.mod_version
 
-            from components.java
+            artifact(tasks.named("remapJar"))
+            artifact(tasks.named("remapSourcesJar"))
         }
     }
 }
