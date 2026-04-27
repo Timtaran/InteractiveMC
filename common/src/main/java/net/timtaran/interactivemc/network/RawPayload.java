@@ -21,7 +21,7 @@ import net.timtaran.interactivemc.util.InteractiveMCIdentifier;
  * entire packet content as a single opaque blob of bytes.
  * </p>
  *
- * @param data The raw Netty buffer containing the packet ID and payload.
+ * @param data       The raw Netty buffer containing the packet ID and payload.
  * @param identifier The specific payload type identifier (C2S or S2C).
  * @author xI-Mx-Ix
  * @author timtaran

@@ -2,7 +2,7 @@
  * This file is part of InteractiveMC.
  * Licensed under LGPL 3.0.
  */
-package net.timtaran.interactivemc.body.player;
+package net.timtaran.interactivemc.body.player.renderer;
 
 import com.github.stephengold.joltjni.Quat;
 import com.github.stephengold.joltjni.Vec3;
@@ -10,6 +10,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.timtaran.interactivemc.body.player.physics.PlayerBodyPartGhostRigidBody;
 import net.xmx.velthoric.core.body.VxBody;
 import net.xmx.velthoric.core.body.client.VxRenderState;
 import net.xmx.velthoric.core.body.client.renderer.VxBodyRenderer;
@@ -27,12 +28,12 @@ public class PlayerBodyPartGhostRenderer extends VxBodyRenderer<VxBody> {
     /**
      * Renders a player body part ghost rigid body as a white wireframe cube.
      *
-     * @param body the ghost body to render
-     * @param poseStack the pose stack for transformations
+     * @param body         the ghost body to render
+     * @param poseStack    the pose stack for transformations
      * @param bufferSource the buffer source for rendering
      * @param partialTicks the partial ticks for interpolation
-     * @param packedLight the packed light value
-     * @param renderState the render state containing transform and other data
+     * @param packedLight  the packed light value
+     * @param renderState  the render state containing transform and other data
      */
     @Override
     public void render(VxBody body, PoseStack poseStack, MultiBufferSource bufferSource, float partialTicks, int packedLight, VxRenderState renderState) {
@@ -53,7 +54,7 @@ public class PlayerBodyPartGhostRenderer extends VxBodyRenderer<VxBody> {
         poseStack.translate(-hx, -hy, -hz);
         poseStack.scale(fullWidth, fullHeight, fullDepth);
 
-        PlayerBodyPartRenderer.renderUnitCubeWireframe(poseStack, bufferSource, packedLight,  1.0f, 1.0f, 1.0f, 1.0f);
+        PlayerBodyPartRenderer.renderUnitCubeWireframe(poseStack, bufferSource, packedLight, 1.0f, 1.0f, 1.0f, 1.0f);
 
         poseStack.popPose();
     }

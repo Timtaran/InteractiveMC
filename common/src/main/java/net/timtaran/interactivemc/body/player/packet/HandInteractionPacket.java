@@ -2,7 +2,7 @@
  * This file is part of InteractiveMC.
  * Licensed under LGPL 3.0.
  */
-package net.timtaran.interactivemc.network.sync.packet;
+package net.timtaran.interactivemc.body.player.packet;
 
 import net.minecraft.world.InteractionHand;
 import net.xmx.velthoric.network.IVxNetPacket;
@@ -17,8 +17,10 @@ import net.xmx.velthoric.network.VxByteBuf;
  * @author timtaran
  */
 public abstract class HandInteractionPacket implements IVxNetPacket {
-    /** The hand that is performing this interaction. */
-    private final InteractionHand interactionHand;
+    /**
+     * The hand that is performing this interaction.
+     */
+    private final InteractionHand interactionHand; // todo replace with player body part
 
     /**
      * Constructs a new hand interaction packet.
