@@ -2,6 +2,7 @@ plugins {
     id 'dev.architectury.loom' version '1.13-SNAPSHOT' apply false
     id 'architectury-plugin' version '3.4-SNAPSHOT'
     id 'com.gradleup.shadow' version '8.3.6' apply false
+    id 'maven-publish'
 }
 
 architectury {
@@ -29,7 +30,7 @@ subprojects {
         // Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
         // See https://docs.gradle.org/current/userguide/declaring_repositories.html
         // for more information about repositories.
-        maven { url = 'https://cursemaven.com'}
+        maven { url = 'https://cursemaven.com' }
         maven { url 'https://jitpack.io' }
         maven { url = 'https://api.modrinth.com/maven' }
     }
@@ -55,12 +56,6 @@ subprojects {
 
     // Configure Maven publishing.
     publishing {
-        publications {
-            mavenJava(MavenPublication) {
-                artifactId = base.archivesName.get()
-                from components.java
-            }
-        }
 
         // See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
         repositories {
@@ -68,6 +63,27 @@ subprojects {
             // Notice: This block does NOT have the same function as the block in the top level.
             // The repositories here will be used for publishing your artifact, not for
             // retrieving dependencies.
+            maven {
+                name = "projectMaven"
+
+                def repoUrl = System.getenv("REPO_URL")
+                def snapshotsUrl = "${repoUrl}/snapshots"
+                def releasesUrl = "${repoUrl}/releases"
+
+                url = version.toString().endsWith("-SNAPSHOT")
+                        ? uri(snapshotsUrl)
+                        : uri(releasesUrl)
+
+                credentials {
+                    username = System.getenv("REPO_USER")
+                    password = System.getenv("REPO_TOKEN")
+                }
+
+                authentication {
+                    basic(BasicAuthentication)
+                }
+            }
+
         }
     }
 }

@@ -22,7 +22,7 @@ import org.jetbrains.annotations.Nullable;
  *
  * @author timtaran
  */
-public interface IGrabbable {
+public interface IGrabbable { // todo: separate into IGrabbable for getGrabPoints and GrabListener for receiving all events
     /**
      * Defines where on the body a grabber attaches.
      *
