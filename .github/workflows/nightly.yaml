@@ -25,13 +25,12 @@ jobs:
       - name: Set outputs
         id: vars
         run: |
-          echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
           echo "base_version=$(grep '^mod_version=' gradle.properties | cut -d'=' -f2)" >> $GITHUB_OUTPUT
 
       - name: Build Snapshot Version
         id: version
         run: |
-          VERSION="${{ steps.vars.outputs.base_version }}-${{ steps.vars.outputs.sha_short }}-SNAPSHOT"
+          VERSION="${{ steps.vars.outputs.base_version }}-SNAPSHOT"
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Using version: $VERSION"
 
