@@ -19,9 +19,13 @@ import net.xmx.velthoric.network.VxByteBuf;
  * @author timtaran
  */
 public class DataSerializers {
-    /** Registry mapping serializer IDs to their corresponding serializer instances. */
+    /**
+     * Registry mapping serializer IDs to their corresponding serializer instances.
+     */
     private static final Int2ObjectMap<VxDataSerializer<?>> REGISTRY = new Int2ObjectOpenHashMap<>();
-    /** Counter for assigning unique IDs to new serializers. */
+    /**
+     * Counter for assigning unique IDs to new serializers.
+     */
     private static int nextId = 0;
 
     /**
@@ -54,7 +58,7 @@ public class DataSerializers {
      * Registers a new data serializer and assigns it a unique ID.
      *
      * @param serializer the serializer to register
-     * @param <T> the type of data this serializer handles
+     * @param <T>        the type of data this serializer handles
      * @return the registered serializer
      */
     private static <T> VxDataSerializer<T> register(VxDataSerializer<T> serializer) {

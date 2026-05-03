@@ -15,7 +15,7 @@ dependencies {
     implementation(annotationProcessor("io.github.llamalad7:mixinextras-fabric:$rootProject.mixinextras_version"))
 
     // Using my fork to pin version and be able to apply fixes/changes I need
-    modImplementation "com.github.ttrndev.Velthoric:velthoric-fabric:$rootProject.velthoric_version"
+    modImplementation "com.github.Timtaran.Velthoric:velthoric-fabric:$rootProject.velthoric_version"
 
     modApi "maven.modrinth:vivecraft:$rootProject.vivecraft_version-fabric"
 

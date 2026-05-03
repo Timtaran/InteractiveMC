@@ -2,10 +2,11 @@
  * This file is part of InteractiveMC.
  * Licensed under LGPL 3.0.
  */
-package net.timtaran.interactivemc.data;
+package net.timtaran.interactivemc.body.player.store;
 
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import net.minecraft.world.InteractionHand;
+import net.timtaran.interactivemc.body.player.interaction.TriggerState;
 import org.vivecraft.api.data.VRPose;
 
 import java.util.EnumMap;
@@ -21,18 +22,22 @@ import java.util.UUID;
  *
  * @author timtaran
  */
-public final class ClientDataStore {
+public final class ClientPlayerBodyDataStore {
     /**
-     * Tracks the UUIDs of bodies currently grabbed in each hand.
      * Maps from {@link InteractionHand} to the UUID of the grabbed body.
      */
-    public static EnumMap<InteractionHand, UUID> grabbedBodies = new EnumMap<>(Map.of(
-            InteractionHand.MAIN_HAND, UUID.randomUUID(),
-            InteractionHand.OFF_HAND, UUID.randomUUID()
+    public static EnumMap<InteractionHand, UUID> grabbedBodies = new EnumMap<>(InteractionHand.class);
+
+    public static EnumMap<InteractionHand, TriggerState> triggerStates = new EnumMap<>(Map.of(
+            InteractionHand.MAIN_HAND, TriggerState.RELEASE,
+            InteractionHand.OFF_HAND, TriggerState.RELEASE
     ));
 
     /**
      * List containing indices of all bodies controlled by the player.
+     * Stores the Jolt physics body IDs associated with each player.
+     * <p>
+     * Used for fast lookups in {@link net.timtaran.interactivemc.body.player.interaction.GrabInteraction#canGrabClient(InteractionHand)}
      */
     public static List<Integer> playerControlledBodies = new IntArrayList();
 
@@ -41,5 +46,6 @@ public final class ClientDataStore {
      */
     public static VRPose currentPose;
 
-    private ClientDataStore() {}
+    private ClientPlayerBodyDataStore() {
+    }
 }
