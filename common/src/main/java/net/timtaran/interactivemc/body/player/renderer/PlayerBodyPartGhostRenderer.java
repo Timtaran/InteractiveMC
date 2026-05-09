@@ -11,6 +11,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.timtaran.interactivemc.body.player.physics.PlayerBodyPartGhostRigidBody;
+import net.timtaran.interactivemc.util.client.render.WireframeRenderer;
 import net.xmx.velthoric.core.body.VxBody;
 import net.xmx.velthoric.core.body.client.VxRenderState;
 import net.xmx.velthoric.core.body.client.renderer.VxBodyRenderer;
@@ -54,7 +55,7 @@ public class PlayerBodyPartGhostRenderer extends VxBodyRenderer<VxBody> {
         poseStack.translate(-hx, -hy, -hz);
         poseStack.scale(fullWidth, fullHeight, fullDepth);
 
-        PlayerBodyPartRenderer.renderUnitCubeWireframe(poseStack, bufferSource, packedLight, 1.0f, 1.0f, 1.0f, 1.0f);
+        WireframeRenderer.renderUnitCubeWireframe(poseStack, bufferSource, packedLight, 1.0f, 1.0f, 1.0f, 1.0f);
 
         poseStack.popPose();
     }
