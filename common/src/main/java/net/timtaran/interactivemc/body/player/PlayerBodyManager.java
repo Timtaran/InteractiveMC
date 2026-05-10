@@ -220,7 +220,7 @@ public class PlayerBodyManager {
             if (player == null) return;
 
             bodyParts.forEach((bodyPart, bodyPartData) -> {
-                if (bodyPartData.grabData() == null || !bodyPartData.grabData().isAttached()) {
+                if (bodyPartData.grabData() == null || bodyPartData.grabData().isAttached()) {
                     return;
                 }
 
@@ -243,7 +243,7 @@ public class PlayerBodyManager {
             if (player == null) return;
 
             bodyParts.forEach((bodyPart, bodyPartData) -> {
-                if (bodyPartData.grabData() == null || !bodyPartData.grabData().isAttached() || !bodyPartData.grabData().retracting()) {
+                if (bodyPartData.grabData() == null || bodyPartData.grabData().isAttached() || !bodyPartData.grabData().retracting()) {
                     return;
                 }
 
