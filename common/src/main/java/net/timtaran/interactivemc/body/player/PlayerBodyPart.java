@@ -4,9 +4,7 @@
  */
 package net.timtaran.interactivemc.body.player;
 
-import com.github.stephengold.joltjni.RVec3;
 import com.github.stephengold.joltjni.Vec3;
-import com.github.stephengold.joltjni.readonly.RVec3Arg;
 import com.github.stephengold.joltjni.readonly.Vec3Arg;
 import net.minecraft.world.InteractionHand;
 import net.timtaran.interactivemc.body.player.physics.PlayerBodyPartGhostRigidBody;
@@ -31,21 +29,21 @@ public enum PlayerBodyPart {
     HEAD(
             new Vec3(0.5f, 0.5f, 0.5f),
             new net.minecraft.world.phys.Vec3(0f, -0.1f, -0.1f),
-            new RVec3(0d, 0.035d, 0.1d),
-            new RVec3(0d, 0d, 0d)
+            new Vec3(0d, 0.035d, 0.1d),
+            new Vec3(0d, 0d, 0d)
     ),
 
     MAIN_HAND(
             new Vec3(0.25f, 0.25f, 0.75f),
             new net.minecraft.world.phys.Vec3(0.5f, 0f, -0.2f),
-            new RVec3(0d, 0d, 0.35d),
-            new RVec3(0d, 0d, -0.34d)
+            new Vec3(0d, 0d, 0.35d),
+            new Vec3(0d, 0d, -0.34d)
     ),
     OFF_HAND(
             new Vec3(0.25f, 0.25f, 0.75f),
             new net.minecraft.world.phys.Vec3(-0.5f, 0f, -0.2f),
-            new RVec3(0d, 0d, 0.35d),
-            new RVec3(0d, 0d, -0.34d)
+            new Vec3(0d, 0d, 0.35d),
+            new Vec3(0d, 0d, -0.34d)
     );
     // todo add elbow
 
@@ -68,7 +66,7 @@ public enum PlayerBodyPart {
      * the actual body part should be physically located.
      * </p>
      */
-    private final RVec3Arg trackingOffset;
+    private final Vec3Arg trackingOffset;
 
     /**
      * The local grab point on this body part in RVec3 format.
@@ -77,7 +75,7 @@ public enum PlayerBodyPart {
      * with this body part. For hands, it's at the tip.
      * </p>
      */
-    private final RVec3Arg grabPoint;
+    private final Vec3Arg grabPoint;
 
     /**
      * Constructs a new player body part with the specified properties.
@@ -87,8 +85,8 @@ public enum PlayerBodyPart {
     PlayerBodyPart(
             Vec3 size,
             net.minecraft.world.phys.Vec3 localPivot,
-            RVec3 trackingOffset,
-            RVec3 grabPoint
+            Vec3 trackingOffset,
+            Vec3 grabPoint
     ) {
         this.size = size;
         this.localPivot = localPivot;
@@ -139,7 +137,7 @@ public enum PlayerBodyPart {
      *
      * @return a vector in local space representing the grab point (RVec3 format)
      */
-    public RVec3Arg getGrabPoint() {
+    public Vec3Arg getGrabPoint() {
         return grabPoint;
     }
 
@@ -152,7 +150,7 @@ public enum PlayerBodyPart {
         };
     }
 
-    public RVec3Arg getTrackingOffset() {
+    public Vec3Arg getTrackingOffset() {
         return trackingOffset;
     }
 
