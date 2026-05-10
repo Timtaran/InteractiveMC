@@ -126,7 +126,7 @@ public class Networking {
      * @param context The execution context (containing player, level, thread executor).
      */
     private static void handlePacket(RawPayload payload, NetworkManager.PacketContext context) {
-        ByteBuf rawData = payload.data();
+        ByteBuf rawData = Unpooled.wrappedBuffer(payload.data());
         try {
             // Ensure there is data to read
             if (!rawData.isReadable()) {
@@ -172,7 +172,7 @@ public class Networking {
      * @return A new Netty ByteBuf containing [ID][Data].
      * @throws IllegalStateException if the packet class is not registered.
      */
-    private static ByteBuf createBuffer(IVxNetPacket packet) {
+    private static byte[] createByteArray(IVxNetPacket packet) {
         Byte id = PACKET_TO_ID.get(packet.getClass());
         if (id == null) {
             throw new IllegalStateException("Attempted to send unregistered packet: " + packet.getClass().getName());
@@ -188,7 +188,11 @@ public class Networking {
         VxByteBuf vxBuf = new VxByteBuf(buffer);
         packet.encode(vxBuf);
 
-        return buffer;
+        byte[] bytes = new byte[buffer.readableBytes()];
+        buffer.readBytes(bytes);
+        buffer.release();
+
+        return bytes;
     }
 
     // ============================================================================================
@@ -201,12 +205,9 @@ public class Networking {
      * @param packet The packet to send.
      */
     public static void sendToServer(IVxNetPacket packet) {
-        ByteBuf buf = createBuffer(packet);
+        byte[] data = createByteArray(packet);
         if (NetworkManager.canServerReceive(RawPayload.TYPE_C2S)) {
-            NetworkManager.sendToServer(new RawPayload(buf, RawPayload.TYPE_C2S));
-        } else {
-            // Prevent memory leaks if the packet cannot be sent
-            buf.release();
+            NetworkManager.sendToServer(new RawPayload(data, RawPayload.TYPE_C2S));
         }
     }
 
@@ -217,11 +218,9 @@ public class Networking {
      * @param packet The packet to send.
      */
     public static void sendToPlayer(ServerPlayer player, IVxNetPacket packet) {
-        ByteBuf buf = createBuffer(packet);
+        byte[] data = createByteArray(packet);
         if (NetworkManager.canPlayerReceive(player, RawPayload.TYPE_S2C)) {
-            NetworkManager.sendToPlayer(player, new RawPayload(buf, RawPayload.TYPE_S2C));
-        } else {
-            buf.release();
+            NetworkManager.sendToPlayer(player, new RawPayload(data, RawPayload.TYPE_S2C));
         }
     }
 
@@ -233,12 +232,10 @@ public class Networking {
     public static void sendToAll(IVxNetPacket packet) {
         if (GameInstance.getServer() == null) return;
 
-        ByteBuf buf = createBuffer(packet);
-        // Note: Architectury's sendToPlayers usually handles retained duplicates internally,
-        // but since we wrap a raw buffer in a record, the record creation is cheap.
+        byte[] data = createByteArray(packet);
         NetworkManager.sendToPlayers(
                 GameInstance.getServer().getPlayerList().getPlayers(),
-                new RawPayload(buf, RawPayload.TYPE_S2C)
+                new RawPayload(data, RawPayload.TYPE_S2C)
         );
     }
 
@@ -253,8 +250,8 @@ public class Networking {
 
         ServerLevel level = GameInstance.getServer().getLevel(dimension);
         if (level != null) {
-            ByteBuf buf = createBuffer(packet);
-            NetworkManager.sendToPlayers(level.players(), new RawPayload(buf, RawPayload.TYPE_S2C));
+            byte[] data = createByteArray(packet);
+            NetworkManager.sendToPlayers(level.players(), new RawPayload(data, RawPayload.TYPE_S2C));
         }
     }
 }

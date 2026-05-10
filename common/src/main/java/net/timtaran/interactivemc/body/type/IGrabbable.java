@@ -100,13 +100,13 @@ public interface IGrabbable { // todo: separate into IGrabbable for getGrabPoint
 
     /**
      * Method called when the body is being pulled.
-     * <p>
-     * If {@code isAttached} is {@code false}, the body was marked to pulled.
      *
      * @param player   the player pulling the body
      * @param bodyPart player body part pulling the body
+     * @return {@code true} to allow pulling body, {@code false} otherwise
      */
-    default void onPull(Player player, PlayerBodyPart bodyPart) {
+    default boolean onPull(Player player, PlayerBodyPart bodyPart) {
+        return true;
     }
 
     /**

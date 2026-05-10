@@ -12,6 +12,7 @@ import com.github.stephengold.joltjni.enumerate.EMotionType;
 import com.github.stephengold.joltjni.readonly.Vec3Arg;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.timtaran.interactivemc.body.player.PlayerBodyPart;
 import net.timtaran.interactivemc.body.player.store.ClientPlayerBodyDataStore;
@@ -114,13 +115,16 @@ public class PlayerBodyPartRigidBody extends VxBody {
     /**
      * Adds this body's index to the client-side storage for tracking.
      */
+    @Environment(EnvType.CLIENT)
     private void addBodyIndexToClientStorage() {
-        Integer index = VxClientBodyManager.getInstance().getStore().getIndexForNetworkId(getNetworkId());
+        if (get(DATA_PLAYER_ID) == Minecraft.getInstance().player.getUUID()) {
+            Integer index = VxClientBodyManager.getInstance().getStore().getIndexForNetworkId(getNetworkId());
 
-        if (index == null)
-            return;
+            if (index == null)
+                return;
 
-        ClientPlayerBodyDataStore.playerControlledBodies.add(index);
+            ClientPlayerBodyDataStore.playerControlledBodies.add(index);
+        }
     }
 
     @Override

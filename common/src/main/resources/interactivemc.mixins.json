@@ -8,6 +8,7 @@
     "bridge.vivecraft.KeyMappingHandlingMixin"
   ],
   "mixins": [
+    "bridge.velthoric.PhysicsTickEvent"
   ],
   "injectors": {
     "defaultRequire": 1

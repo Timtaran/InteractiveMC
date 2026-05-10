@@ -84,8 +84,9 @@ public class TestDuckRigidBody extends VxBody implements IGrabbable {
     }
 
     @Override
-    public void onPull(Player player, PlayerBodyPart bodyPart) {
+    public boolean onPull(Player player, PlayerBodyPart bodyPart) {
         System.out.println("on pull");
+        return IGrabbable.super.onPull(player, bodyPart);
     }
 
     @Override

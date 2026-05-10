@@ -26,8 +26,7 @@ import net.timtaran.interactivemc.util.InteractiveMCIdentifier;
  * @author xI-Mx-Ix
  * @author timtaran
  */
-public record RawPayload(ByteBuf data, Type<RawPayload> identifier) implements CustomPacketPayload {
-
+public record RawPayload(byte[] data, Type<RawPayload> identifier) implements CustomPacketPayload {
     public static final Type<RawPayload> TYPE_C2S = new Type<>(InteractiveMCIdentifier.get("c2s"));
     public static final Type<RawPayload> TYPE_S2C = new Type<>(InteractiveMCIdentifier.get("s2c"));
 
@@ -52,16 +51,17 @@ public record RawPayload(ByteBuf data, Type<RawPayload> identifier) implements C
     private static StreamCodec<RegistryFriendlyByteBuf, RawPayload> createCodec(Type<RawPayload> type) {
         return StreamCodec.of(
                 (buf, payload) -> {
-                    // Write the raw Netty buffer directly into the output
+                    // Write the raw bytes into the output.
+                    // This is thread-safe for broadcasting.
                     buf.writeBytes(payload.data);
-                    // Release the buffer as ownership is transferred to the network stack
-                    payload.data.release();
                 },
                 (buf) -> {
-                    // Create a slice of the remaining readable bytes.
-                    // This does NOT copy the memory, making it extremely efficient.
+                    // Create a copy of the incoming bytes.
+                    // This ensures the payload owns its data independently.
                     int readable = buf.readableBytes();
-                    return new RawPayload(buf.readBytes(readable), type);
+                    byte[] bytes = new byte[readable];
+                    buf.readBytes(bytes);
+                    return new RawPayload(bytes, type);
                 }
         );
     }

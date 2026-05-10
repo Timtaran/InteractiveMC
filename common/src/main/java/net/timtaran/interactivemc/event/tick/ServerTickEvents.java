@@ -1,3 +1,7 @@
+/*
+ * This file is part of InteractiveMC.
+ * Licensed under LGPL 3.0.
+ */
 package net.timtaran.interactivemc.event.tick;
 
 import dev.architectury.event.events.common.TickEvent;
@@ -19,7 +23,7 @@ public class ServerTickEvents {
     }
 
     /**
-     * Handles hand pull to pull not attached grabbed body.
+     * Checks if pull gesture triggered.
      *
      * @param level the server level
      */
@@ -30,7 +34,7 @@ public class ServerTickEvents {
         physicsWorld.execute(() -> {
             for (ServerPlayer player : level.players()) {
                 for (InteractionHand interactionHand : InteractionHand.values()) {
-                    PlayerBodyManager.get(physicsWorld).pull(player, interactionHand);
+                    PlayerBodyManager.get(physicsWorld).updatePullState(player, interactionHand);
                 }
             }
         });

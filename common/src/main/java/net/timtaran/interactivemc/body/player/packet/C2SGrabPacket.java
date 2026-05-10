@@ -53,7 +53,7 @@ public class C2SGrabPacket extends HandInteractionPacket {
         VxPhysicsWorld physicsWorld = VxPhysicsWorld.get(context.getPlayer().level().dimension());
         if (physicsWorld != null)
             physicsWorld.execute(() ->
-                    PlayerBodyManager.get(physicsWorld).grab(context.getPlayer(), getInteractionHand())
+                    PlayerBodyManager.get(physicsWorld).grab(context.getPlayer(), getInteractionHand(), true)
 
             );
     }

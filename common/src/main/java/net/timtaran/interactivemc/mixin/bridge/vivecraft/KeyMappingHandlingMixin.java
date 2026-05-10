@@ -81,7 +81,7 @@ public class KeyMappingHandlingMixin {
      */
     @Unique
     private static boolean interactivemc$grab(InteractionHand interactionHand) {
-        boolean isGrabbing = GrabInteraction.canGrabClient(interactionHand);
+        boolean isGrabbing = GrabInteraction.canGrabClient(interactionHand);  // todo: rework using approximate body shapes instead center distance
         System.out.println("isGrabbing:" + isGrabbing);
 
         Networking.sendToServer(new C2SGrabPacket(interactionHand));
