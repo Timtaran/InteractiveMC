@@ -124,19 +124,24 @@ public class S2CGrabResultPacket extends HandInteractionPacket {
 
         UUID previousId = ClientPlayerBodyDataStore.grabbedBodies.put(hand, currentId);
 
+        System.out.println(ClientPlayerBodyDataStore.grabbedBodies);
+
         if (Objects.equals(previousId, currentId)) {
             return;
         }
 
-        VxBody grabbedBody = VxClientBodyManager.getInstance().getVxBody(Objects.requireNonNullElse(currentId, previousId));
-        if (!(grabbedBody instanceof IGrabbable grabbable)) {
-            return;
+        if (previousId != null) {
+            VxBody oldBody = VxClientBodyManager.getInstance().getVxBody(previousId);
+            if (oldBody instanceof IGrabbable grabbable) {
+                grabbable.onReleaseClient(context.getPlayer(), hand, isAttached);
+            }
         }
 
         if (currentId != null) {
-            grabbable.onGrabClient(context.getPlayer(), hand, isAttached);
-        } else {
-            grabbable.onReleaseClient(context.getPlayer(), hand, isAttached);
+            VxBody newBody = VxClientBodyManager.getInstance().getVxBody(currentId);
+            if (newBody instanceof IGrabbable grabbable) {
+                grabbable.onGrabClient(context.getPlayer(), hand, isAttached);
+            }
         }
     }
 }

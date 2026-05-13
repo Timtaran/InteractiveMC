@@ -216,42 +216,50 @@ public class PlayerBodyManager {
 
     public void onPrePhysicsTick() {
         PlayerBodyDataStore.playersBodies.forEach((playerId, bodyParts) -> {
-            Player player = world.getLevel().getPlayerByUUID(playerId);
-            if (player == null) return;
+            try {
+                Player player = world.getLevel().getPlayerByUUID(playerId);
+                if (player == null) return;
 
-            bodyParts.forEach((bodyPart, bodyPartData) -> {
-                if (bodyPartData.grabData() == null || bodyPartData.grabData().isAttached()) {
-                    return;
-                }
+                bodyParts.forEach((bodyPart, bodyPartData) -> {
+                    if (bodyPartData.grabData() == null || bodyPartData.grabData().isAttached()) {
+                        return;
+                    }
 
-                VxBody grabberBody = world.getBodyManager().getVxBody(bodyPartData.bodyPartId());
-                VxBody grabbedBody = world.getBodyManager().getVxBody(bodyPartData.grabData().grabbedBodyId());
+                    VxBody grabberBody = world.getBodyManager().getVxBody(bodyPartData.bodyPartId());
+                    VxBody grabbedBody = world.getBodyManager().getVxBody(bodyPartData.grabData().grabbedBodyId());
 
-                GrabInteraction.GrabResult grabResult = grabInteraction.attachIfWithinReach(player, grabberBody, grabbedBody, bodyPart);
+                    GrabInteraction.GrabResult grabResult = grabInteraction.attachIfWithinReach(player, grabberBody, grabbedBody, bodyPart);
 
-                if (grabResult != null) {
-                    processGrabResult(player, bodyPart, grabResult);
-                }
-            });
+                    if (grabResult != null) {
+                        processGrabResult(player, bodyPart, grabResult);
+                    }
+                });
+            } catch (Exception e) {
+                InteractiveMC.LOGGER.error("Error while attaching grabbed body", e);
+            }
         });
 
     }
 
     public void onPhysicsTick() {
         PlayerBodyDataStore.playersBodies.forEach((playerId, bodyParts) -> {
-            Player player = world.getLevel().getPlayerByUUID(playerId);
-            if (player == null) return;
+            try {
+                Player player = world.getLevel().getPlayerByUUID(playerId);
+                if (player == null) return;
 
-            bodyParts.forEach((bodyPart, bodyPartData) -> {
-                if (bodyPartData.grabData() == null || bodyPartData.grabData().isAttached() || !bodyPartData.grabData().retracting()) {
-                    return;
-                }
+                bodyParts.forEach((bodyPart, bodyPartData) -> {
+                    if (bodyPartData.grabData() == null || bodyPartData.grabData().isAttached() || !bodyPartData.grabData().retracting()) {
+                        return;
+                    }
 
-                VxBody grabberBody = world.getBodyManager().getVxBody(bodyPartData.bodyPartId());
-                VxBody grabbedBody = world.getBodyManager().getVxBody(bodyPartData.grabData().grabbedBodyId());
+                    VxBody grabberBody = world.getBodyManager().getVxBody(bodyPartData.bodyPartId());
+                    VxBody grabbedBody = world.getBodyManager().getVxBody(bodyPartData.grabData().grabbedBodyId());
 
-                grabInteraction.applyPullForce(player, grabberBody, grabbedBody, bodyPart, bodyPartData);
-            });
+                    grabInteraction.applyPullForce(player, grabberBody, grabbedBody, bodyPart, bodyPartData);
+                });
+            } catch (Exception e) {
+                InteractiveMC.LOGGER.error("Error while applying pull force to grabbed body", e);
+            }
         });
     }
 
@@ -298,7 +306,7 @@ public class PlayerBodyManager {
 
         processGrabResult(player, playerBodyPart, grabResult);
 
-        return grabResult.grabbedBody();
+        return grabResult != null ? grabResult.grabbedBody() : null;
     }
 
     /**
@@ -323,8 +331,8 @@ public class PlayerBodyManager {
 
             if (
                     playerBodyPartData.grabData() == null ||
-                            !playerBodyPartData.grabData().isAttached() ||
-                            !playerBodyPartData.grabData().retracting()
+                            playerBodyPartData.grabData().isAttached() ||
+                            playerBodyPartData.grabData().retracting()
             )
                 return;
 
@@ -334,6 +342,9 @@ public class PlayerBodyManager {
             }
 
             VxBody grabbedBody = world.getBodyManager().getVxBody(playerBodyPartData.grabData().grabbedBodyId());
+            if  (grabbedBody == null) {
+                return;
+            }
 
             if (grabInteraction.updatePullState(player, grabberBody, grabbedBody, playerBodyPart, playerBodyPartData)) {
                 playerBodies.put(playerBodyPart, playerBodyPartData.withGrabData(playerBodyPartData.grabData().withRetracting(true)));
@@ -388,6 +399,8 @@ public class PlayerBodyManager {
         boolean isGrabConstraint = playerBodyPartData.grabData().constraintId() != null;
 
         playerBodies.put(playerBodyPart, playerBodyPartData.withGrabData(null));
+
+        System.out.println(playerBodies);
         if (player instanceof ServerPlayer serverPlayer) {
             player.getServer().execute(() ->
                     Networking.sendToPlayer(
@@ -435,12 +448,21 @@ public class PlayerBodyManager {
         }
         System.out.println(playerBodyPartData);
 
-        UUID grabbedBodyId = grabResult.grabbedBody() != null ? grabResult.grabbedBody().getPhysicsId() : null;
-        UUID constraintId = grabResult.grabConstraint() != null ? grabResult.grabConstraint().getConstraintId() : null;
+        UUID grabbedBodyId;
+        UUID constraintId;
 
-        playerBodies.put(playerBodyPart, playerBodyPartData.withGrabData(new PlayerBodyPartData.GrabData(grabbedBodyId, constraintId, false)));
+        if (grabResult == null) {
+            playerBodies.put(playerBodyPart, playerBodyPartData.withGrabData(null));
+            grabbedBodyId = null;
+            constraintId = null;
+        } else {
+            grabbedBodyId = grabResult.grabbedBody().getPhysicsId();
+            constraintId = grabResult.grabConstraint() != null ? grabResult.grabConstraint().getConstraintId() : null;
 
-        if (grabResult.grabbedBody() != null) {
+            playerBodies.put(playerBodyPart, playerBodyPartData.withGrabData(
+                    new PlayerBodyPartData.GrabData(grabbedBodyId, constraintId, false)
+            ));
+
             PlayerBodyDataStore.grabbedBodies.add(grabResult.grabbedBody().getBodyId());
         }
 

@@ -82,9 +82,10 @@ public class GrabInteraction {
     private static final int PULL_PREVIOUS_POSE_TICKS = 3;
     private static final double PULL_THRESHOLD = 0.1;
 
-    private static final float PULL_MAGNITUDE_MULTIPLIER = 1000f;
-
-    private static final GrabResult EMPTY_GRAB_RESULT = new GrabResult(null, null);
+    private static final float PULL_MAGNITUDE_STIFFNESS = 45f;
+    private static final float PULL_MAGNITUDE_DAMPING = 12f;
+    private static final float PULL_MIN_FORCE = 5f;
+    private static final float PULL_MAX_FORCE = 3500f;
 
     private final VxPhysicsWorld world;
     private final PlayerBodyManager playerBodyManager;
@@ -101,7 +102,7 @@ public class GrabInteraction {
      * @param grabConstraint the grab constraint that was created
      * @see PlayerBodyPartData
      */
-    public record GrabResult(@Nullable VxBody grabbedBody, @Nullable VxConstraint grabConstraint) {
+    public record GrabResult(@NotNull VxBody grabbedBody, @Nullable VxConstraint grabConstraint) {
     }
 
     /**
@@ -113,9 +114,10 @@ public class GrabInteraction {
      * @param isRemoteAllowed whether remote grabbing (raycast-based) is allowed if no bodies are within grab radius
      * @return the body that was grabbed, or null if no body was grabbed
      */
+    @Nullable
     public GrabResult grab(Player player, VxBody grabberBody, PlayerBodyPart playerBodyPart, boolean isRemoteAllowed) {
         PhysicsSystem physicsSystem = world.getPhysicsSystem();
-        if (physicsSystem == null) return EMPTY_GRAB_RESULT;
+        if (physicsSystem == null) return null;
 
         ConstBodyLockInterface lockInterface = physicsSystem.getBodyLockInterface();
 
@@ -124,7 +126,7 @@ public class GrabInteraction {
         try (BodyLockRead lock = new BodyLockRead(lockInterface, grabberBody.getBodyId())) {
             ConstBody body = lock.getBody();
             if (body == null)
-                return EMPTY_GRAB_RESULT;
+                return null;
 
             worldGrabPoint = getBodyPartGrabPointWorld(body, playerBodyPart);
         }
@@ -133,7 +135,7 @@ public class GrabInteraction {
 
         // Performing instant grab checks (body will be teleported and attached)
         GrabResult instantGrabResult = tryInstantGrab(lockInterface, player, grabberBody, worldGrabPoint, playerBodyPart);
-        if (!isRemoteAllowed || instantGrabResult.grabbedBody() != null) {
+        if (!isRemoteAllowed || instantGrabResult != null) {
             return instantGrabResult;
         }
 
@@ -147,7 +149,7 @@ public class GrabInteraction {
      * This method performs a sphere cast from the grab point and tries to grab the closest
      * non-player body within the grab radius.
      */
-    @NotNull
+    @Nullable
     private GrabResult tryInstantGrab(ConstBodyLockInterface lockInterface, Player player, VxBody grabberBody, RVec3 worldGrabPoint, PlayerBodyPart playerBodyPart) {
         List<VxPhysicsIntersector.IntersectShapeResult> intersections = findInstantGrabCandidates(player, grabberBody, worldGrabPoint);
 
@@ -189,7 +191,7 @@ public class GrabInteraction {
             }
         }
 
-        return EMPTY_GRAB_RESULT;
+        return null;
     }
 
     @NotNull
@@ -286,7 +288,7 @@ public class GrabInteraction {
         return null;
     }
 
-    @NotNull
+    @Nullable
     private GrabResult tryRemoteGrab(ConstBodyLockInterface lockInterface, Player player, VxBody grabberBody, RVec3 worldGrabPoint, PlayerBodyPart playerBodyPart) {  // todo replace with RVec3Arg
         try (ObjectLayerFilter olFilter = new ObjectLayerFilter() {
             @Override
@@ -345,7 +347,7 @@ public class GrabInteraction {
             }
         }
 
-        return EMPTY_GRAB_RESULT;
+        return null;
     }
 
     @Nullable
@@ -407,6 +409,7 @@ public class GrabInteraction {
         PhysicsSystem physicsSystem = world.getPhysicsSystem();
         if (physicsSystem == null) return;
 
+        BodyInterface bodyInterface = physicsSystem.getBodyInterfaceNoLock();
         ConstBodyLockInterface lockInterface = physicsSystem.getBodyLockInterface();
 
         // Lock the body for modification.
@@ -414,28 +417,49 @@ public class GrabInteraction {
             Body grabberJoltBody = lock.getBody(0);
             Body grabbedJoltBody = lock.getBody(1);
 
+            bodyInterface.activateBody(grabbedBody.getBodyId());
+
             // Only apply forces to valid, dynamic (simulated) objects.
             if (grabbedJoltBody.isInBroadPhase() && grabbedJoltBody.isDynamic()) {
                 RVec3 worldGrabPoint = getBodyPartGrabPointWorld(grabberJoltBody, playerBodyPart);
 
                 RVec3 bodyPos = grabbedJoltBody.getCenterOfMassPosition();
-                RVec3 vectorToTarget = Op.minus(worldGrabPoint, bodyPos);
+                RVec3 toTarget = Op.minus(worldGrabPoint, bodyPos);
 
-                double distance = vectorToTarget.length();
+                double distance = toTarget.length();
 
                 if (distance > REMOTE_GRAB_MAX_DISTANCE) {
                     playerBodyManager.release(player, playerBodyPart.toInteractionHand());
                     return;
                 }
 
-                if (distance < 1e-3) {
-                    return; // body is already close enough. attaching happens inside prePhysicsTick so we're not doing anything
+                if (distance < 1e-4d) {
+                    return;
                 }
 
-                Vec3 direction = vectorToTarget.toVec3().normalized();
-                float magnitude = (float) distance * PULL_MAGNITUDE_MULTIPLIER;
+                Vec3 direction = toTarget.toVec3().normalized();
 
-                Vec3 force = Op.star(magnitude, direction);
+                Vec3 velocity = grabbedJoltBody.getLinearVelocity();
+
+                float velocityAlongDirection = velocity.dot(direction);
+
+                float stiffness = 45.0f;
+                float damping = 12.0f;
+
+                float forceMagnitude =
+                        (float) distance * stiffness
+                                - velocityAlongDirection * damping;
+                float inverseMass = grabbedJoltBody.getMotionProperties().getInverseMass();
+
+                if (inverseMass <= 0.0f) {
+                    return;
+                }
+
+                forceMagnitude /= inverseMass;
+                forceMagnitude = Math.max(PULL_MIN_FORCE, Math.min(PULL_MAX_FORCE, forceMagnitude));
+
+                Vec3 force = Op.star(forceMagnitude, direction);
+
                 grabbedJoltBody.addForce(force);
             }
         }
@@ -446,14 +470,24 @@ public class GrabInteraction {
         if (historicalPoses == null)
             return false;
 
-        net.minecraft.world.phys.Vec3 lookDirection = historicalPoses.getHistoricalData(0).getHead().getDir();
-        net.minecraft.world.phys.Vec3 handMovement = historicalPoses.netMovement(playerBodyPart.toVRBodyPart(), PULL_PREVIOUS_POSE_TICKS, true);
+        net.minecraft.world.phys.Vec3 handMovement =
+                historicalPoses.netMovement(
+                        playerBodyPart.toVRBodyPart(),
+                        PULL_PREVIOUS_POSE_TICKS,
+                        true
+                );
 
-        if (handMovement == null) {
+        if (handMovement == null || handMovement.lengthSqr() < 1e-3d) {
             return false;
         }
 
-        double pullAmount = handMovement.dot(lookDirection);
+        // current hand/controller position
+        RVec3 handPosition = grabberBody.getTransform().getTranslation();
+
+        // direction from grabbed object to hand
+        RVec3 pullDirection = Op.minus(handPosition, grabbedBody.getTransform().getTranslation()).normalized();
+
+        double pullAmount = handMovement.normalize().dot(VxConversions.toMinecraft(pullDirection));
 
         if (pullAmount > PULL_THRESHOLD) {
             if (grabbedBody instanceof IGrabbable grabbableBody) {
