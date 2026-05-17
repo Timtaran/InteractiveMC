@@ -188,6 +188,8 @@ public class PlayerBodyPartGhostRigidBody extends VxBody {
         constraint.setMotorState(EAxis.RotationZ, EMotorState.Position);
 
         constraint.setTargetOrientationCs(Quat.sIdentity());
+
+        isConstraintConfigured = true;
     }
 
     /**
