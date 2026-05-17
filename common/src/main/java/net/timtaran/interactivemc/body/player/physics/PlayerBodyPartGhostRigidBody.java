@@ -5,7 +5,9 @@
 package net.timtaran.interactivemc.body.player.physics;
 
 import com.github.stephengold.joltjni.*;
+import com.github.stephengold.joltjni.enumerate.EAxis;
 import com.github.stephengold.joltjni.enumerate.EMotionType;
+import com.github.stephengold.joltjni.enumerate.EMotorState;
 import com.github.stephengold.joltjni.readonly.Vec3Arg;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -19,6 +21,7 @@ import net.xmx.velthoric.core.body.VxBody;
 import net.xmx.velthoric.core.body.VxBodyType;
 import net.xmx.velthoric.core.body.client.VxClientBodyManager;
 import net.xmx.velthoric.core.body.factory.VxRigidBodyFactory;
+import net.xmx.velthoric.core.constraint.VxConstraint;
 import net.xmx.velthoric.core.network.synchronization.VxDataSerializers;
 import net.xmx.velthoric.core.network.synchronization.VxSynchronizedData;
 import net.xmx.velthoric.core.network.synchronization.accessor.VxServerAccessor;
@@ -58,6 +61,9 @@ public class PlayerBodyPartGhostRigidBody extends VxBody {
     private static short selectiveGhostLayer = -1;
     private boolean isIndexSaved = false;
 
+    private VxConstraint linkedConstraint = null;
+    private boolean isConstraintConfigured = false;
+
     /**
      * Server-side constructor.
      *
@@ -78,6 +84,10 @@ public class PlayerBodyPartGhostRigidBody extends VxBody {
     @Environment(EnvType.CLIENT)
     public PlayerBodyPartGhostRigidBody(VxBodyType type, UUID id) {
         super(type, id);
+    }
+
+    public void setLinkedConstraint(VxConstraint linkedConstraint) {
+        this.linkedConstraint = linkedConstraint;
     }
 
     /**
@@ -154,6 +164,30 @@ public class PlayerBodyPartGhostRigidBody extends VxBody {
                 rotation,
                 FIXED_TIME_STEP
         );
+    }
+
+    @Override
+    public void onPhysicsTick(VxPhysicsWorld world) {
+        if (!isConstraintConfigured) {
+            configureConstraint();
+        }
+    }
+
+    private void configureConstraint() {
+        if (linkedConstraint == null) return;
+        SixDofConstraint constraint = (SixDofConstraint) linkedConstraint.getJoltConstraint();
+        if (constraint == null) return;
+
+        constraint.setMotorState(EAxis.TranslationX, EMotorState.Position);
+        constraint.setMotorState(EAxis.TranslationY, EMotorState.Position);
+        constraint.setMotorState(EAxis.TranslationZ, EMotorState.Position);
+        constraint.setTargetPositionCs(new Vec3(0f, 0f, 0f));
+
+        constraint.setMotorState(EAxis.RotationX, EMotorState.Position);
+        constraint.setMotorState(EAxis.RotationY, EMotorState.Position);
+        constraint.setMotorState(EAxis.RotationZ, EMotorState.Position);
+
+        constraint.setTargetOrientationCs(Quat.sIdentity());
     }
 
     /**

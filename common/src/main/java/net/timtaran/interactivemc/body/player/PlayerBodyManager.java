@@ -30,6 +30,7 @@ import net.timtaran.interactivemc.network.Networking;
 import net.xmx.velthoric.core.body.VxBody;
 import net.xmx.velthoric.core.body.VxRemovalReason;
 import net.xmx.velthoric.core.body.server.VxServerBodyManager;
+import net.xmx.velthoric.core.constraint.VxConstraint;
 import net.xmx.velthoric.core.physics.VxJoltBridge;
 import net.xmx.velthoric.core.physics.world.VxPhysicsWorld;
 import net.xmx.velthoric.math.VxConversions;
@@ -39,6 +40,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Manages the creation, tracking, and interaction of player bodies in the physics world.
@@ -56,7 +58,7 @@ import java.util.UUID;
  * @author timtaran
  */
 public class PlayerBodyManager {
-    private static final HashMap<VxPhysicsWorld, PlayerBodyManager> managers = new HashMap<>();
+    private static final ConcurrentHashMap<VxPhysicsWorld, PlayerBodyManager> managers = new ConcurrentHashMap<>();
 
     private final VxPhysicsWorld world;
     private final GrabInteraction grabInteraction;
@@ -139,25 +141,27 @@ public class PlayerBodyManager {
             settings.setAxisX2(new Vec3(1f, 0f, 0f));
             settings.setAxisY2(new Vec3(0f, 1f, 0f));
 
-            settings.setLimitedAxis(EAxis.TranslationX, 0f, 0f);
-            settings.setLimitedAxis(EAxis.TranslationY, 0f, 0f);
-            settings.setLimitedAxis(EAxis.TranslationZ, 0f, 0f);
-            settings.setLimitedAxis(EAxis.RotationX, 0f, 0f);
-            settings.setLimitedAxis(EAxis.RotationY, 0f, 0f);
-            settings.setLimitedAxis(EAxis.RotationZ, 0f, 0f);
+            settings.setLimitedAxis(EAxis.TranslationX, -0.5f, 0.5f);
+            settings.setLimitedAxis(EAxis.TranslationY, -0.5f, 0.5f);
+            settings.setLimitedAxis(EAxis.TranslationZ, -0.5f, 0.5f);
+            settings.setLimitedAxis(EAxis.RotationX, -0.5f, 0.5f);
+            settings.setLimitedAxis(EAxis.RotationY, -0.5f, 0.5f);
+            settings.setLimitedAxis(EAxis.RotationZ, -0.5f, 0.5f);
 
-            MotorSettings linearMotor = new MotorSettings(8.0f, 1.0f, 3000.0f, 0f);
+            MotorSettings linearMotor = new MotorSettings(6.0f, 1.0f, 80f / (VxJoltBridge.INSTANCE.getJoltBody(world, bodyPart.getBodyId()).getMotionProperties().getInverseMass()), 0f);
             settings.setMotorSettings(EAxis.TranslationX, linearMotor);
             settings.setMotorSettings(EAxis.TranslationY, linearMotor);
             settings.setMotorSettings(EAxis.TranslationZ, linearMotor);
 
-            MotorSettings angularMotor = new MotorSettings(15.0f, 1.0f, 0f, 1600.0f);
+            MotorSettings angularMotor = new MotorSettings(4.0f, 1.0f, 0f, 1600.0f);
             settings.setMotorSettings(EAxis.RotationX, angularMotor);
             settings.setMotorSettings(EAxis.RotationY, angularMotor);
             settings.setMotorSettings(EAxis.RotationZ, angularMotor);
 
             // Create the constraint. It will be activated automatically once both bodies are loaded.
-            world.getConstraintManager().createConstraint(settings, bodyPartGhost.getPhysicsId(), bodyPart.getPhysicsId()).setPersistent(false);
+            VxConstraint constraint = world.getConstraintManager().createConstraint(settings, bodyPartGhost.getPhysicsId(), bodyPart.getPhysicsId());
+            constraint.setPersistent(false);
+            bodyPartGhost.setLinkedConstraint(constraint);
         }
 
         return new PlayerBodyPartData(bodyPart.getPhysicsId(), bodyPartGhost.getPhysicsId(), TriggerState.RELEASE, null);
