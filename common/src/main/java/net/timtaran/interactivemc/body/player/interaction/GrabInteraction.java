@@ -405,7 +405,7 @@ public class GrabInteraction {
         return null;
     }
 
-    public void applyPullForce(Player player, VxBody grabberBody, VxBody grabbedBody, PlayerBodyPart playerBodyPart, PlayerBodyPartData playerBodyPartData) {
+    public void applyPullForce(Player player, VxBody grabberBody, VxBody grabbedBody, PlayerBodyPart playerBodyPart) {
         PhysicsSystem physicsSystem = world.getPhysicsSystem();
         if (physicsSystem == null) return;
 
@@ -462,7 +462,7 @@ public class GrabInteraction {
         }
     }
 
-    public boolean updatePullState(Player player, VxBody grabberBody, VxBody grabbedBody, PlayerBodyPart playerBodyPart, PlayerBodyPartData playerBodyPartData) {
+    public boolean updatePullState(Player player, VxBody grabberBody, VxBody grabbedBody, PlayerBodyPart playerBodyPart) {
         VRPoseHistory historicalPoses = VRAPI.instance().getHistoricalVRPoses(player);
         if (historicalPoses == null)
             return false;

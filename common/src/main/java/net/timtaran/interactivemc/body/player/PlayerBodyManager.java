@@ -38,7 +38,6 @@ import net.xmx.velthoric.math.VxTransform;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -259,7 +258,7 @@ public class PlayerBodyManager {
                     VxBody grabberBody = world.getBodyManager().getVxBody(bodyPartData.bodyPartId());
                     VxBody grabbedBody = world.getBodyManager().getVxBody(bodyPartData.grabData().grabbedBodyId());
 
-                    grabInteraction.applyPullForce(player, grabberBody, grabbedBody, bodyPart, bodyPartData);
+                    grabInteraction.applyPullForce(player, grabberBody, grabbedBody, bodyPart);
                 });
             } catch (Exception e) {
                 InteractiveMC.LOGGER.error("Error while applying pull force to grabbed body", e);
@@ -350,7 +349,7 @@ public class PlayerBodyManager {
                 return;
             }
 
-            if (grabInteraction.updatePullState(player, grabberBody, grabbedBody, playerBodyPart, playerBodyPartData)) {
+            if (grabInteraction.updatePullState(player, grabberBody, grabbedBody, playerBodyPart)) {
                 playerBodies.put(playerBodyPart, playerBodyPartData.withGrabData(playerBodyPartData.grabData().withRetracting(true)));
             }
         } catch (Exception e) {
