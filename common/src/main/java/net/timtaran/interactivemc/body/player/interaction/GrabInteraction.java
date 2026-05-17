@@ -443,12 +443,9 @@ public class GrabInteraction {
 
                 float velocityAlongDirection = velocity.dot(direction);
 
-                float stiffness = 45.0f;
-                float damping = 12.0f;
-
                 float forceMagnitude =
-                        (float) distance * stiffness
-                                - velocityAlongDirection * damping;
+                        (float) distance * PULL_MAGNITUDE_STIFFNESS
+                                - velocityAlongDirection * PULL_MAGNITUDE_DAMPING;
                 float inverseMass = grabbedJoltBody.getMotionProperties().getInverseMass();
 
                 if (inverseMass <= 0.0f) {
