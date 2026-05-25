@@ -19,6 +19,7 @@ import net.timtaran.interactivemc.body.type.IGrabbable;
 import net.xmx.velthoric.core.body.VxBody;
 import net.xmx.velthoric.core.body.VxBodyType;
 import net.xmx.velthoric.core.body.factory.VxRigidBodyFactory;
+import net.xmx.velthoric.core.body.shape.VxBoxShape;
 import net.xmx.velthoric.core.physics.VxPhysicsLayers;
 import net.xmx.velthoric.core.physics.world.VxPhysicsWorld;
 import org.jetbrains.annotations.Nullable;
@@ -53,13 +54,11 @@ public class TestDuckRigidBody extends VxBody implements IGrabbable {
     }
 
     public static int createJoltBody(VxBody body, VxRigidBodyFactory factory) {
-        try (
-                ShapeSettings shapeSettings = new BoxShapeSettings(new Vec3(0.2f, 0.2f, 0.2f));
-                BodyCreationSettings bcs = new BodyCreationSettings()
-        ) {
+        VxBoxShape shape = new VxBoxShape(new Vec3(0.2f, 0.2f, 0.2f));
+        try (BodyCreationSettings bcs = new BodyCreationSettings()) {
             bcs.setMotionType(EMotionType.Dynamic);
             bcs.setObjectLayer(VxPhysicsLayers.MOVING);
-            return factory.create(shapeSettings, bcs);
+            return factory.create(shape, bcs);
         }
     }
 

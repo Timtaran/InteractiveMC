@@ -105,9 +105,10 @@ public class PlayerBodyManager {
                 new Quat()
         );
 
-        PlayerBodyPartRigidBody bodyPart = (PlayerBodyPartRigidBody) world.getBodyManager().createBody(
+        PlayerBodyPartRigidBody bodyPart = world.getBodyManager().createBody(
                 BodyRegistry.PLAYER_BODY_PART,
                 transform,
+                EMotionType.Dynamic,
                 EActivation.Activate,
                 body -> {
                     body.setServerData(PlayerBodyPartRigidBody.DATA_HALF_EXTENTS, halfExtents);
@@ -116,9 +117,10 @@ public class PlayerBodyManager {
                 }
         );
 
-        PlayerBodyPartGhostRigidBody bodyPartGhost = (PlayerBodyPartGhostRigidBody) world.getBodyManager().createBody(
+        PlayerBodyPartGhostRigidBody bodyPartGhost = world.getBodyManager().createBody(
                 BodyRegistry.PLAYER_BODY_PART_GHOST,
                 transform,
+                EMotionType.Kinematic,
                 EActivation.Activate,
                 body -> {
                     body.setServerData(PlayerBodyPartGhostRigidBody.DATA_HALF_EXTENTS, halfExtents);
@@ -126,8 +128,6 @@ public class PlayerBodyManager {
                     body.setServerData(PlayerBodyPartGhostRigidBody.DATA_BODY_PART, partType);
                 }
         );
-        VxJoltBridge.INSTANCE.getJoltBody(world, bodyPartGhost).setMotionType(EMotionType.Kinematic);
-        // Workaround until https://github.com/xI-Mx-Ix/Velthoric/issues/31 will be resolved
 
         try (SixDofConstraintSettings settings = new SixDofConstraintSettings()) {
             settings.setSpace(EConstraintSpace.LocalToBodyCom);

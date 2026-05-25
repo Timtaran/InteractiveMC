@@ -30,8 +30,8 @@ public class BodyRegistry {
     /**
      * The dynamic rigid body type for player body parts (head, hands, etc.).
      */
-    public static final VxBodyType PLAYER_BODY_PART = VxBodyType.Builder
-            .create(PlayerBodyPartRigidBody::new)
+    public static final VxBodyType<PlayerBodyPartRigidBody> PLAYER_BODY_PART = VxBodyType.Builder
+            .<PlayerBodyPartRigidBody>create(PlayerBodyPartRigidBody::new)
             .rigidProvider(PlayerBodyPartRigidBody::createJoltBody)
             .noSummon()
             .behavior(VxNetSyncBehavior.ID)
@@ -43,8 +43,8 @@ public class BodyRegistry {
     /**
      * The ghost (kinematic) rigid body type for player body parts, used to track VR controller positions.
      */
-    public static final VxBodyType PLAYER_BODY_PART_GHOST = VxBodyType.Builder
-            .create(PlayerBodyPartGhostRigidBody::new)
+    public static final VxBodyType<PlayerBodyPartGhostRigidBody> PLAYER_BODY_PART_GHOST = VxBodyType.Builder
+            .<PlayerBodyPartGhostRigidBody>create(PlayerBodyPartGhostRigidBody::new)
             .rigidProvider(PlayerBodyPartGhostRigidBody::createJoltBody)
             // .behavior(VxNetSyncBehavior.ID)
             // .behavior(VxSyncBehavior.ID)
@@ -54,8 +54,8 @@ public class BodyRegistry {
             .persistence(PlayerBodyPartGhostRigidBody::writePersistenceData, PlayerBodyPartGhostRigidBody::readPersistenceData)
             .build(InteractiveMCIdentifier.get("player_ghost_body_part"));
 
-    public static final VxBodyType TEST_DUCK = VxBodyType.Builder
-            .create(TestDuckRigidBody::new)
+    public static final VxBodyType<TestDuckRigidBody> TEST_DUCK = VxBodyType.Builder
+            .<TestDuckRigidBody>create(TestDuckRigidBody::new)
             .rigidProvider(TestDuckRigidBody::createJoltBody)
             .behavior(VxNetSyncBehavior.ID)
             .setPersistent(true)
