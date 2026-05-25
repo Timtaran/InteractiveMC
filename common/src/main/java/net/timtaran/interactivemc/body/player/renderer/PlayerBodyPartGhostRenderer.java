@@ -55,7 +55,7 @@ public class PlayerBodyPartGhostRenderer extends VxBodyRenderer<VxBody> {
         poseStack.translate(-hx, -hy, -hz);
         poseStack.scale(fullWidth, fullHeight, fullDepth);
 
-        WireframeRenderer.renderUnitCubeWireframe(poseStack, bufferSource, packedLight, 1.0f, 1.0f, 1.0f, 1.0f);
+        WireframeRenderer.renderUnitCubeWireframe(poseStack, bufferSource, packedLight, 1.0f, 1.0f, 1.0f, 0.5f);
 
         poseStack.popPose();
     }

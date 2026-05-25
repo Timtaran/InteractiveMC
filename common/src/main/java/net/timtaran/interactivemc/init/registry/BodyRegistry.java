@@ -46,8 +46,8 @@ public class BodyRegistry {
     public static final VxBodyType<PlayerBodyPartGhostRigidBody> PLAYER_BODY_PART_GHOST = VxBodyType.Builder
             .<PlayerBodyPartGhostRigidBody>create(PlayerBodyPartGhostRigidBody::new)
             .rigidProvider(PlayerBodyPartGhostRigidBody::createJoltBody)
-            // .behavior(VxNetSyncBehavior.ID)
-            // .behavior(VxSyncBehavior.ID)
+            .behavior(VxNetSyncBehavior.ID)
+            .behavior(VxSyncBehavior.ID)
             .behavior(VxTickBehavior.ID)
             .noSummon()
             .setPersistent(false)
