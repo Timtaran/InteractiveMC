@@ -147,7 +147,7 @@ public class PlayerBodyManager {
             settings.setLimitedAxis(EAxis.RotationY, -0.5f, 0.5f);
             settings.setLimitedAxis(EAxis.RotationZ, -0.5f, 0.5f);
 
-            MotorSettings linearMotor = new MotorSettings(6.0f, 1.0f, 80f / (VxJoltBridge.INSTANCE.getJoltBody(world, bodyPart.getBodyId()).getMotionProperties().getInverseMass()), 0f);
+            MotorSettings linearMotor = new MotorSettings(6.0f, 1.0f, 90f / (VxJoltBridge.INSTANCE.getJoltBody(world, bodyPart.getBodyId()).getMotionProperties().getInverseMass()), 0f);
             settings.setMotorSettings(EAxis.TranslationX, linearMotor);
             settings.setMotorSettings(EAxis.TranslationY, linearMotor);
             settings.setMotorSettings(EAxis.TranslationZ, linearMotor);
