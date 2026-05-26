@@ -13,6 +13,7 @@ import net.timtaran.interactivemc.body.player.physics.PlayerBodyPartRigidBody;
 import net.timtaran.interactivemc.body.player.renderer.PlayerBodyPartGhostRenderer;
 import net.timtaran.interactivemc.body.player.renderer.PlayerBodyPartRenderer;
 import net.timtaran.interactivemc.util.InteractiveMCIdentifier;
+import net.xmx.velthoric.core.behavior.impl.VxNoKillBehavior;
 import net.xmx.velthoric.core.behavior.impl.VxTickBehavior;
 import net.xmx.velthoric.core.body.VxBodyType;
 import net.xmx.velthoric.core.body.registry.VxBodyRegistry;
@@ -36,6 +37,7 @@ public class BodyRegistry {
             .noSummon()
             .behavior(VxNetSyncBehavior.ID)
             .behavior(VxSyncBehavior.ID)
+            .behavior(VxNoKillBehavior.ID)
             .setPersistent(false)
             .persistence(PlayerBodyPartRigidBody::writePersistenceData, PlayerBodyPartRigidBody::readPersistenceData)
             .build(InteractiveMCIdentifier.get("player_body_part"));
@@ -49,6 +51,7 @@ public class BodyRegistry {
             .behavior(VxNetSyncBehavior.ID)
             .behavior(VxSyncBehavior.ID)
             .behavior(VxTickBehavior.ID)
+            .behavior(VxNoKillBehavior.ID)
             .noSummon()
             .setPersistent(false)
             .persistence(PlayerBodyPartGhostRigidBody::writePersistenceData, PlayerBodyPartGhostRigidBody::readPersistenceData)
