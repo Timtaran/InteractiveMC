@@ -41,7 +41,7 @@ dependencies {
     shadowBundle project(path: ':common', configuration: 'transformProductionNeoForge')
 
     // Required dependencies
-    // modImplementation "com.github.ttrndev.Velthoric:velthoric-neoforge:$rootProject.velthoric_version" // wait until remap error will be fixed
+    // modImplementation "com.github.Timtaran.Velthoric:velthoric-neoforge:$rootProject.velthoric_version" // wait until remap error will be fixed
 
     modApi "maven.modrinth:vivecraft:$rootProject.vivecraft_version-neoforge"
     runtimeOnly "com.illposed.osc:javaosc-core:0.9"
@@ -73,4 +73,21 @@ shadowJar {
 
 remapJar {
     inputFile.set shadowJar.archiveFile
+}
+
+tasks.named("sourcesJar") {
+    def commonSources = project(":common").sourceSets.main.allSource
+    from commonSources
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            artifactId = base.archivesName.get()
+
+            artifact(tasks.named("remapJar"))
+            artifact(tasks.named("remapSourcesJar"))
+        }
+    }
 }

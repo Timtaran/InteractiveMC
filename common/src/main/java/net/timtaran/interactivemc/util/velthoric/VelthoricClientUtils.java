@@ -6,7 +6,7 @@ package net.timtaran.interactivemc.util.velthoric;
 
 import com.github.stephengold.joltjni.RVec3;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
-import net.xmx.velthoric.core.body.client.VxClientBodyDataStore;
+import net.xmx.velthoric.core.body.client.VxClientBodyDataContainer;
 import net.xmx.velthoric.core.body.client.VxClientBodyManager;
 
 import java.util.List;
@@ -35,9 +35,9 @@ public class VelthoricClientUtils {
      * <p>The distance check is performed using squared distance
      * to avoid an expensive square root operation.</p>
      *
-     * @param x the x-coordinate of the search point
-     * @param y the y-coordinate of the search point
-     * @param z the z-coordinate of the search point
+     * @param x      the x-coordinate of the search point
+     * @param y      the y-coordinate of the search point
+     * @param z      the z-coordinate of the search point
      * @param radius the search radius (must be >= 0)
      * @return a list of indices of bodies located strictly inside the radius
      */
@@ -45,7 +45,7 @@ public class VelthoricClientUtils {
         double squaredRadius = radius * radius;
 
         List<Integer> result = new IntArrayList();
-        VxClientBodyDataStore dataStore = VxClientBodyManager.getInstance().getStore();
+        VxClientBodyDataContainer dataStore = VxClientBodyManager.getInstance().getStore().clientCurrent();
 
         for (int i = 0; i < dataStore.lastKnownPosition.length; i++) {
             RVec3 bodyPosition = dataStore.lastKnownPosition[i];

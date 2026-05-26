@@ -19,7 +19,7 @@ public class InteractiveMCIdentifier {
      * The returned key is in the format "category.mod_id.path".
      *
      * @param category The category of the translation key.
-     * @param path The path of the translation key.
+     * @param path     The path of the translation key.
      * @return The generated translation key.
      */
     public static String getTranslationKey(String category, String path) {

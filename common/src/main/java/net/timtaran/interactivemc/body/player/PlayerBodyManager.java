@@ -10,26 +10,35 @@ import com.github.stephengold.joltjni.enumerate.EAxis;
 import com.github.stephengold.joltjni.enumerate.EConstraintSpace;
 import com.github.stephengold.joltjni.enumerate.EMotionType;
 import com.github.stephengold.joltjni.operator.Op;
-import com.github.stephengold.joltjni.readonly.RVec3Arg;
+import com.github.stephengold.joltjni.readonly.Vec3Arg;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
+import it.unimi.dsi.fastutil.ints.IntSet;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.timtaran.interactivemc.init.registry.BodyRegistry;
+import net.timtaran.interactivemc.body.player.interaction.GrabInteraction;
+import net.timtaran.interactivemc.body.player.interaction.TriggerInteraction;
+import net.timtaran.interactivemc.body.player.interaction.TriggerState;
+import net.timtaran.interactivemc.body.player.packet.S2CGrabResultPacket;
+import net.timtaran.interactivemc.body.player.physics.PlayerBodyPartGhostRigidBody;
+import net.timtaran.interactivemc.body.player.physics.PlayerBodyPartRigidBody;
+import net.timtaran.interactivemc.body.player.store.PlayerBodyDataStore;
 import net.timtaran.interactivemc.init.InteractiveMC;
+import net.timtaran.interactivemc.init.registry.BodyRegistry;
+import net.timtaran.interactivemc.network.Networking;
+import net.xmx.velthoric.core.body.VxBody;
 import net.xmx.velthoric.core.body.VxRemovalReason;
 import net.xmx.velthoric.core.body.server.VxServerBodyManager;
-import net.xmx.velthoric.core.body.VxBody;
 import net.xmx.velthoric.core.constraint.VxConstraint;
-import net.xmx.velthoric.core.constraint.manager.VxConstraintManager;
-import net.xmx.velthoric.core.intersection.VxPhysicsIntersector;
 import net.xmx.velthoric.core.physics.VxJoltBridge;
-import net.xmx.velthoric.core.physics.VxPhysicsLayers;
 import net.xmx.velthoric.core.physics.world.VxPhysicsWorld;
 import net.xmx.velthoric.math.VxConversions;
 import net.xmx.velthoric.math.VxTransform;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.EnumMap;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -48,29 +57,16 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author timtaran
  */
 public class PlayerBodyManager {
-    public static final float GRAB_RADIUS = 0.3f;
-    private static final Vec3 SHAPE_SCALE = new Vec3(1f, 1f, 1f);
-
-    private static final HashMap<VxPhysicsWorld, PlayerBodyManager> managers = new HashMap<>();
-
-    private record PlayerBodyPartData(UUID bodyPartId, UUID ghostBodyPartId, @Nullable UUID grabbedBodyId,
-                                      @Nullable UUID grabConstraintId) {
-    }
-
-    /**
-     * Contains all bodies associated with each player, indexed by their UUID.
-     */
-    private static final HashMap<UUID, EnumMap<PlayerBodyPart, PlayerBodyPartData>> playersBodies = new HashMap<>();
-
-    /**
-     * Contains the Jolt body IDs of all player bodies for quick lookup during interactions.
-     */
-    private static final ConcurrentHashMap<UUID, List<Integer>> playersJoltBodies = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<VxPhysicsWorld, PlayerBodyManager> managers = new ConcurrentHashMap<>();
 
     private final VxPhysicsWorld world;
+    private final GrabInteraction grabInteraction;
+    private final TriggerInteraction triggerInteraction;
 
     private PlayerBodyManager(VxPhysicsWorld world) {
         this.world = world;
+        this.grabInteraction = new GrabInteraction(world, this);
+        this.triggerInteraction = new TriggerInteraction();
     }
 
     /**
@@ -97,11 +93,11 @@ public class PlayerBodyManager {
      * Creates a body part for the given player and body part type.
      *
      * @param partType the type of body part (head, hands, etc.)
-     * @param player the player who owns this body part
+     * @param player   the player who owns this body part
      * @return data about the created body part, including the IDs of both the main and ghost bodies
      */
     private PlayerBodyPartData createBodyPart(PlayerBodyPart partType, Player player) {
-        Vec3 size = partType.getSize();
+        Vec3Arg size = partType.getSize();
         Vec3 halfExtents = Op.star(0.5f, size);
 
         VxTransform transform = new VxTransform(
@@ -109,9 +105,10 @@ public class PlayerBodyManager {
                 new Quat()
         );
 
-        PlayerBodyPartRigidBody bodyPart = (PlayerBodyPartRigidBody) world.getBodyManager().createBody(
+        PlayerBodyPartRigidBody bodyPart = world.getBodyManager().createBody(
                 BodyRegistry.PLAYER_BODY_PART,
                 transform,
+                EMotionType.Dynamic,
                 EActivation.Activate,
                 body -> {
                     body.setServerData(PlayerBodyPartRigidBody.DATA_HALF_EXTENTS, halfExtents);
@@ -120,19 +117,17 @@ public class PlayerBodyManager {
                 }
         );
 
-        PlayerBodyPartGhostRigidBody bodyPartGhost = (PlayerBodyPartGhostRigidBody) world.getBodyManager().createBody(
+        PlayerBodyPartGhostRigidBody bodyPartGhost = world.getBodyManager().createBody(
                 BodyRegistry.PLAYER_BODY_PART_GHOST,
                 transform,
+                EMotionType.Kinematic,
                 EActivation.Activate,
                 body -> {
-                    body.setServerData(PlayerBodyPartRigidBody.DATA_HALF_EXTENTS, halfExtents);
-                    body.setServerData(PlayerBodyPartRigidBody.DATA_PLAYER_ID, player.getUUID());
-                    body.setServerData(PlayerBodyPartRigidBody.DATA_BODY_PART, partType);
+                    body.setServerData(PlayerBodyPartGhostRigidBody.DATA_HALF_EXTENTS, halfExtents);
+                    body.setServerData(PlayerBodyPartGhostRigidBody.DATA_PLAYER_ID, player.getUUID());
+                    body.setServerData(PlayerBodyPartGhostRigidBody.DATA_BODY_PART, partType);
                 }
         );
-        VxJoltBridge.INSTANCE.getJoltBody(world, bodyPartGhost).setMotionType(EMotionType.Kinematic);
-        // Workaround until https://github.com/xI-Mx-Ix/Velthoric/issues/31 will be resolved
-
 
         try (SixDofConstraintSettings settings = new SixDofConstraintSettings()) {
             settings.setSpace(EConstraintSpace.LocalToBodyCom);
@@ -145,28 +140,30 @@ public class PlayerBodyManager {
             settings.setAxisX2(new Vec3(1f, 0f, 0f));
             settings.setAxisY2(new Vec3(0f, 1f, 0f));
 
-            settings.setLimitedAxis(EAxis.TranslationX, 0f, 0f);
-            settings.setLimitedAxis(EAxis.TranslationY, 0f, 0f);
-            settings.setLimitedAxis(EAxis.TranslationZ, 0f, 0f);
-            settings.setLimitedAxis(EAxis.RotationX, 0f, 0f);
-            settings.setLimitedAxis(EAxis.RotationY, 0f, 0f);
-            settings.setLimitedAxis(EAxis.RotationZ, 0f, 0f);
+            settings.setLimitedAxis(EAxis.TranslationX, -0.5f, 0.5f);
+            settings.setLimitedAxis(EAxis.TranslationY, -0.5f, 0.5f);
+            settings.setLimitedAxis(EAxis.TranslationZ, -0.5f, 0.5f);
+            settings.setLimitedAxis(EAxis.RotationX, -0.5f, 0.5f);
+            settings.setLimitedAxis(EAxis.RotationY, -0.5f, 0.5f);
+            settings.setLimitedAxis(EAxis.RotationZ, -0.5f, 0.5f);
 
-            MotorSettings linearMotor = new MotorSettings(8.0f, 1.0f, 3000.0f, 0f);
+            MotorSettings linearMotor = new MotorSettings(6.0f, 1.0f, 90f / (VxJoltBridge.INSTANCE.getJoltBody(world, bodyPart.getBodyId()).getMotionProperties().getInverseMass()), 0f);
             settings.setMotorSettings(EAxis.TranslationX, linearMotor);
             settings.setMotorSettings(EAxis.TranslationY, linearMotor);
             settings.setMotorSettings(EAxis.TranslationZ, linearMotor);
 
-            MotorSettings angularMotor = new MotorSettings(15.0f, 1.0f, 0f, 1600.0f);
+            MotorSettings angularMotor = new MotorSettings(4.0f, 1.0f, 0f, 1600.0f);
             settings.setMotorSettings(EAxis.RotationX, angularMotor);
             settings.setMotorSettings(EAxis.RotationY, angularMotor);
             settings.setMotorSettings(EAxis.RotationZ, angularMotor);
 
             // Create the constraint. It will be activated automatically once both bodies are loaded.
-            world.getConstraintManager().createConstraint(settings, bodyPartGhost.getPhysicsId(), bodyPart.getPhysicsId()).setPersistent(false);
+            VxConstraint constraint = world.getConstraintManager().createConstraint(settings, bodyPartGhost.getPhysicsId(), bodyPart.getPhysicsId());
+            constraint.setPersistent(false);
+            bodyPartGhost.setLinkedConstraint(constraint);
         }
 
-        return new PlayerBodyPartData(bodyPart.getPhysicsId(), bodyPartGhost.getPhysicsId(), null, null);
+        return new PlayerBodyPartData(bodyPart.getPhysicsId(), bodyPartGhost.getPhysicsId(), TriggerState.RELEASE, null);
     }
 
     /**
@@ -178,12 +175,10 @@ public class PlayerBodyManager {
      * @param player the player to spawn bodies for
      */
     public void spawnPlayer(Player player) {
-        if (playersBodies.containsKey(player.getUUID())) {
-            removePlayer(player);
-        }
+        removePlayer(player);
 
         EnumMap<PlayerBodyPart, PlayerBodyPartData> playerBodies = new EnumMap<>(PlayerBodyPart.class);
-        List<Integer> joltBodyIds = new ArrayList<>();
+        IntSet joltBodyIds = new IntOpenHashSet();
 
         VxServerBodyManager bodyManager = world.getBodyManager();
 
@@ -192,16 +187,16 @@ public class PlayerBodyManager {
             playerBodies.put(partType, bodyPartData);
 
             joltBodyIds.add(
-                    bodyManager.getVxBody(bodyPartData.bodyPartId).getBodyId()
+                    bodyManager.getVxBody(bodyPartData.bodyPartId()).getBodyId()
             );
 
             joltBodyIds.add(
-                    bodyManager.getVxBody(bodyPartData.ghostBodyPartId).getBodyId()
+                    bodyManager.getVxBody(bodyPartData.ghostBodyPartId()).getBodyId()
             );
         }
 
-        playersBodies.put(player.getUUID(), playerBodies);
-        playersJoltBodies.put(player.getUUID(), joltBodyIds);
+        PlayerBodyDataStore.playersBodies.put(player.getUUID(), playerBodies);
+        PlayerBodyDataStore.playersJoltBodies.put(player.getUUID(), joltBodyIds);
     }
 
     /**
@@ -210,36 +205,83 @@ public class PlayerBodyManager {
      * @param player the player to remove bodies for
      */
     public void removePlayer(Player player) {
-        EnumMap<PlayerBodyPart, PlayerBodyPartData> playerBodies = playersBodies.remove(player.getUUID());
+        EnumMap<PlayerBodyPart, PlayerBodyPartData> playerBodies = PlayerBodyDataStore.playersBodies.remove(player.getUUID());
         if (playerBodies == null) return;
 
-        playersJoltBodies.remove(player.getUUID());
+        PlayerBodyDataStore.playersJoltBodies.remove(player.getUUID());
 
         for (PlayerBodyPartData bodyData : playerBodies.values()) {
-            world.getBodyManager().removeBody(bodyData.bodyPartId, VxRemovalReason.DISCARD);
-            world.getBodyManager().removeBody(bodyData.ghostBodyPartId, VxRemovalReason.DISCARD);
+            world.getBodyManager().removeBody(bodyData.bodyPartId(), VxRemovalReason.DISCARD);
+            world.getBodyManager().removeBody(bodyData.ghostBodyPartId(), VxRemovalReason.DISCARD);
             // Constraints are being removed internally in removeBody, so we don't need to worry about them here.
         }
     }
 
+    public void onPrePhysicsTick() {
+        PlayerBodyDataStore.playersBodies.forEach((playerId, bodyParts) -> {
+            try {
+                Player player = world.getLevel().getPlayerByUUID(playerId);
+                if (player == null) return;
+
+                bodyParts.forEach((bodyPart, bodyPartData) -> {
+                    if (bodyPartData.grabData() == null || bodyPartData.grabData().isAttached()) {
+                        return;
+                    }
+
+                    VxBody grabberBody = world.getBodyManager().getVxBody(bodyPartData.bodyPartId());
+                    VxBody grabbedBody = world.getBodyManager().getVxBody(bodyPartData.grabData().grabbedBodyId());
+
+                    GrabInteraction.GrabResult grabResult = grabInteraction.attachIfWithinReach(player, grabberBody, grabbedBody, bodyPart);
+
+                    if (grabResult != null) {
+                        processGrabResult(player, bodyPart, grabResult);
+                    }
+                });
+            } catch (Exception e) {
+                InteractiveMC.LOGGER.error("Error while attaching grabbed body", e);
+            }
+        });
+
+    }
+
+    public void onPhysicsTick() {
+        PlayerBodyDataStore.playersBodies.forEach((playerId, bodyParts) -> {
+            try {
+                Player player = world.getLevel().getPlayerByUUID(playerId);
+                if (player == null) return;
+
+                bodyParts.forEach((bodyPart, bodyPartData) -> {
+                    if (bodyPartData.grabData() == null || bodyPartData.grabData().isAttached() || !bodyPartData.grabData().retracting()) {
+                        return;
+                    }
+
+                    VxBody grabberBody = world.getBodyManager().getVxBody(bodyPartData.bodyPartId());
+                    VxBody grabbedBody = world.getBodyManager().getVxBody(bodyPartData.grabData().grabbedBodyId());
+
+                    grabInteraction.applyPullForce(player, grabberBody, grabbedBody, bodyPart);
+                });
+            } catch (Exception e) {
+                InteractiveMC.LOGGER.error("Error while applying pull force to grabbed body", e);
+            }
+        });
+    }
+
     /**
      * Attempts to grab an object using the specified player's hand.
-     * <p>
-     * This method performs a sphere cast from the grab point and tries to grab the closest
-     * non-player body within the grab radius.
-     * </p>
      *
-     * @param player the player attempting to grab
+     * @param player          the player attempting to grab
      * @param interactionHand the hand to use for grabbing (main or off-hand)
+     * @param isRemoteAllowed whether remote grabbing (raycast-based) is allowed if no bodies are within grab radius
      * @return the body that was grabbed, or null if no body was grabbed
+     * @see GrabInteraction#grab(Player, VxBody, PlayerBodyPart, boolean)
      */
     @Nullable
-    public VxBody grab(Player player, InteractionHand interactionHand) {
+    public VxBody grab(Player player, InteractionHand interactionHand, boolean isRemoteAllowed) {
         PlayerBodyPart playerBodyPart = PlayerBodyPart.fromInteractionHand(interactionHand);
         if (playerBodyPart == null)
             return null;
 
-        EnumMap<PlayerBodyPart, PlayerBodyPartData> playerBodies = playersBodies.get(player.getUUID());
+        EnumMap<PlayerBodyPart, PlayerBodyPartData> playerBodies = PlayerBodyDataStore.playersBodies.get(player.getUUID());
         if (playerBodies == null)
             return null;
 
@@ -251,141 +293,197 @@ public class PlayerBodyManager {
             );
         }
 
-        if (playerBodyPartData.grabbedBodyId() != null)
+        System.out.println("grab data: " + playerBodyPartData);
+
+        if (playerBodyPartData.grabData() != null)
             return null; // already grabbing something
 
-        VxBody body = world.getBodyManager().getVxBody(playerBodyPartData.bodyPartId);
+        VxBody body = world.getBodyManager().getVxBody(playerBodyPartData.bodyPartId());
         if (body == null) {
             throw new IllegalStateException(
                     "Body not found for body part " + playerBodyPart + " of player " + player.getUUID()
             );
         }
 
-        try (ObjectLayerFilter olFilter = new ObjectLayerFilter() {
-            @Override
-            public boolean shouldCollide(int objectLayer) {
-                return objectLayer != VxPhysicsLayers.NON_MOVING;
+        GrabInteraction.GrabResult grabResult = grabInteraction.grab(player, body, playerBodyPart, isRemoteAllowed);
+
+        processGrabResult(player, playerBodyPart, grabResult);
+
+        return grabResult != null ? grabResult.grabbedBody() : null;
+    }
+
+    /**
+     * Updates pull behavior for a grabbed body part.
+     *
+     * @param player the player attempting to pull
+     */
+    public void updatePullState(Player player, InteractionHand interactionHand) {
+        try {
+            PlayerBodyPart playerBodyPart = PlayerBodyPart.fromInteractionHand(interactionHand);
+            if (playerBodyPart == null)
+                return;
+
+            EnumMap<PlayerBodyPart, PlayerBodyPartData> playerBodies = PlayerBodyDataStore.playersBodies.get(player.getUUID());
+            if (playerBodies == null)
+                return;
+
+            PlayerBodyPartData playerBodyPartData = playerBodies.get(playerBodyPart);
+            // every player body part should be initialized if we have playerBodies
+            if (playerBodyPartData == null)
+                return;
+
+            if (
+                    playerBodyPartData.grabData() == null ||
+                            playerBodyPartData.grabData().isAttached() ||
+                            playerBodyPartData.grabData().retracting()
+            )
+                return;
+
+            VxBody grabberBody = world.getBodyManager().getVxBody(playerBodyPartData.bodyPartId());
+            if (grabberBody == null) {
+                return;
             }
-        };
-             BroadPhaseLayerFilter bplFilter = new BroadPhaseLayerFilter();
-             BodyFilter bodyFilter = new BodyFilter(); // runtime checks works really strange so we will check body ids below
-             SphereShape shape = new SphereShape(GRAB_RADIUS)) {
 
-            RVec3Arg base = new RVec3(0.0f, 0.0f, 0.0f);
-
-            VxTransform vxTransform = body.getTransform();
-
-            RVec3 worldGrabPoint = vxTransform.getTranslation();
-            RVec3 localGrabPoint = playerBodyPart.getLocalGrabPoint();
-
-            // Rotate the local grab point by the body's rotation to get the correct world offset.
-            RVec3 localGrabPointRotated = new RVec3(localGrabPoint);
-            localGrabPointRotated.rotateInPlace(vxTransform.getRotation());
-
-            // Add the rotated local grab point to the body's position to get the final grab point in world space.
-            worldGrabPoint.addInPlace(localGrabPointRotated.xx(), localGrabPointRotated.yy(), localGrabPointRotated.zz());
-            RMat44 comTransform = new VxTransform(worldGrabPoint, vxTransform.getRotation()).toRMat44();
-
-            List<VxPhysicsIntersector.IntersectShapeResult> intersections = VxPhysicsIntersector.narrowIntersectShape(world, shape, SHAPE_SCALE, comTransform, base, bplFilter, olFilter, bodyFilter);
-
-            intersections.sort(Comparator.comparingDouble(result -> { // sort by closest intersection point to base.
-                Vec3 p = result.bodyContactPoint();
-
-                double dx = p.getX() - vxTransform.getTranslation().x();
-                double dy = p.getY() - vxTransform.getTranslation().y();
-                double dz = p.getZ() - vxTransform.getTranslation().z();
-
-                return dx * dx + dy * dy + dz * dz;
-            }));
-
-            VxConstraintManager constraintManager = world.getConstraintManager();
-
-            for (VxPhysicsIntersector.IntersectShapeResult intersection : intersections) {
-                if (
-                        !playersJoltBodies.get(player.getUUID()).contains(intersection.bodyId())
-
-                ) {
-                    Body grabbedJoltBody = VxJoltBridge.INSTANCE.getJoltBody(world, intersection.bodyId());
-
-                    if (grabbedJoltBody.getObjectLayer() != VxPhysicsLayers.TERRAIN) {
-                        VxBody grabbedBody = world.getBodyManager().getByJoltBodyId(intersection.bodyId());
-
-                        if (grabbedBody == null) {
-                            InteractiveMC.LOGGER.warn("vxBody1 is null for body ID: {}", intersection.bodyId());
-                            continue;
-                        }
-
-                        if (grabbedJoltBody.getMotionType() == EMotionType.Dynamic) {
-                            VxTransform grabbedBodyTransform = grabbedBody.getTransform();
-                            // Calculate a new world-space position for the body so that the local contact point
-                            // aligns exactly with the desired grab point in world space.
-                            RVec3 worldGrabPointOnBody = new RVec3(
-                                    worldGrabPoint.xx() - (intersection.bodyContactPoint().getX() - grabbedBodyTransform.getTranslation().xx()),
-                                    worldGrabPoint.yy() - (intersection.bodyContactPoint().getY() - grabbedBodyTransform.getTranslation().yy()),
-                                    worldGrabPoint.zz() - (intersection.bodyContactPoint().getZ() - grabbedBodyTransform.getTranslation().zz())
-                            );
-
-                            grabbedJoltBody.setPositionAndRotationInternal(worldGrabPointOnBody, grabbedBodyTransform.getRotation());
-                        }
-                        else {
-                            // todo move grabber body if grabbed body not meant to be moved by physics
-                        }
-
-                        try (FixedConstraintSettings settings = new FixedConstraintSettings()) {
-                            settings.setSpace(EConstraintSpace.WorldSpace);
-                            settings.setPoint1(worldGrabPoint);
-                            settings.setPoint2(worldGrabPoint);
-
-                            // todo rework
-                            //if (body instanceof Grabber grabber)
-                            //    grabbedJoltBody.setCollisionGroup(new CollisionGroup(GroupFilters.PLAYER_BODY_FILTER, GroupFilters.PLAYER_BODY_GROUP_ID, grabber.getSubGroupId()));
-
-                            VxConstraint constraint = constraintManager.createConstraint(settings, body.getPhysicsId(), grabbedBody.getPhysicsId());
-                            constraint.setPersistent(false);
-
-                            playerBodies.put(playerBodyPart, new PlayerBodyPartData(playerBodyPartData.bodyPartId, playerBodyPartData.ghostBodyPartId, grabbedBody.getPhysicsId(), constraint.getConstraintId()));
-
-                            return grabbedBody;
-                        }
-                    } // todo add terrain grab after implementing client-side prediction
-                }
+            VxBody grabbedBody = world.getBodyManager().getVxBody(playerBodyPartData.grabData().grabbedBodyId());
+            if  (grabbedBody == null) {
+                return;
             }
+
+            if (grabInteraction.updatePullState(player, grabberBody, grabbedBody, playerBodyPart)) {
+                playerBodies.put(playerBodyPart, playerBodyPartData.withGrabData(playerBodyPartData.grabData().withRetracting(true)));
+            }
+        } catch (Exception e) {
+            InteractiveMC.LOGGER.error("Error while pulling grabbed body", e);
         }
-
-        return null;
     }
 
     /**
      * Releases any object being grabbed by the specified player's hand.
-     * <p>
-     * This removes the grab constraint, allowing the grabbed body to move freely again.
-     * </p>
      *
-     * @param player the player releasing the grab
+     * @param player          the player releasing the grab
      * @param interactionHand the hand to release (main or off-hand)
+     * @see GrabInteraction#release(Player, VxBody, VxBody, PlayerBodyPart, PlayerBodyPartData)
      */
     public void release(Player player, InteractionHand interactionHand) {
         PlayerBodyPart playerBodyPart = PlayerBodyPart.fromInteractionHand(interactionHand);
+        System.out.println("release playerbodypart: " + playerBodyPart);
         if (playerBodyPart == null)
             return;
 
-        EnumMap<PlayerBodyPart, PlayerBodyPartData> playerBodies = playersBodies.get(player.getUUID());
+        EnumMap<PlayerBodyPart, PlayerBodyPartData> playerBodies = PlayerBodyDataStore.playersBodies.get(player.getUUID());
+        System.out.println("release playerbodies: " + playerBodies);
+        if (playerBodies == null)
+            return;
+
+        PlayerBodyPartData playerBodyPartData = playerBodies.get(playerBodyPart);
+        System.out.println("release playerbodypartdata: " + playerBodyPartData);
+        if (playerBodyPartData == null) {
+            return;
+        }
+
+        System.out.println("release triggered with: " + playerBodyPartData);
+
+        if (playerBodyPartData.grabData() == null) {
+            return;
+        }
+
+        VxBody grabberBody = world.getBodyManager().getVxBody(playerBodyPartData.bodyPartId());
+        VxBody grabbedBody = world.getBodyManager().getVxBody(playerBodyPartData.grabData().grabbedBodyId());
+
+        boolean isReleaseSuccessful = grabInteraction.release(player, grabberBody, grabbedBody, playerBodyPart, playerBodyPartData);
+
+        if (!isReleaseSuccessful) {
+            return;
+        }
+
+        // remove only first found body because multiple bodies can grab single body
+        PlayerBodyDataStore.grabbedBodies.rem(grabbedBody.getBodyId());
+
+        boolean isGrabConstraint = playerBodyPartData.grabData().constraintId() != null;
+
+        playerBodies.put(playerBodyPart, playerBodyPartData.withGrabData(null));
+
+        System.out.println(playerBodies);
+        if (player instanceof ServerPlayer serverPlayer) {
+            player.getServer().execute(() ->
+                    Networking.sendToPlayer(
+                            serverPlayer,
+                            new S2CGrabResultPacket(
+                                    interactionHand,
+                                    null,
+                                    isGrabConstraint
+                            )
+                    )
+            );
+        }
+    }
+
+    public void updateTriggerState(Player player, InteractionHand interactionHand, TriggerState triggerState) {
+        PlayerBodyPart playerBodyPart = PlayerBodyPart.fromInteractionHand(interactionHand);
+        if (playerBodyPart == null) return;
+
+        EnumMap<PlayerBodyPart, PlayerBodyPartData> playerBodies = PlayerBodyDataStore.playersBodies.get(player.getUUID());
+        if (playerBodies == null) return;
+
+        PlayerBodyPartData playerBodyPartData = playerBodies.get(playerBodyPart);
+        if (playerBodyPartData == null) return;
+
+        if (playerBodyPartData.triggerState().equals(triggerState)) return;
+
+        playerBodies.put(playerBodyPart, playerBodyPartData.withTriggerState(triggerState));
+
+        if (playerBodyPartData.grabData() == null || playerBodyPartData.grabData().constraintId() == null) return;
+
+        VxBody grabbedBody = world.getBodyManager().getVxBody(playerBodyPartData.grabData().grabbedBodyId());
+
+        triggerInteraction.updateGrabState(player, grabbedBody, playerBodyPart, triggerState);
+    }
+
+    public void processGrabResult(Player player, PlayerBodyPart playerBodyPart, GrabInteraction.GrabResult grabResult) {
+        System.out.println(grabResult);
+        EnumMap<PlayerBodyPart, PlayerBodyPartData> playerBodies = PlayerBodyDataStore.playersBodies.get(player.getUUID());
         if (playerBodies == null)
             return;
 
         PlayerBodyPartData playerBodyPartData = playerBodies.get(playerBodyPart);
         if (playerBodyPartData == null) {
-            throw new IllegalStateException(
-                    "Missing body part " + playerBodyPart + " for player " + player.getUUID()
-            );
-        }
-
-        if (playerBodyPartData.grabbedBodyId() == null || playerBodyPartData.grabConstraintId() == null) {
             return;
         }
+        System.out.println(playerBodyPartData);
 
-        world.getConstraintManager().removeConstraint(playerBodyPartData.grabConstraintId);
+        UUID grabbedBodyId;
+        UUID constraintId;
 
-        playerBodies.put(playerBodyPart, new PlayerBodyPartData(playerBodyPartData.bodyPartId, playerBodyPartData.ghostBodyPartId, null, null));
+        if (grabResult == null) {
+            playerBodies.put(playerBodyPart, playerBodyPartData.withGrabData(null));
+            grabbedBodyId = null;
+            constraintId = null;
+        } else {
+            grabbedBodyId = grabResult.grabbedBody().getPhysicsId();
+            constraintId = grabResult.grabConstraint() != null ? grabResult.grabConstraint().getConstraintId() : null;
+
+            playerBodies.put(playerBodyPart, playerBodyPartData.withGrabData(
+                    new PlayerBodyPartData.GrabData(grabbedBodyId, constraintId, false)
+            ));
+
+            PlayerBodyDataStore.grabbedBodies.add(grabResult.grabbedBody().getBodyId());
+        }
+
+        InteractionHand interactionHand = playerBodyPart.toInteractionHand();
+        if (interactionHand == null)
+            return;
+
+        if (player instanceof ServerPlayer serverPlayer) {
+            player.getServer().execute(() ->
+                    Networking.sendToPlayer(
+                            serverPlayer,
+                            new S2CGrabResultPacket(
+                                    interactionHand,
+                                    grabbedBodyId,
+                                    constraintId != null
+                            )
+                    )
+            );
+        }
     }
 }
