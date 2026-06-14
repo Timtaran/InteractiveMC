@@ -13,12 +13,13 @@ import net.timtaran.interactivemc.body.player.physics.PlayerBodyPartRigidBody;
 import net.timtaran.interactivemc.body.player.renderer.PlayerBodyPartGhostRenderer;
 import net.timtaran.interactivemc.body.player.renderer.PlayerBodyPartRenderer;
 import net.timtaran.interactivemc.util.InteractiveMCIdentifier;
-import net.xmx.velthoric.core.behavior.impl.VxNoKillBehavior;
+import net.xmx.velthoric.core.behavior.impl.VxSummonableBehavior;
 import net.xmx.velthoric.core.behavior.impl.VxTickBehavior;
 import net.xmx.velthoric.core.body.VxBodyType;
+import net.xmx.velthoric.core.body.persistence.behavior.VxPersistenceBehavior;
 import net.xmx.velthoric.core.body.registry.VxBodyRegistry;
 import net.xmx.velthoric.core.network.internal.behavior.VxNetSyncBehavior;
-import net.xmx.velthoric.core.network.synchronization.behavior.VxSyncBehavior;
+import net.xmx.velthoric.core.network.synchronization.behavior.VxSynchronizedDataBehavior;
 
 /**
  * Registry for physics body types used in the mod.
@@ -34,12 +35,10 @@ public class BodyRegistry {
     public static final VxBodyType<PlayerBodyPartRigidBody> PLAYER_BODY_PART = VxBodyType.Builder
             .<PlayerBodyPartRigidBody>create(PlayerBodyPartRigidBody::new)
             .rigidProvider(PlayerBodyPartRigidBody::createJoltBody)
-            .noSummon()
-            .behavior(VxNetSyncBehavior.ID)
-            .behavior(VxSyncBehavior.ID)
-            .behavior(VxNoKillBehavior.ID)
-            .setPersistent(false)
-            .persistence(PlayerBodyPartRigidBody::writePersistenceData, PlayerBodyPartRigidBody::readPersistenceData)
+            .behaviors(builder -> builder
+                    .add(new VxNetSyncBehavior())
+                    .add(new VxSynchronizedDataBehavior(PlayerBodyPartRigidBody::defineSyncData))
+            )
             .build(InteractiveMCIdentifier.get("player_body_part"));
 
     /**
@@ -48,20 +47,21 @@ public class BodyRegistry {
     public static final VxBodyType<PlayerBodyPartGhostRigidBody> PLAYER_BODY_PART_GHOST = VxBodyType.Builder
             .<PlayerBodyPartGhostRigidBody>create(PlayerBodyPartGhostRigidBody::new)
             .rigidProvider(PlayerBodyPartGhostRigidBody::createJoltBody)
-            .behavior(VxNetSyncBehavior.ID)
-            .behavior(VxSyncBehavior.ID)
-            .behavior(VxTickBehavior.ID)
-            .behavior(VxNoKillBehavior.ID)
-            .noSummon()
-            .setPersistent(false)
-            .persistence(PlayerBodyPartGhostRigidBody::writePersistenceData, PlayerBodyPartGhostRigidBody::readPersistenceData)
+            .behaviors(builder -> builder
+                    .add(new VxTickBehavior())
+                    .add(new VxNetSyncBehavior())
+                    .add(new VxSynchronizedDataBehavior(PlayerBodyPartGhostRigidBody::defineSyncData))
+            )
             .build(InteractiveMCIdentifier.get("player_ghost_body_part"));
 
     public static final VxBodyType<TestDuckRigidBody> TEST_DUCK = VxBodyType.Builder
             .<TestDuckRigidBody>create(TestDuckRigidBody::new)
             .rigidProvider(TestDuckRigidBody::createJoltBody)
-            .behavior(VxNetSyncBehavior.ID)
-            .setPersistent(true)
+            .behaviors(builder -> builder
+                    .add(new VxPersistenceBehavior())
+                    .add(new VxNetSyncBehavior())
+                    .add(new VxSummonableBehavior())
+            )
             .build(InteractiveMCIdentifier.get("test_duck"));
 
     /**

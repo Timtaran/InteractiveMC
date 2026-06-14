@@ -38,7 +38,7 @@ dependencies {
     shadowBundle project(path: ':common', configuration: 'transformProductionFabric')
 
     // Required dependencies
-    modImplementation "net.xmx.velthoric:velthoric-fabric:$rootProject.velthoric_version"
+    modImplementation "net.xmx.velthoric:velthoric-$rootProject.minecraft_version-fabric:$rootProject.velthoric_version"
 
     modApi "maven.modrinth:vivecraft:$rootProject.vivecraft_version-fabric"
 

@@ -30,7 +30,6 @@ import net.xmx.velthoric.core.physics.VxJoltBridge;
 import net.xmx.velthoric.core.physics.VxPhysicsLayers;
 import net.xmx.velthoric.core.physics.world.VxPhysicsWorld;
 import net.xmx.velthoric.math.VxConversions;
-import net.xmx.velthoric.network.VxByteBuf;
 import org.joml.Quaternionf;
 import org.vivecraft.api.data.VRBodyPartData;
 import org.vivecraft.api.data.VRPose;
@@ -127,20 +126,7 @@ public class PlayerBodyPartGhostRigidBody extends VxBody {
         }
     }
 
-    public static void writePersistenceData(VxBody body, VxByteBuf buf) {
-        VxDataSerializers.VEC3.write(buf, body.get(DATA_HALF_EXTENTS));
-        DataSerializers.BODY_PART.write(buf, body.get(DATA_BODY_PART));
-        VxDataSerializers.UUID.write(buf, body.get(DATA_PLAYER_ID));
-    }
-
-    public static void readPersistenceData(VxBody body, VxByteBuf buf) {
-        body.setServerData(DATA_HALF_EXTENTS, VxDataSerializers.VEC3.read(buf));
-        body.setServerData(DATA_BODY_PART, DataSerializers.BODY_PART.read(buf));
-        body.setServerData(DATA_PLAYER_ID, VxDataSerializers.UUID.read(buf));
-    }
-
-    @Override
-    protected void defineSyncData(VxSynchronizedData.Builder builder) {
+    public static void defineSyncData(VxSynchronizedData.Builder builder) {
         builder.define(DATA_HALF_EXTENTS, new Vec3(0.25f, 0.25f, 0.25f));
         builder.define(DATA_BODY_PART, PlayerBodyPart.HEAD);
         builder.define(DATA_PLAYER_ID, UUID.randomUUID());
