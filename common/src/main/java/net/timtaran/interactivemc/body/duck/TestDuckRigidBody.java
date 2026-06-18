@@ -78,7 +78,7 @@ public class TestDuckRigidBody extends VxBody implements IGrabbable {
     }
 
     @Override
-    public void onGrab(Player player, PlayerBodyPart bodyPart, boolean isAttached) {
+    public void onGrab(Player player, VxBody grabberBody, PlayerBodyPart bodyPart, boolean isAttached) {
         System.out.println("on grab: " + isAttached);
     }
 
@@ -89,7 +89,7 @@ public class TestDuckRigidBody extends VxBody implements IGrabbable {
     }
 
     @Override
-    public void onRelease(Player player, PlayerBodyPart bodyPart, boolean isAttached) {
+    public void onRelease(Player player, VxBody grabberBody, PlayerBodyPart bodyPart, boolean isAttached) {
         System.out.println("on release");
     }
 

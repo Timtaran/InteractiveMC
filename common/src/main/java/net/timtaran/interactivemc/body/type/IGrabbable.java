@@ -12,6 +12,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.timtaran.interactivemc.body.player.PlayerBodyPart;
 import net.timtaran.interactivemc.body.player.interaction.TriggerState;
+import net.xmx.velthoric.core.body.VxBody;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -69,11 +70,12 @@ public interface IGrabbable { // todo: separate into IGrabbable for getGrabPoint
      * <p>
      * If {@code isAttached} is {@code false}, the body is marked to pulled.
      *
-     * @param player     the player grabbing the body
-     * @param bodyPart   player body part grabbing the body
-     * @param isAttached {@code true} if the body is attached to the player body part, {@code false} otherwise
+     * @param player      the player grabbing the body
+     * @param grabberBody the body part grabbing this body
+     * @param bodyPart    player body part grabbing the body
+     * @param isAttached  {@code true} if the body is attached to the player body part, {@code false} otherwise
      */
-    default void onGrab(Player player, PlayerBodyPart bodyPart, boolean isAttached) {
+    default void onGrab(Player player, VxBody grabberBody, PlayerBodyPart bodyPart, boolean isAttached) {
     }
 
     /**
@@ -112,11 +114,12 @@ public interface IGrabbable { // todo: separate into IGrabbable for getGrabPoint
     /**
      * Method called when the body is released.
      *
-     * @param player     the player releasing the body
-     * @param bodyPart   player body part releasing the body
-     * @param isAttached {@code true} if the body was attached to the player body part, {@code false} otherwise
+     * @param player      the player releasing the body
+     * @param grabberBody the body part grabbing this body
+     * @param bodyPart    player body part releasing the body
+     * @param isAttached  {@code true} if the body was attached to the player body part, {@code false} otherwise
      */
-    default void onRelease(Player player, PlayerBodyPart bodyPart, boolean isAttached) {
+    default void onRelease(Player player, VxBody grabberBody, PlayerBodyPart bodyPart, boolean isAttached) {
     }
 
     /**

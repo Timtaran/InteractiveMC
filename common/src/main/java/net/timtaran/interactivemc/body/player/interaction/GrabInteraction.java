@@ -364,7 +364,7 @@ public class GrabInteraction {
                 constraint.setPersistent(false);
 
             if (grabbedBody instanceof IGrabbable grabbableBody) {
-                grabbableBody.onGrab(player, playerBodyPart, true);
+                grabbableBody.onGrab(player, grabberBody, playerBodyPart, true);
             }
 
             return constraint;
@@ -528,7 +528,7 @@ public class GrabInteraction {
             world.getConstraintManager().removeConstraint(playerBodyPartData.grabData().constraintId());
 
         if (grabbedBody instanceof IGrabbable grabbableBody) {
-            grabbableBody.onRelease(player, playerBodyPart, isGrabConstraint);
+            grabbableBody.onRelease(player, grabberBody, playerBodyPart, isGrabConstraint);
         }
 
         return true;
