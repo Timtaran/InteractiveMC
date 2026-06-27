@@ -8,13 +8,14 @@ import com.github.stephengold.joltjni.*;
 import com.github.stephengold.joltjni.enumerate.EAxis;
 import com.github.stephengold.joltjni.enumerate.EMotionType;
 import com.github.stephengold.joltjni.enumerate.EMotorState;
-import com.github.stephengold.joltjni.readonly.Vec3Arg;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.timtaran.interactivemc.body.player.PlayerBodyPart;
+import net.timtaran.interactivemc.body.player.data.PlayerData;
 import net.timtaran.interactivemc.body.player.store.ClientPlayerBodyDataStore;
 import net.timtaran.interactivemc.body.player.store.PlayerBodyDataStore;
+import net.timtaran.interactivemc.init.registry.PhysicsLayerRegistry;
 import net.timtaran.interactivemc.network.sync.DataSerializers;
 import net.timtaran.interactivemc.util.PlayerBodyPartTransforms;
 import net.xmx.velthoric.core.body.VxBody;
@@ -27,7 +28,6 @@ import net.xmx.velthoric.core.network.synchronization.VxDataSerializers;
 import net.xmx.velthoric.core.network.synchronization.VxSynchronizedData;
 import net.xmx.velthoric.core.network.synchronization.accessor.VxServerAccessor;
 import net.xmx.velthoric.core.physics.VxJoltBridge;
-import net.xmx.velthoric.core.physics.VxPhysicsLayers;
 import net.xmx.velthoric.core.physics.world.VxPhysicsWorld;
 import net.xmx.velthoric.math.VxConversions;
 import org.joml.Quaternionf;
@@ -58,7 +58,6 @@ public class PlayerBodyPartGhostRigidBody extends VxBody {
      */
     public static final VxServerAccessor<UUID> DATA_PLAYER_ID = VxServerAccessor.create(PlayerBodyPartGhostRigidBody.class, VxDataSerializers.UUID);
     private static final float FIXED_TIME_STEP = VxPhysicsWorld.getFixedTimeStep();
-    private static short selectiveGhostLayer = -1;
     private boolean isIndexSaved = false;
 
     private VxConstraint linkedConstraint = null;
@@ -101,26 +100,12 @@ public class PlayerBodyPartGhostRigidBody extends VxBody {
      * @return the Jolt body ID
      */
     public static int createJoltBody(VxBody body, VxRigidBodyFactory factory) {
-        if (selectiveGhostLayer == -1) {
-            selectiveGhostLayer = VxPhysicsLayers.claimLayer();
+        Vec3 halfExtents = body.get(DATA_HALF_EXTENTS);
 
-            // Map it to the moving broad-phase layer as the spawned box is dynamic.
-            VxPhysicsLayers.setBroadPhaseMapping(selectiveGhostLayer, VxPhysicsLayers.BP_MOVING);
-
-            // Configure selective collisions
-            VxPhysicsLayers.setCollision(selectiveGhostLayer, VxPhysicsLayers.NON_MOVING, false);
-            VxPhysicsLayers.setCollision(selectiveGhostLayer, VxPhysicsLayers.MOVING, false);
-            VxPhysicsLayers.setCollision(selectiveGhostLayer, VxPhysicsLayers.TERRAIN, false);
-            VxPhysicsLayers.setCollision(selectiveGhostLayer, selectiveGhostLayer, false);
-        }
-
-        PlayerBodyPart partType = body.get(DATA_BODY_PART);
-        Vec3Arg fullSize = partType.getSize();
-
-        VxBoxShape shape = new VxBoxShape(new Vec3(fullSize.getX() / 2,  fullSize.getY() / 2, fullSize.getZ() / 2));
+        VxBoxShape shape = new VxBoxShape(halfExtents);
         try (BodyCreationSettings bcs = new BodyCreationSettings()) {
             bcs.setMotionType(EMotionType.Kinematic);
-            bcs.setObjectLayer(selectiveGhostLayer);
+            bcs.setObjectLayer(PhysicsLayerRegistry.getGhostLayer());
             bcs.setAllowSleeping(false);
             return factory.create(shape, bcs);
         }
@@ -134,7 +119,9 @@ public class PlayerBodyPartGhostRigidBody extends VxBody {
 
     @Override
     public void onPrePhysicsTick(VxPhysicsWorld world) {
-        VRPose pose = PlayerBodyDataStore.vrPoses.get(get(DATA_PLAYER_ID));
+        PlayerData playerData = PlayerBodyDataStore.playerData.get(get(DATA_PLAYER_ID));
+        VRPose pose = playerData.getCurrentVrPose();
+        // todo: predict pose on loss
         if (pose == null) return;
 
         PlayerBodyPart bodyPart = get(DATA_BODY_PART);
@@ -143,7 +130,7 @@ public class PlayerBodyPartGhostRigidBody extends VxBody {
         if (bodyPartData == null) return;
 
         Quat rotation = VxConversions.toJolt(new Quaternionf(bodyPartData.getRotation()));
-        RVec3 position = PlayerBodyPartTransforms.getTrackingOffsetWorld(VxConversions.toJolt(bodyPartData.getPos()), rotation, bodyPart);
+        RVec3 position = PlayerBodyPartTransforms.getTrackingOffsetWorld(VxConversions.toJolt(bodyPartData.getPos()), rotation, bodyPart, playerData.getPlayerScale());
 
         VxJoltBridge.INSTANCE.getJoltBody(world, this).moveKinematic(
                 position,

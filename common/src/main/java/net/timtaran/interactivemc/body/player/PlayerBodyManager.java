@@ -23,6 +23,7 @@ import net.timtaran.interactivemc.body.player.interaction.TriggerState;
 import net.timtaran.interactivemc.body.player.packet.S2CGrabResultPacket;
 import net.timtaran.interactivemc.body.player.physics.PlayerBodyPartGhostRigidBody;
 import net.timtaran.interactivemc.body.player.physics.PlayerBodyPartRigidBody;
+import net.timtaran.interactivemc.body.player.data.PlayerBodyPartData;
 import net.timtaran.interactivemc.body.player.store.PlayerBodyDataStore;
 import net.timtaran.interactivemc.init.InteractiveMC;
 import net.timtaran.interactivemc.init.registry.BodyRegistry;
@@ -98,10 +99,12 @@ public class PlayerBodyManager {
      */
     private PlayerBodyPartData createBodyPart(PlayerBodyPart partType, Player player) {
         Vec3Arg size = partType.getSize();
-        Vec3 halfExtents = Op.star(0.5f, size);
+        float playerScale = PlayerBodyDataStore.playerData.get(player.getUUID()).getPlayerScale();
+        System.out.println("player scale: " + playerScale);
+        Vec3 halfExtents = Op.star(Op.star(0.5f, size), playerScale);
 
         VxTransform transform = new VxTransform(
-                VxConversions.toJolt(player.position().add(partType.getLocalPivot()).add(new net.minecraft.world.phys.Vec3(0, 2, 0))),
+                VxConversions.toJolt(player.position().add(partType.getLocalPivot().multiply(playerScale, playerScale, playerScale)).add(new net.minecraft.world.phys.Vec3(0, 2, 0))),
                 new Quat()
         );
 

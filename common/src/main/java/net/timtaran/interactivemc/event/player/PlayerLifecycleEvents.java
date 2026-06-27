@@ -3,6 +3,10 @@ package net.timtaran.interactivemc.event.player;
 import dev.architectury.event.events.common.PlayerEvent;
 import net.minecraft.world.entity.player.Player;
 import net.timtaran.interactivemc.body.player.PlayerBodyManager;
+import net.timtaran.interactivemc.body.player.data.PlayerData;
+import net.timtaran.interactivemc.body.player.store.PlayerBodyDataStore;
+import net.timtaran.interactivemc.util.vivecraft.VRPlayerData;
+import net.timtaran.interactivemc.util.vivecraft.VivecraftUtils;
 import net.xmx.velthoric.core.physics.world.VxPhysicsWorld;
 
 /**
@@ -37,6 +41,14 @@ public class PlayerLifecycleEvents {
      * @param player the player that joined or respawned
      */
     public static void spawnPlayer(Player player) {
+        VRPlayerData vrPlayerData = VivecraftUtils.getVRPlayerData(player);
+        PlayerBodyDataStore.playerData.put(
+                player.getUUID(),
+                vrPlayerData == null ?
+                        new PlayerData(null, 1f) :
+                        new PlayerData(vrPlayerData.vrPose(), vrPlayerData.getPlayerScale())
+        );
+
         VxPhysicsWorld physicsWorld = VxPhysicsWorld.get(player.level().dimension());
         physicsWorld.execute(() ->
                 PlayerBodyManager.get(physicsWorld).spawnPlayer(player));
@@ -48,6 +60,8 @@ public class PlayerLifecycleEvents {
      * @param player the player that left
      */
     public static void removePlayer(Player player) {
+        PlayerBodyDataStore.playerData.remove(player.getUUID());
+
         VxPhysicsWorld physicsWorld = VxPhysicsWorld.get(player.level().dimension());
         physicsWorld.execute(() ->
                 PlayerBodyManager.get(physicsWorld).removePlayer(player));

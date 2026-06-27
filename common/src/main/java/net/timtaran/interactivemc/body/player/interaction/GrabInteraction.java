@@ -18,7 +18,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.timtaran.interactivemc.body.player.PlayerBodyManager;
 import net.timtaran.interactivemc.body.player.PlayerBodyPart;
-import net.timtaran.interactivemc.body.player.PlayerBodyPartData;
+import net.timtaran.interactivemc.body.player.data.PlayerBodyPartData;
 import net.timtaran.interactivemc.body.player.store.ClientPlayerBodyDataStore;
 import net.timtaran.interactivemc.body.player.store.PlayerBodyDataStore;
 import net.timtaran.interactivemc.body.type.GrabPoint;
@@ -128,7 +128,7 @@ public class GrabInteraction {
             if (body == null)
                 return null;
 
-            worldGrabPoint = getBodyPartGrabPointWorld(body, playerBodyPart);
+            worldGrabPoint = getBodyPartGrabPointWorld(body, playerBodyPart, PlayerBodyDataStore.playerData.get(player.getUUID()).getPlayerScale());
         }
 
         System.out.println("worldGrabPoint_grab: " + worldGrabPoint);
@@ -271,7 +271,7 @@ public class GrabInteraction {
                 grabberJoltBody.setPositionAndRotationInternal(
                         Op.minus(
                                 bodyContactPoint,
-                                PlayerBodyPartTransforms.getGrabPointRotatedLocal(grabberJoltBody.getRotation(), playerBodyPart)
+                                PlayerBodyPartTransforms.getGrabPointRotatedLocal(grabberJoltBody.getRotation(), playerBodyPart, PlayerBodyDataStore.playerData.get(player.getUUID()).getPlayerScale())
                         ),
                         isGrabbable ? Op.star(grabbedJoltBody.getRotation(), grabPoint.rotation().conjugated()) : grabberJoltBody.getRotation()
                 );
@@ -296,7 +296,7 @@ public class GrabInteraction {
                 return (objectLayer != VxPhysicsLayers.NON_MOVING && objectLayer != VxPhysicsLayers.TERRAIN);
             }
         }) {
-            VRBodyPartData bodyPartData = PlayerBodyDataStore.vrPoses.get(player.getUUID()).getBodyPartData(playerBodyPart.toVRBodyPart());
+            VRBodyPartData bodyPartData = PlayerBodyDataStore.playerData.get(player.getUUID()).getCurrentVrPose().getBodyPartData(playerBodyPart.toVRBodyPart());
             Vec3 direction = VxConversions.toJolt(bodyPartData.getDir()).toVec3().normalized();
             Quat bodyRotation = grabberBody.getTransform().getRotation().normalized(); // todo: remove
             System.out.println("VR Pose direction " + direction + "; Direction based on rotation: " + quatToForward(bodyRotation.getX(), bodyRotation.getY(), bodyRotation.getZ(), bodyRotation.getW()));
@@ -381,7 +381,7 @@ public class GrabInteraction {
 
         int grabberBodyId = grabberBody.getBodyId();
         int grabbedBodyId = grabbedBody.getBodyId();
-        RVec3 worldGrabPoint = getBodyPartGrabPointWorld(grabberBody, playerBodyPart);
+        RVec3 worldGrabPoint = getBodyPartGrabPointWorld(grabberBody, playerBodyPart, PlayerBodyDataStore.playerData.get(player.getUUID()).getPlayerScale());
 
         List<VxPhysicsIntersector.IntersectShapeResult> intersections = findInstantGrabCandidates(player, grabberBody, worldGrabPoint);
 
@@ -421,7 +421,7 @@ public class GrabInteraction {
 
             // Only apply forces to valid, dynamic (simulated) objects.
             if (grabbedJoltBody.isInBroadPhase() && grabbedJoltBody.isDynamic()) {
-                RVec3 worldGrabPoint = getBodyPartGrabPointWorld(grabberJoltBody, playerBodyPart);
+                RVec3 worldGrabPoint = getBodyPartGrabPointWorld(grabberJoltBody, playerBodyPart, PlayerBodyDataStore.playerData.get(player.getUUID()).getPlayerScale());
 
                 RVec3 bodyPos = grabbedJoltBody.getCenterOfMassPosition();
                 RVec3 toTarget = Op.minus(worldGrabPoint, bodyPos);
@@ -567,45 +567,28 @@ public class GrabInteraction {
     }
 
     @Nullable
-    private RVec3 getBodyPartGrabPointWorld(ConstBodyLockInterface lockInterface, int bodyId, PlayerBodyPart playerBodyPart) {
+    private RVec3 getBodyPartGrabPointWorld(ConstBodyLockInterface lockInterface, int bodyId, PlayerBodyPart playerBodyPart, float scale) {
         try (BodyLockRead lock = new BodyLockRead(lockInterface, bodyId)) {
             ConstBody body = lock.getBody();
             if (body == null)
                 return null;
 
-            return getBodyPartGrabPointWorld(body, playerBodyPart);
+            return getBodyPartGrabPointWorld(body, playerBodyPart, scale);
         }
     }
 
-    private RVec3 getBodyPartGrabPointWorld(VxBody body, PlayerBodyPart playerBodyPart) {
-        return getBodyPartGrabPointWorld(body.getTransform(), playerBodyPart);
+    private RVec3 getBodyPartGrabPointWorld(VxBody body, PlayerBodyPart playerBodyPart, float scale) {
+        return getBodyPartGrabPointWorld(body.getTransform(), playerBodyPart, scale);
     }
 
-    private RVec3 getBodyPartGrabPointWorld(VxTransform transform, PlayerBodyPart playerBodyPart) {
-        return PlayerBodyPartTransforms.getGrabPointRotatedWorld(transform.getTranslation(), transform.getRotation(), playerBodyPart);
+    private RVec3 getBodyPartGrabPointWorld(VxTransform transform, PlayerBodyPart playerBodyPart, float scale) {
+        return PlayerBodyPartTransforms.getGrabPointRotatedWorld(transform.getTranslation(), transform.getRotation(), playerBodyPart, scale);
     }
 
-    private RVec3 getBodyPartGrabPointWorld(ConstBody body, PlayerBodyPart playerBodyPart) {
-        return PlayerBodyPartTransforms.getGrabPointRotatedWorld(body.getPosition(), body.getRotation(), playerBodyPart);
+    private RVec3 getBodyPartGrabPointWorld(ConstBody body, PlayerBodyPart playerBodyPart, float scale) {
+        return PlayerBodyPartTransforms.getGrabPointRotatedWorld(body.getPosition(), body.getRotation(), playerBodyPart, scale);
     }
 
-    @Nullable
-    private RVec3 getBodyPartGrabPointWorld(VRPose pose, PlayerBodyPart playerBodyPart) {
-        VRBodyPartData bodyPartData = pose.getBodyPartData(playerBodyPart.toVRBodyPart());
-        if (bodyPartData == null)
-            return null;
-
-        return getBodyPartGrabPointWorld(bodyPartData, playerBodyPart);
-    }
-
-    private RVec3 getBodyPartGrabPointWorld(VRBodyPartData bodyPartData, PlayerBodyPart playerBodyPart) {
-        RVec3 position = VxConversions.toJolt(bodyPartData.getPos());
-        Quat rotation = VxConversions.toJolt(bodyPartData.getRotation());
-        return Op.plus(
-                PlayerBodyPartTransforms.getTrackingOffsetLocal(rotation, playerBodyPart),
-                PlayerBodyPartTransforms.getGrabPointRotatedWorld(position, rotation, playerBodyPart)
-        );
-    }
 
     private static Vec3 quatToForward(float x, float y, float z, float w) {
         // todo put in separate class

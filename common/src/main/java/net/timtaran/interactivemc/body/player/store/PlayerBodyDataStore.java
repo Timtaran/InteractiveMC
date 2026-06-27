@@ -7,7 +7,8 @@ package net.timtaran.interactivemc.body.player.store;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import net.timtaran.interactivemc.body.player.PlayerBodyPart;
-import net.timtaran.interactivemc.body.player.PlayerBodyPartData;
+import net.timtaran.interactivemc.body.player.data.PlayerBodyPartData;
+import net.timtaran.interactivemc.body.player.data.PlayerData;
 import org.vivecraft.api.data.VRPose;
 
 import java.util.*;
@@ -44,10 +45,7 @@ public class PlayerBodyDataStore {
      */
     public static final IntList grabbedBodies = new IntArrayList();  // read/write in physics thread
 
-    /**
-     * The VR poses of the players by UUID.
-     */
-    public static Map<UUID, VRPose> vrPoses = new ConcurrentHashMap<>(); // read/write in networking and physics threads, so using ConcurrentHashMap
+    public static Map<UUID, PlayerData> playerData = new ConcurrentHashMap<>(); // read/write in networking and physics threads
 
     public static boolean isPlayerControlledBody(UUID playerId, int bodyId) {
         Set<Integer> bodies = playersJoltBodies.get(playerId);

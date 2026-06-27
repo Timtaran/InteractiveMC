@@ -144,6 +144,6 @@ public class C2SFrameVRPosePacket implements IVxNetPacket {
      */
     @Override
     public void handle(NetworkManager.PacketContext context) {
-        PlayerBodyDataStore.vrPoses.put(context.getPlayer().getUUID(), pose);
+        PlayerBodyDataStore.playerData.get(context.getPlayer().getUUID()).updateVrPose(pose);
     }
 }

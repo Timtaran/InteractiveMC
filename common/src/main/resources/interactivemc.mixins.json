@@ -5,7 +5,8 @@
   "minVersion": "0.8",
   "client": [
     "bridge.vivecraft.KeyMappingRegisterMixin",
-    "bridge.vivecraft.KeyMappingHandlingMixin"
+    "bridge.vivecraft.KeyMappingHandlingMixin",
+    "bridge.velthoric.VelthoricRenderingFix"
   ],
   "mixins": [
     "bridge.velthoric.PhysicsTickEvent"

@@ -74,10 +74,9 @@ public class PlayerBodyPartRigidBody extends VxBody {
     }
 
     public static int createJoltBody(VxBody body, VxRigidBodyFactory factory) {
-        PlayerBodyPart partType = body.get(DATA_BODY_PART);
-        Vec3Arg fullSize = partType.getSize();
+        Vec3 halfExtents = body.get(DATA_HALF_EXTENTS);
 
-        VxBoxShape shape = new VxBoxShape(new Vec3(fullSize.getX() / 2,  fullSize.getY() / 2, fullSize.getZ() / 2));
+        VxBoxShape shape = new VxBoxShape(halfExtents);
         try (BodyCreationSettings bcs = new BodyCreationSettings()) {
             bcs.setMotionType(EMotionType.Dynamic);
             bcs.setObjectLayer(VxPhysicsLayers.MOVING);

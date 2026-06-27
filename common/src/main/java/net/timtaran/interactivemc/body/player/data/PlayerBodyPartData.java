@@ -2,7 +2,7 @@
  * This file is part of InteractiveMC.
  * Licensed under LGPL 3.0.
  */
-package net.timtaran.interactivemc.body.player;
+package net.timtaran.interactivemc.body.player.data;
 
 import net.timtaran.interactivemc.body.player.interaction.TriggerState;
 import org.jetbrains.annotations.NotNull;

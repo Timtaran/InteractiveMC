@@ -21,4 +21,7 @@ public record VRPlayerData(
         float heightScale,
         VRPose vrPose
 ) {
+    public float getPlayerScale() {
+        return worldScale * heightScale;
+    }
 }
