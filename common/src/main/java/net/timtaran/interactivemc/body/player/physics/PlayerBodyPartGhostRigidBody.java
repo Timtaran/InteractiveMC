@@ -121,7 +121,7 @@ public class PlayerBodyPartGhostRigidBody extends VxBody {
     public void onPrePhysicsTick(VxPhysicsWorld world) {
         PlayerData playerData = PlayerBodyDataStore.playerData.get(get(DATA_PLAYER_ID));
         VRPose pose = playerData.getCurrentVrPose();
-        // todo: predict pose on loss
+        // todo: predict pose on loss and use servertick data
         if (pose == null) return;
 
         PlayerBodyPart bodyPart = get(DATA_BODY_PART);

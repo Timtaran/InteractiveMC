@@ -7,6 +7,7 @@ package net.timtaran.interactivemc.init;
 import com.mojang.logging.LogUtils;
 import net.timtaran.interactivemc.init.registry.BodyRegistry;
 import net.timtaran.interactivemc.init.registry.EventRegistry;
+import net.timtaran.interactivemc.init.registry.InteractiveMCConfig;
 import net.timtaran.interactivemc.init.registry.ViveRegistry;
 import net.timtaran.interactivemc.network.PacketRegistry;
 import org.slf4j.Logger;
@@ -26,6 +27,8 @@ public class InteractiveMC {
      */
     public static void onInit() {
         LOGGER.info("Initializing InteractiveMC");
+
+        InteractiveMCConfig.load();
 
         EventRegistry.register();
         BodyRegistry.register();

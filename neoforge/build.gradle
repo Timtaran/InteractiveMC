@@ -41,11 +41,12 @@ dependencies {
     shadowBundle project(path: ':common', configuration: 'transformProductionNeoForge')
 
     // Required dependencies
-    // modImplementation "com.github.Timtaran.Velthoric:velthoric-neoforge:$rootProject.velthoric_version" // wait until remap error will be fixed
+    modImplementation "net.xmx.velthoric:velthoric-$rootProject.minecraft_version-neoforge:$rootProject.velthoric_version"
+
+    modImplementation "dev.isxander:yet-another-config-lib:$rootProject.yacl_version+$rootProject.minecraft_version-neoforge"
 
     modApi "maven.modrinth:vivecraft:$rootProject.vivecraft_version-neoforge"
     runtimeOnly "com.illposed.osc:javaosc-core:0.9"
-
 }
 
 processResources {
@@ -61,7 +62,8 @@ processResources {
                 sources: rootProject.mod_sources,
                 architectury_api_version: rootProject.architectury_api_version,
                 minecraft_version: rootProject.minecraft_version,
-                neoforge_version: rootProject.neoforge_version
+                neoforge_version: rootProject.neoforge_version,
+                yacl_version: rootProject.yacl_version
         )
     }
 }

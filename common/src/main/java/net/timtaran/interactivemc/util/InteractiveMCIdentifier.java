@@ -4,8 +4,11 @@
  */
 package net.timtaran.interactivemc.util;
 
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.timtaran.interactivemc.init.InteractiveMC;
+
+import java.awt.*;
 
 /**
  * Utils for generating mod-specific identifiers.
@@ -24,6 +27,10 @@ public class InteractiveMCIdentifier {
      */
     public static String getTranslationKey(String category, String path) {
         return "%s.%s.%s".formatted(category, InteractiveMC.MOD_ID, path);
+    }
+
+    public static Component getTranslation(String category, String path) {
+        return Component.translatable(getTranslationKey(category, path));
     }
 
     /**
