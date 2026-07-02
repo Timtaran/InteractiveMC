@@ -155,7 +155,7 @@ public class PlayerBodyManager {
             settings.setMotorSettings(EAxis.TranslationY, linearMotor);
             settings.setMotorSettings(EAxis.TranslationZ, linearMotor);
 
-            MotorSettings angularMotor = new MotorSettings(4.0f, 1.0f, 0f, 1600.0f);
+            MotorSettings angularMotor = new MotorSettings(18.0f, 1.0f, 0f, 1600.0f);
             settings.setMotorSettings(EAxis.RotationX, angularMotor);
             settings.setMotorSettings(EAxis.RotationY, angularMotor);
             settings.setMotorSettings(EAxis.RotationZ, angularMotor);
