@@ -6,6 +6,9 @@
   "client": [
     "bridge.vivecraft.KeyMappingRegisterMixin",
     "bridge.vivecraft.KeyMappingHandlingMixin",
+    "bridge.vivecraft.VRInputActionMixin",
+    "bridge.vivecraft.VRInputActionAccessor",
+    "bridge.vivecraft.VRInputActionProcessReorderMixin",
     "bridge.velthoric.VelthoricRenderingFix"
   ],
   "mixins": [

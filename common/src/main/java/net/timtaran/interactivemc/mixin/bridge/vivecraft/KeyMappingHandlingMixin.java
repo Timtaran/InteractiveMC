@@ -4,9 +4,10 @@
  */
 package net.timtaran.interactivemc.mixin.bridge.vivecraft;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.world.InteractionHand;
-import net.timtaran.interactivemc.body.player.interaction.GrabInteraction;
 import net.timtaran.interactivemc.body.player.interaction.TriggerState;
 import net.timtaran.interactivemc.body.player.packet.C2SGrabPacket;
 import net.timtaran.interactivemc.body.player.packet.C2SReleasePacket;
@@ -15,11 +16,13 @@ import net.timtaran.interactivemc.body.player.store.ClientPlayerBodyDataStore;
 import net.timtaran.interactivemc.init.registry.KeyMapRegistry;
 import net.timtaran.interactivemc.network.Networking;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.vivecraft.client_vr.provider.MCVR;
+import org.vivecraft.client_vr.provider.openvr_lwjgl.VRInputAction;
 
 /**
  * Mixin that processes keymappings right before Vivecraft would perform its own checks.
@@ -31,7 +34,11 @@ import org.vivecraft.client_vr.provider.MCVR;
  * @see KeyMapRegistry
  */
 @Mixin(value = MCVR.class, remap = false)
-public class KeyMappingHandlingMixin {
+public abstract class KeyMappingHandlingMixin {
+    @Shadow
+    public abstract VRInputAction getInputAction(KeyMapping keyMapping);
+
+
     /**
      * Injects into the processBindings method to handle grab/release keymappings.
      * <p>
@@ -63,29 +70,22 @@ public class KeyMappingHandlingMixin {
      * @param keyMapping the key mapping to check
      */
     @Unique
-    private static void interactivemc$updateGrabState(InteractionHand hand, KeyMapping keyMapping) {
+    private void interactivemc$updateGrabState(InteractionHand hand, KeyMapping keyMapping) {
         if (keyMapping.consumeClick()) {
             interactivemc$grab(hand);
-        } else if (!keyMapping.isDown() && ClientPlayerBodyDataStore.grabbedBodies.get(hand) != null) {
-            System.out.println("client release");
+        } else if (!keyMapping.isDown() && ClientPlayerBodyDataStore.isGrabbing(hand)) {
             interactivemc$release(hand);
         }
     }
 
     /**
-     * Sends packet to the server to grab an object using the specified hand and predicts response
-     * using {@link GrabInteraction#canGrabClient(InteractionHand)}.
+     * Sends packet to the server to grab an object using the specified hand.
      *
      * @param interactionHand the hand attempting to grab (main or off-hand)
-     * @return true if a grabbable object was found nearby, false otherwise
      */
     @Unique
-    private static boolean interactivemc$grab(InteractionHand interactionHand) {
-        boolean isGrabbing = GrabInteraction.canGrabClient(interactionHand);  // todo: rework using approximate body shapes instead center distance
-        System.out.println("isGrabbing: " + isGrabbing);
-
+    private static void interactivemc$grab(InteractionHand interactionHand) {
         Networking.sendToServer(new C2SGrabPacket(interactionHand));
-        return isGrabbing;
     }
 
     /**
@@ -99,7 +99,7 @@ public class KeyMappingHandlingMixin {
     }
 
     @Unique
-    private static void interactivemc$updateTriggerState(InteractionHand hand, KeyMapping touchKeyMapping, KeyMapping pressKeyMapping) {
+    private void interactivemc$updateTriggerState(InteractionHand hand, KeyMapping touchKeyMapping, KeyMapping pressKeyMapping) {
         TriggerState triggerState;
 
         if (pressKeyMapping.consumeClick() || pressKeyMapping.isDown()) {
@@ -117,15 +117,33 @@ public class KeyMappingHandlingMixin {
         }
     }
 
-//    @ModifyExpressionValue(
-//            method = "processBindings",
-//            at = @At(
-//                    value = "FIELD",
-//                    target = "Lorg/vivecraft/client/VivecraftVRMod;keyHotbarNext:Lnet/minecraft/client/KeyMapping;",
-//                    opcode = Opcodes.GETFIELD
-//            )
-//    )
-//    private KeyMapping intercept(KeyMapping keyMapping) {
-//        return keyMapping;
-//    }
+    /**
+     * Intercepts KeyMapping.consumeClick to optionally suppress input events
+     * originating from previously handled grab actions.
+     * <p>
+     * This is used to prevent double-processing of input events when grab
+     * actions have already been consumed by InteractiveMC logic.
+     *
+     * @param key      key mapping being checked
+     * @param original original consumeClick operation
+     * @return false if the event should be suppressed, otherwise original result
+     */
+    @WrapOperation(
+            method = "processBindings",
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/client/KeyMapping;consumeClick()Z"
+            )
+    )
+    private boolean wrapConsumeClick(KeyMapping key, Operation<Boolean> original) {
+        boolean callResult = original.call(key);
+
+        if (callResult) {
+            if (ClientPlayerBodyDataStore.cancelOrigins.contains(getInputAction(key).getLastOrigin())) {
+                return false;
+            }
+        }
+
+        return callResult;
+    }
 }

@@ -7,12 +7,12 @@ package net.timtaran.interactivemc.body.player.store;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import net.minecraft.world.InteractionHand;
 import net.timtaran.interactivemc.body.player.interaction.TriggerState;
+import net.timtaran.interactivemc.mixin.bridge.vivecraft.VRInputActionMixin;
+import net.timtaran.interactivemc.mixin.bridge.vivecraft.VRInputActionProcessReorderMixin;
+
 import org.vivecraft.api.data.VRPose;
 
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Client-side data store containing VR-related information.
@@ -43,8 +43,20 @@ public final class ClientPlayerBodyDataStore {
 
     /**
      * The current VR pose of the player, updated every frame.
+     * @see net.timtaran.interactivemc.bridge.vivecraft.PlayerBodyTracker
      */
     public static VRPose currentPose;
+
+    /**
+     * Origins scheduled to be ignored by other actions sharing the same VR origin.
+     * @see VRInputActionMixin
+     * @see VRInputActionProcessReorderMixin
+     */
+    public static final Set<Long> cancelOrigins = new HashSet<>();
+
+    public static boolean isGrabbing(InteractionHand hand) {
+        return ClientPlayerBodyDataStore.grabbedBodies.get(hand) != null;
+    }
 
     private ClientPlayerBodyDataStore() {
     }

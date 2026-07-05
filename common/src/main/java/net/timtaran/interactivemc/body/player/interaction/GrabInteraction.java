@@ -276,7 +276,7 @@ public class GrabInteraction {
                         isGrabbable ? Op.star(grabbedJoltBody.getRotation(), grabPoint.rotation().conjugated()) : grabberJoltBody.getRotation()
                 );
                 constraint = attach(grabberBody, grabbedBody, bodyContactPoint, player, playerBodyPart);
-                System.out.println("Attaching " + grabbedBody.getClass().getSimpleName() + " to " + grabberBody.getClass().getSimpleName() + " at " + bodyContactPoint);
+                System.out.println("Attaching " + grabberBody.getClass().getSimpleName() + " to " + grabbedBody.getClass().getSimpleName() + " at " + bodyContactPoint);
             }
 
             world.getBodyPairIgnoreHandler().ignorePair(grabberBody.getBodyId(), grabbedBody.getBodyId());
@@ -542,6 +542,7 @@ public class GrabInteraction {
      */
     @Environment(EnvType.CLIENT)
     public static boolean canGrabClient(InteractionHand interactionHand) {
+        // todo: rework using approximate body shapes instead center distance
         if (ClientPlayerBodyDataStore.currentPose == null)
             return false;
 

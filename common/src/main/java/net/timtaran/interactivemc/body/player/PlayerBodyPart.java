@@ -146,7 +146,7 @@ public enum PlayerBodyPart {
         // vivecraft stores player hand position at the tip, so vec3f grab point is trackingOffset + rvec3 grab point, which is very close to zero
         return switch (this) {
             case HEAD -> new Vector3f(0f, 0f, 0f);
-            case MAIN_HAND, OFF_HAND -> new Vector3f(0, 0f, -0.01f);
+            case MAIN_HAND, OFF_HAND -> new Vector3f(0, 0f, 0.1f);
         };
     }
 
