@@ -4,56 +4,68 @@
  */
 package net.timtaran.interactivemc.init.registry;
 
-import net.minecraft.client.KeyMapping;
 import net.timtaran.interactivemc.mixin.bridge.vivecraft.KeyMappingHandlingMixin;
 import net.timtaran.interactivemc.mixin.bridge.vivecraft.KeyMappingRegisterMixin;
+import net.timtaran.interactivemc.mixin.bridge.vivecraft.VRInputActionMixin;
 import net.timtaran.interactivemc.util.InteractiveMCIdentifier;
+import org.vivecraft.client_vr.provider.HandedKeyBinding;
 
 /**
  * Class containing all mod keymappings.
  * Registration happens inside {@link KeyMappingRegisterMixin}.
  * Handling happens inside {@link KeyMappingHandlingMixin}.
+ * Others bindings prevention happens inside {@link VRInputActionMixin}
  *
  * @author timtaran
  */
 public class KeyMapRegistry {
-    // todo intercept vivecraft grip and trigger binds (vivecraft handles internal keymappings before everything and we don't want to mappings like hotbar change or breaking blocks to be called while interacting)
-    // this could be done at MCVR#processBindings or VRInputAction#pressBinding or other classes
-    // (or just consumeClick before vivecraft could process it)
+    // We are using `HandedKeyBinding` here, because vivecraft doesn't pass `ControllerType` to default KeyMapping's.
 
     /**
      * Main-Hand Trigger
      */
-    public static final KeyMapping MAIN_TRIGGER_KEYMAPPING = new KeyMapping(
+    public static final HandedKeyBinding MAIN_TRIGGER_KEYMAPPING = new HandedKeyBinding(
             InteractiveMCIdentifier.getTranslationKey("key", "mtrigger"),
             -1,
-            KeyMapping.CATEGORY_GAMEPLAY
+            HandedKeyBinding.CATEGORY_GAMEPLAY
+    );
+
+    public static final HandedKeyBinding MAIN_TRIGGER_TOUCH_KEYMAPPING = new HandedKeyBinding(
+            InteractiveMCIdentifier.getTranslationKey("key", "mtouch"),
+            -1,
+            HandedKeyBinding.CATEGORY_GAMEPLAY
     );
 
     /**
      * Main-Hand Grab
      */
-    public static final KeyMapping MAIN_GRAB_KEYMAPPING = new KeyMapping(
+    public static final HandedKeyBinding MAIN_GRAB_KEYMAPPING = new HandedKeyBinding(
             InteractiveMCIdentifier.getTranslationKey("key", "mgrab"),
             -1,
-            KeyMapping.CATEGORY_GAMEPLAY
+            HandedKeyBinding.CATEGORY_GAMEPLAY
     );
 
     /**
      * Off-Hand Trigger
      */
-    public static final KeyMapping OFF_TRIGGER_KEYMAPPING = new KeyMapping(
+    public static final HandedKeyBinding OFF_TRIGGER_KEYMAPPING = new HandedKeyBinding(
             InteractiveMCIdentifier.getTranslationKey("key", "otrigger"),
             -1,
-            KeyMapping.CATEGORY_GAMEPLAY
+            HandedKeyBinding.CATEGORY_GAMEPLAY
+    );
+
+    public static final HandedKeyBinding OFF_TRIGGER_TOUCH_KEYMAPPING = new HandedKeyBinding(
+            InteractiveMCIdentifier.getTranslationKey("key", "otouch"),
+            -1,
+            HandedKeyBinding.CATEGORY_GAMEPLAY
     );
 
     /**
      * Off-Hand Grab
      */
-    public static final KeyMapping OFF_GRAB_KEYMAPPING = new KeyMapping(
+    public static final HandedKeyBinding OFF_GRAB_KEYMAPPING = new HandedKeyBinding(
             InteractiveMCIdentifier.getTranslationKey("key", "ograb"),
             -1,
-            KeyMapping.CATEGORY_GAMEPLAY
+            HandedKeyBinding.CATEGORY_GAMEPLAY
     );
 }

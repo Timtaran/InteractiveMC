@@ -11,9 +11,9 @@ import org.vivecraft.api.data.VRPose;
  * <p>
  * This record contains the scaling factors and current VR pose of a player.
  *
- * @param worldScale the scaling factor for the world relative to the player
+ * @param worldScale  the scaling factor for the world relative to the player
  * @param heightScale the scaling factor for the player's height
- * @param vrPose the current VR pose data
+ * @param vrPose      the current VR pose data
  * @author timtaran
  */
 public record VRPlayerData(
@@ -21,4 +21,7 @@ public record VRPlayerData(
         float heightScale,
         VRPose vrPose
 ) {
+    public float getPlayerScale() {
+        return worldScale * heightScale;
+    }
 }

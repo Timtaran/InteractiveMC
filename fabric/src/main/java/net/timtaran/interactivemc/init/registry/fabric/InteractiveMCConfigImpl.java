@@ -1,0 +1,11 @@
+package net.timtaran.interactivemc.init.registry.fabric;
+
+import net.fabricmc.loader.api.FabricLoader;
+
+import java.nio.file.Path;
+
+public class InteractiveMCConfigImpl {
+    public static Path getConfigDirectory() {
+        return FabricLoader.getInstance().getConfigDir();
+    }
+}

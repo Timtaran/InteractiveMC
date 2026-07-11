@@ -27,7 +27,9 @@ import java.util.Set;
  */
 @Mixin(value = VivecraftVRMod.class, remap = false)
 public class KeyMappingRegisterMixin {
-    /** The set of hidden keybindings maintained by Vivecraft. */
+    /**
+     * The set of hidden keybindings maintained by Vivecraft.
+     */
     @Shadow
     private Set<KeyMapping> hiddenKeyBindingSet;
 
@@ -47,7 +49,9 @@ public class KeyMappingRegisterMixin {
     )
     public void interactivemc$registerKeymappings(CallbackInfo ci) {
         hiddenKeyBindingSet.add(KeyMapRegistry.MAIN_TRIGGER_KEYMAPPING);
+        hiddenKeyBindingSet.add(KeyMapRegistry.MAIN_TRIGGER_TOUCH_KEYMAPPING);
         hiddenKeyBindingSet.add(KeyMapRegistry.OFF_TRIGGER_KEYMAPPING);
+        hiddenKeyBindingSet.add(KeyMapRegistry.OFF_TRIGGER_TOUCH_KEYMAPPING);
         hiddenKeyBindingSet.add(KeyMapRegistry.MAIN_GRAB_KEYMAPPING);
         hiddenKeyBindingSet.add(KeyMapRegistry.OFF_GRAB_KEYMAPPING);
     }

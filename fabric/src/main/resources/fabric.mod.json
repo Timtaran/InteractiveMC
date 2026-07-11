@@ -17,6 +17,9 @@
   "entrypoints": {
     "main": [
       "net.timtaran.interactivemc.fabric.InteractiveMCFabric"
+    ],
+    "modmenu": [
+      "net.timtaran.interactivemc.compat.ModMenuIntegration"
     ]
   },
   "mixins": [

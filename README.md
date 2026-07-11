@@ -24,9 +24,6 @@ It enhances VR gameplay by adding real collision and interaction systems, making
 > [!NOTE]  
 > Since Velthoric is under active development, you will likely need to use [nightly builds](https://github.com/xI-Mx-Ix/Velthoric/actions/workflows/nightly.yml). Public releases occur roughly once per month and can become outdated, so we use the latest commits instead.
 
-> [!WARNING]
-> If you are playing in singleplayer, it is recommended to set `interpolation_delay_nanos` to `0` in the Velthoric client config to prevent input lag.
-
 ## Current features
 - Physical interactions via Velthoric
 - Player head and body collisions
