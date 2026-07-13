@@ -12,6 +12,8 @@
   <a href="https://neoforged.net/"><img src="assets/neoforge_badge.png" alt="Available on NeoForge"></a>
   <br>
   <a href="https://modrinth.com/mod/architectury-api"><img src="assets/architectury_api_badge.png" alt="Requires Architectury API"></a>
+  <a href="https://modrinth.com/mod/yacl"><img src="assets/yacl_badge.png" alt="Requires YetAnotherConfigLib"></a>
+  <br>
   <a href="https://modrinth.com/mod/vivecraft"><img src="assets/vivecraft_badge.png" alt="Requires Vivecraft"></a>
   <a href="https://modrinth.com/mod/velthoric"><img src="assets/velthoric_badge.png" alt="Requires Velthoric"></a>
 </div>
@@ -20,9 +22,6 @@
 **InteractiveMC** is an addon for the [Vivecraft](https://modrinth.com/mod/vivecraft) mod that introduces physical interactions powered by [Velthoric Physics](https://modrinth.com/mod/velthoric).
 
 It enhances VR gameplay by adding real collision and interaction systems, making the Minecraft world feel more immersive.
-
-> [!NOTE]  
-> Since Velthoric is under active development, you will likely need to use [nightly builds](https://github.com/xI-Mx-Ix/Velthoric/actions/workflows/nightly.yml). Public releases occur roughly once per month and can become outdated, so we use the latest commits instead.
 
 ## Current features
 - Physical interactions via Velthoric

@@ -39,7 +39,23 @@ modId = "yet_another_config_lib_v3"
 mandatory = true
 versionRange = "[${yacl_version},)"
 ordering = "NONE"
-side = "CLIENT"
+side = "BOTH"
+
+[[dependencies.${id}]]
+modId = "vivecraft"
+mandatory = true
+versionRange = "[${vivecraft_version},)"
+ordering = "NONE"
+side = "BOTH"
+
+
+[[dependencies.${id}]]
+modId = "velthoric"
+mandatory = true
+versionRange = "[${velthoric_version},)"
+ordering = "NONE"
+side = "BOTH"
+
 
 [[mixins]]
 config = "interactivemc.mixins.json"
