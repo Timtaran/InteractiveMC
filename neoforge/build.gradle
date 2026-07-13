@@ -63,7 +63,9 @@ processResources {
                 architectury_api_version: rootProject.architectury_api_version,
                 minecraft_version: rootProject.minecraft_version,
                 neoforge_version: rootProject.neoforge_version,
-                yacl_version: rootProject.yacl_version
+                yacl_version: rootProject.yacl_version,
+                vivecraft_version: rootProject.vivecraft_version,
+                velthoric_version: rootProject.velthoric_version
         )
     }
 }

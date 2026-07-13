@@ -30,6 +30,9 @@
     "minecraft": "~${minecraft_version}",
     "java": ">=21",
     "architectury": ">=${architectury_api_version}",
+    "vivecraft": ">=${vivecraft_version}",
+    "yet_another_config_lib_v3": ">=${yacl_version}",
+    "velthoric": ">=${velthoric_version}",
     "fabric-api": "*"
   }
 }
