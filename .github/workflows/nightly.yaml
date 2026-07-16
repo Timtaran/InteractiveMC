@@ -22,33 +22,30 @@ jobs:
       - name: Grant Execute Permissions
         run: chmod +x gradlew
 
-      - name: Set outputs
-        id: vars
-        run: |
-          echo "base_version=$(grep '^mod_version=' gradle.properties | cut -d'=' -f2)" >> $GITHUB_OUTPUT
-
-      - name: Build Snapshot Version
-        id: version
-        run: |
-          VERSION="${{ steps.vars.outputs.base_version }}-SNAPSHOT"
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "Using version: $VERSION"
-
       - name: Build with Gradle
-        run: ./gradlew build -Pmod_version="${{ steps.version.outputs.version }}"
+        run: ./gradlew build
 
       - name: Publish Snapshot
         env:
           REPO_URL: ${{ secrets.REPO_URL }}
           REPO_USER: ${{ secrets.REPO_USER }}
           REPO_TOKEN: ${{ secrets.REPO_TOKEN }}
-        if: ${{ env.REPO_URL != '' && env.REPO_USER != '' && env.REPO_TOKEN != '' }}
-        run: ./gradlew publishAllPublicationsToProjectMavenRepository -Pmod_version="${{ steps.version.outputs.version }}"
+        if: >
+          ${{
+            env.REPO_URL != '' &&
+            env.REPO_USER != '' &&
+            env.REPO_TOKEN != '' &&
+            (
+              github.ref == 'refs/heads/master' ||
+              startsWith(github.ref, 'refs/heads/dev')
+            )
+          }}
+        run: ./gradlew publishAllPublicationsToProjectMavenRepository
 
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: InteractiveMC-Build-${{ steps.vars.outputs.sha_short }}
+          name: InteractiveMC-Build
           path: |
             fabric/build/libs/*.jar
             neoforge/build/libs/*.jar
