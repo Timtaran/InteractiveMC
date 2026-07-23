@@ -52,32 +52,33 @@ public class VivecraftVRPlayerDataProvider implements VRPlayerDataProvider {
         if (!isVRPlayer(player))
             return null;
 
+        org.vivecraft.api.data.VRPose vrPose = null;
+        float playerScale = 1f;
+
         if (player instanceof ServerPlayer serverPlayer) {
             ServerVivePlayer vivePlayer = ServerVRPlayers.getVivePlayer(serverPlayer);
-            return VivecraftConversions.toInteractivemcType(
-                    vivePlayer.asVRPose(),
-                    vivePlayer.heightScale * vivePlayer.worldScale
-            );
+            vrPose = vivePlayer.asVRPose();
+            playerScale = vivePlayer.heightScale * vivePlayer.worldScale;
         }
 
         if (Platform.getEnv() == EnvType.CLIENT) {
             if (player instanceof LocalPlayer) {
-                org.vivecraft.api.data.VRPose renderPose = VRClientAPI.instance().getWorldRenderPose();
-                return VivecraftConversions.toInteractivemcType(
-                        renderPose,
-                        VRClientAPI.instance().getWorldScale() * AutoCalibration.getPlayerHeight() / 1.52F
-                );
+                vrPose = VRClientAPI.instance().getWorldRenderPose();
+                playerScale = VRClientAPI.instance().getWorldScale() * AutoCalibration.getPlayerHeight() / 1.52F;
             } else {
                 ClientVRPlayers.RotInfo clientRotations = ClientVRPlayers.getInstance().getRotationsForPlayer(player.getUUID());
 
-                return VivecraftConversions.toInteractivemcType(
-                        clientRotations.asVRPose(player.position()),
-                        clientRotations.heightScale * clientRotations.worldScale
-                );
+
+                vrPose = clientRotations.asVRPose(player.position());
+                playerScale = clientRotations.heightScale * clientRotations.worldScale;
             }
         }
 
-        return null;
+        if (vrPose == null) {
+            return null;
+        }
+
+        return VivecraftConversions.toInteractivemcType(vrPose, playerScale);
     }
 
     @Override

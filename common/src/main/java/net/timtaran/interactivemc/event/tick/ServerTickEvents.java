@@ -32,6 +32,11 @@ public class ServerTickEvents {
         for (ServerPlayer player : level.players()) {
             VRPoseHistoryImpl poseHistory = (VRPoseHistoryImpl) ProviderRegistry.getVrPlayerDataProvider().getPoseHistory(player);
 
+            VRPose vrPose = ProviderRegistry.getVrPlayerDataProvider().getVrPose(player);
+
+            if (vrPose == null)
+                continue;
+
             poseHistory.addPose(ProviderRegistry.getVrPlayerDataProvider().getVrPose(player), player.position());
         }
     }
