@@ -118,7 +118,7 @@ publishing {
 
             artifact(tasks.named("remapJar"))
             artifact(tasks.named("remapSourcesJar"))
-            artifact(tasks.named("javadoc"))
+            artifact(tasks.named("javadocJar"))
         }
     }
 }
