@@ -70,7 +70,9 @@ dependencies {
     runtimeOnly "com.electronwill.night-config:core:3.6.6"
 
     // Optional dependencies (compat)
-    modImplementation("com.terraformersmc:modmenu:${rootProject.modmenu_version}")
+
+    // Mod Menu
+    modImplementation("maven.modrinth:mOgUt4GM:${rootProject.modmenu_version}")
 }
 
 processResources {
