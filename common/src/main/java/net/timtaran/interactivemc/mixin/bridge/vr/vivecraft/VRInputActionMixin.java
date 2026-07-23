@@ -1,18 +1,19 @@
-package net.timtaran.interactivemc.mixin.bridge.vivecraft;
+package net.timtaran.interactivemc.mixin.bridge.vr.vivecraft;
 
 import net.minecraft.client.KeyMapping;
 import net.minecraft.world.InteractionHand;
 import net.timtaran.interactivemc.body.player.interaction.GrabInteraction;
 import net.timtaran.interactivemc.body.player.store.ClientPlayerBodyDataStore;
-import net.timtaran.interactivemc.bridge.vivecraft.VRInputActionExtension;
-import net.timtaran.interactivemc.init.registry.KeyMapRegistry;
-import net.timtaran.interactivemc.util.vivecraft.VivecraftConversions;
+import net.timtaran.interactivemc.bridge.vr.vivecraft.VRInputActionExtension;
+import net.timtaran.interactivemc.bridge.vr.vivecraft.VivecraftKeyMapRegistry;
+import net.timtaran.interactivemc.util.vr.vivecraft.VivecraftConversions;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.vivecraft.client_vr.provider.ControllerType;
 import org.vivecraft.client_vr.provider.openvr_lwjgl.VRInputAction;
 
@@ -32,18 +33,29 @@ public abstract class VRInputActionMixin implements VRInputActionExtension {
         KeyMapping keyMapping = ((VRInputActionAccessor) this).getKeyBinding();
 
         interactivemc$interactivemcBinding =
-                keyMapping == KeyMapRegistry.MAIN_GRAB_KEYMAPPING
-                        || keyMapping == KeyMapRegistry.OFF_GRAB_KEYMAPPING
-                        || keyMapping == KeyMapRegistry.MAIN_TRIGGER_KEYMAPPING
-                        || keyMapping == KeyMapRegistry.OFF_TRIGGER_KEYMAPPING
-                        || keyMapping == KeyMapRegistry.MAIN_TRIGGER_TOUCH_KEYMAPPING
-                        || keyMapping == KeyMapRegistry.OFF_TRIGGER_TOUCH_KEYMAPPING;
+                keyMapping == VivecraftKeyMapRegistry.MAIN_GRAB_KEYMAPPING
+                        || keyMapping == VivecraftKeyMapRegistry.OFF_GRAB_KEYMAPPING
+                        || keyMapping == VivecraftKeyMapRegistry.MAIN_TRIGGER_KEYMAPPING
+                        || keyMapping == VivecraftKeyMapRegistry.OFF_TRIGGER_KEYMAPPING
+                        || keyMapping == VivecraftKeyMapRegistry.MAIN_TRIGGER_TOUCH_KEYMAPPING
+                        || keyMapping == VivecraftKeyMapRegistry.OFF_TRIGGER_TOUCH_KEYMAPPING;
     }
 
     @Override
     @Unique
     public boolean interactivemc$isInteractivemcBinding() {
         return interactivemc$interactivemcBinding;
+    }
+
+    @Inject(
+            method = "isHanded",
+            at = @At("HEAD"),
+            cancellable = true
+    )
+    public void interactivemc$isHanded(CallbackInfoReturnable<Boolean> cir) {
+        if (interactivemc$interactivemcBinding) {
+            cir.setReturnValue(true);
+        }
     }
 
     @Inject(
@@ -62,14 +74,14 @@ public abstract class VRInputActionMixin implements VRInputActionExtension {
             boolean canGrab = GrabInteraction.canGrabClient(interactionHand);
 
             boolean isGrabKey =
-                    keyMapping == KeyMapRegistry.MAIN_GRAB_KEYMAPPING
-                            || keyMapping == KeyMapRegistry.OFF_GRAB_KEYMAPPING;
+                    keyMapping == VivecraftKeyMapRegistry.MAIN_GRAB_KEYMAPPING
+                            || keyMapping == VivecraftKeyMapRegistry.OFF_GRAB_KEYMAPPING;
 
             boolean isTriggerKey =
-                    keyMapping == KeyMapRegistry.MAIN_TRIGGER_KEYMAPPING
-                            || keyMapping == KeyMapRegistry.OFF_TRIGGER_KEYMAPPING
-                            || keyMapping == KeyMapRegistry.MAIN_TRIGGER_TOUCH_KEYMAPPING
-                            || keyMapping == KeyMapRegistry.OFF_TRIGGER_TOUCH_KEYMAPPING;
+                    keyMapping == VivecraftKeyMapRegistry.MAIN_TRIGGER_KEYMAPPING
+                            || keyMapping == VivecraftKeyMapRegistry.OFF_TRIGGER_KEYMAPPING
+                            || keyMapping == VivecraftKeyMapRegistry.MAIN_TRIGGER_TOUCH_KEYMAPPING
+                            || keyMapping == VivecraftKeyMapRegistry.OFF_TRIGGER_TOUCH_KEYMAPPING;
 
             if ((isGrabKey && (isGrabbing || canGrab)) || (isTriggerKey && isGrabbing)) {
                 ClientPlayerBodyDataStore.cancelOrigins.add(getLastOrigin());

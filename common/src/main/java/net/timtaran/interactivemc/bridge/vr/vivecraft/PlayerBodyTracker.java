@@ -2,17 +2,17 @@
  * This file is part of InteractiveMC.
  * Licensed under LGPL 3.0.
  */
-package net.timtaran.interactivemc.bridge.vivecraft;
+package net.timtaran.interactivemc.bridge.vr.vivecraft;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.player.LocalPlayer;
 import net.timtaran.interactivemc.body.player.packet.C2SFrameVRPosePacket;
 import net.timtaran.interactivemc.body.player.store.ClientPlayerBodyDataStore;
+import net.timtaran.interactivemc.init.registry.ProviderRegistry;
 import net.timtaran.interactivemc.network.Networking;
+import net.timtaran.interactivemc.util.vr.data.VRPose;
 import org.vivecraft.api.client.Tracker;
-import org.vivecraft.api.client.VRClientAPI;
-import org.vivecraft.api.data.VRPose;
 
 /**
  * Tracker for monitoring the player's body movements in Vivecraft VR.
@@ -34,8 +34,8 @@ public class PlayerBodyTracker implements Tracker {
     @Override
     public void activeProcess(LocalPlayer localPlayer) {
         // todo optimize?
-        VRPose renderPose = VRClientAPI.instance().getWorldRenderPose();
-        ClientPlayerBodyDataStore.currentPose = renderPose;
-        Networking.sendToServer(new C2SFrameVRPosePacket(renderPose));
+        VRPose vrPose = ProviderRegistry.getVrPlayerDataProvider().getVrPose(localPlayer);
+        ClientPlayerBodyDataStore.currentPose = vrPose;
+        Networking.sendToServer(new C2SFrameVRPosePacket(vrPose));
     }
 }

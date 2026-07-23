@@ -24,7 +24,11 @@ import net.timtaran.interactivemc.body.player.store.PlayerBodyDataStore;
 import net.timtaran.interactivemc.body.type.GrabPoint;
 import net.timtaran.interactivemc.body.type.IGrabbable;
 import net.timtaran.interactivemc.init.InteractiveMC;
+import net.timtaran.interactivemc.init.registry.ProviderRegistry;
+import net.timtaran.interactivemc.mixin.bridge.vr.vivecraft.KeyMappingHandlingMixin;
 import net.timtaran.interactivemc.util.PlayerBodyPartTransforms;
+import net.timtaran.interactivemc.util.vr.VRPoseHistory;
+import net.timtaran.interactivemc.util.vr.data.VRBodyPartData;
 import net.timtaran.interactivemc.util.velthoric.VelthoricClientUtils;
 import net.xmx.velthoric.core.body.VxBody;
 import net.xmx.velthoric.core.constraint.VxConstraint;
@@ -41,11 +45,6 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
-import org.vivecraft.api.VRAPI;
-import org.vivecraft.api.data.VRBodyPart;
-import org.vivecraft.api.data.VRBodyPartData;
-import org.vivecraft.api.data.VRPose;
-import org.vivecraft.api.data.VRPoseHistory;
 
 import java.util.Comparator;
 import java.util.List;
@@ -296,7 +295,7 @@ public class GrabInteraction {
                 return (objectLayer != VxPhysicsLayers.NON_MOVING && objectLayer != VxPhysicsLayers.TERRAIN);
             }
         }) {
-            VRBodyPartData bodyPartData = PlayerBodyDataStore.playerData.get(player.getUUID()).getCurrentVrPose().getBodyPartData(playerBodyPart.toVRBodyPart());
+            VRBodyPartData bodyPartData = PlayerBodyDataStore.playerData.get(player.getUUID()).getCurrentVrPose().getBodyPartData(playerBodyPart);
             Vec3 direction = VxConversions.toJolt(bodyPartData.getDir()).toVec3().normalized();
             Quat bodyRotation = grabberBody.getTransform().getRotation().normalized(); // todo: remove
             System.out.println("VR Pose direction " + direction + "; Direction based on rotation: " + quatToForward(bodyRotation.getX(), bodyRotation.getY(), bodyRotation.getZ(), bodyRotation.getW()));
@@ -463,13 +462,13 @@ public class GrabInteraction {
     }
 
     public boolean updatePullState(Player player, VxBody grabberBody, VxBody grabbedBody, PlayerBodyPart playerBodyPart) {
-        VRPoseHistory historicalPoses = VRAPI.instance().getHistoricalVRPoses(player);
+        VRPoseHistory historicalPoses = ProviderRegistry.getVrPlayerDataProvider().getPoseHistory(player);
         if (historicalPoses == null)
             return false;
 
         net.minecraft.world.phys.Vec3 handMovement =
                 historicalPoses.netMovement(
-                        playerBodyPart.toVRBodyPart(),
+                        playerBodyPart,
                         PULL_PREVIOUS_POSE_TICKS,
                         true
                 );
@@ -536,7 +535,7 @@ public class GrabInteraction {
 
     /**
      * Checks is any body around player can be grabbed.
-     * Used to predict if player can grab body in {@link net.timtaran.interactivemc.mixin.bridge.vivecraft.KeyMappingHandlingMixin} to prevent other grip binds to be called.
+     * Used to predict if player can grab body in {@link KeyMappingHandlingMixin} to prevent other grip binds to be called.
      *
      * @return is any body around player can be grabbed.
      */
@@ -547,7 +546,7 @@ public class GrabInteraction {
             return false;
 
         Vector3fc localGrabOffset = PlayerBodyPart.fromInteractionHand(interactionHand).getGrabPointVec3f();
-        VRBodyPartData bodyPartData = ClientPlayerBodyDataStore.currentPose.getBodyPartData(VRBodyPart.fromInteractionHand(interactionHand));
+        VRBodyPartData bodyPartData = ClientPlayerBodyDataStore.currentPose.getBodyPartData(PlayerBodyPart.fromInteractionHand(interactionHand));
         if (bodyPartData != null) {
             Quaternionf targetRot = new Quaternionf(bodyPartData.getRotation());
 

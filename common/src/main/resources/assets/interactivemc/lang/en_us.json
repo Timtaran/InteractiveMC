@@ -1,9 +1,8 @@
 {
-  "category.interactivemc.vrbindings": "InteractiveMC — VR Bindings",
-  "key.interactivemc.mtrigger": "Main-Hand Trigger",
-  "key.interactivemc.mtouch": "Main-Hand Trigger Touch",
-  "key.interactivemc.otrigger": "Off-Hand Trigger",
-  "key.interactivemc.otouch": "Off-Hand Trigger Touch",
-  "key.interactivemc.mgrab": "Main-Hand Grab",
-  "key.interactivemc.ograb": "Off-Hand Grab"
+  "interactivemc.key.mtrigger": "Main-Hand Trigger",
+  "interactivemc.key.mtouch": "Main-Hand Trigger Touch",
+  "interactivemc.key.otrigger": "Off-Hand Trigger",
+  "interactivemc.key.otouch": "Off-Hand Trigger Touch",
+  "interactivemc.key.mgrab": "Main-Hand Grab",
+  "interactivemc.key.ograb": "Off-Hand Grab"
 }

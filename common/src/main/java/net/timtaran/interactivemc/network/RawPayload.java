@@ -1,10 +1,9 @@
 /*
- * This file is part of Velthoric.
- * Copyright (C) xI-Mx-Ix
- *
- * Modifications Copyright (C) 2026 timtaran
- *
+ * This file is part of InteractiveMC.
  * Licensed under LGPL 3.0.
+ *
+ * Original code from Velthoric.
+ * Copyright (c) 2025 xI-Mx-Ix
  */
 package net.timtaran.interactivemc.network;
 

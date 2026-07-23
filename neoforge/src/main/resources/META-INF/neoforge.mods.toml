@@ -45,7 +45,7 @@ side = "BOTH"
 modId = "vivecraft"
 mandatory = true
 versionRange = "[${vivecraft_version},)"
-ordering = "NONE"
+ordering = "AFTER"
 side = "BOTH"
 
 

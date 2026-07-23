@@ -2,7 +2,7 @@
  * This file is part of InteractiveMC.
  * Licensed under LGPL 3.0.
  */
-package net.timtaran.interactivemc.mixin.bridge.vivecraft;
+package net.timtaran.interactivemc.mixin.bridge.vr.vivecraft;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
@@ -13,7 +13,7 @@ import net.timtaran.interactivemc.body.player.packet.C2SGrabPacket;
 import net.timtaran.interactivemc.body.player.packet.C2SReleasePacket;
 import net.timtaran.interactivemc.body.player.packet.C2STriggerStatePacket;
 import net.timtaran.interactivemc.body.player.store.ClientPlayerBodyDataStore;
-import net.timtaran.interactivemc.init.registry.KeyMapRegistry;
+import net.timtaran.interactivemc.bridge.vr.vivecraft.VivecraftKeyMapRegistry;
 import net.timtaran.interactivemc.network.Networking;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -31,7 +31,7 @@ import org.vivecraft.client_vr.provider.openvr_lwjgl.VRInputAction;
  * actions before Vivecraft's default handling takes place.
  *
  * @author timtaran
- * @see KeyMapRegistry
+ * @see VivecraftKeyMapRegistry
  */
 @Mixin(value = MCVR.class, remap = false)
 public abstract class KeyMappingHandlingMixin {
@@ -53,10 +53,10 @@ public abstract class KeyMappingHandlingMixin {
             at = @At("HEAD")
     )
     private void interactivemc$processKeymappings(CallbackInfo ci) {
-        interactivemc$updateGrabState(InteractionHand.MAIN_HAND, KeyMapRegistry.MAIN_GRAB_KEYMAPPING);
-        interactivemc$updateGrabState(InteractionHand.OFF_HAND, KeyMapRegistry.OFF_GRAB_KEYMAPPING);
-        interactivemc$updateTriggerState(InteractionHand.MAIN_HAND, KeyMapRegistry.MAIN_TRIGGER_TOUCH_KEYMAPPING, KeyMapRegistry.MAIN_TRIGGER_KEYMAPPING);
-        interactivemc$updateTriggerState(InteractionHand.OFF_HAND, KeyMapRegistry.OFF_TRIGGER_TOUCH_KEYMAPPING, KeyMapRegistry.OFF_TRIGGER_KEYMAPPING);
+        interactivemc$updateGrabState(InteractionHand.MAIN_HAND, VivecraftKeyMapRegistry.MAIN_GRAB_KEYMAPPING);
+        interactivemc$updateGrabState(InteractionHand.OFF_HAND, VivecraftKeyMapRegistry.OFF_GRAB_KEYMAPPING);
+        interactivemc$updateTriggerState(InteractionHand.MAIN_HAND, VivecraftKeyMapRegistry.MAIN_TRIGGER_TOUCH_KEYMAPPING, VivecraftKeyMapRegistry.MAIN_TRIGGER_KEYMAPPING);
+        interactivemc$updateTriggerState(InteractionHand.OFF_HAND, VivecraftKeyMapRegistry.OFF_TRIGGER_TOUCH_KEYMAPPING, VivecraftKeyMapRegistry.OFF_TRIGGER_KEYMAPPING);
     }
 
     /**

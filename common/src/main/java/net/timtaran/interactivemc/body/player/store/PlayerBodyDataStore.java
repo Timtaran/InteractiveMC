@@ -9,7 +9,6 @@ import it.unimi.dsi.fastutil.ints.IntList;
 import net.timtaran.interactivemc.body.player.PlayerBodyPart;
 import net.timtaran.interactivemc.body.player.data.PlayerBodyPartData;
 import net.timtaran.interactivemc.body.player.data.PlayerData;
-import org.vivecraft.api.data.VRPose;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;

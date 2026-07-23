@@ -7,10 +7,10 @@ package net.timtaran.interactivemc.body.player.store;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import net.minecraft.world.InteractionHand;
 import net.timtaran.interactivemc.body.player.interaction.TriggerState;
-import net.timtaran.interactivemc.mixin.bridge.vivecraft.VRInputActionMixin;
-import net.timtaran.interactivemc.mixin.bridge.vivecraft.VRInputActionProcessReorderMixin;
-
-import org.vivecraft.api.data.VRPose;
+import net.timtaran.interactivemc.bridge.vr.vivecraft.PlayerBodyTracker;
+import net.timtaran.interactivemc.mixin.bridge.vr.vivecraft.VRInputActionMixin;
+import net.timtaran.interactivemc.mixin.bridge.vr.vivecraft.VRInputActionProcessReorderMixin;
+import net.timtaran.interactivemc.util.vr.data.VRPose;
 
 import java.util.*;
 
@@ -43,7 +43,7 @@ public final class ClientPlayerBodyDataStore {
 
     /**
      * The current VR pose of the player, updated every frame.
-     * @see net.timtaran.interactivemc.bridge.vivecraft.PlayerBodyTracker
+     * @see PlayerBodyTracker
      */
     public static VRPose currentPose;
 

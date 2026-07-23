@@ -4,7 +4,7 @@
  */
 package net.timtaran.interactivemc.init.registry;
 
-import net.timtaran.interactivemc.bridge.vivecraft.PlayerBodyTracker;
+import net.timtaran.interactivemc.bridge.vr.vivecraft.PlayerBodyTracker;
 import org.vivecraft.client_vr.ClientDataHolderVR;
 
 /**

@@ -1,4 +1,4 @@
-package net.timtaran.interactivemc.mixin.bridge.vivecraft;
+package net.timtaran.interactivemc.mixin.bridge.vr.vivecraft;
 
 import net.minecraft.client.KeyMapping;
 import org.spongepowered.asm.mixin.Mixin;

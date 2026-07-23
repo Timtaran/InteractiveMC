@@ -5,8 +5,8 @@ import net.minecraft.world.entity.player.Player;
 import net.timtaran.interactivemc.body.player.PlayerBodyManager;
 import net.timtaran.interactivemc.body.player.data.PlayerData;
 import net.timtaran.interactivemc.body.player.store.PlayerBodyDataStore;
-import net.timtaran.interactivemc.util.vivecraft.VRPlayerData;
-import net.timtaran.interactivemc.util.vivecraft.VivecraftUtils;
+import net.timtaran.interactivemc.init.registry.ProviderRegistry;
+import net.timtaran.interactivemc.util.vr.data.VRPose;
 import net.xmx.velthoric.core.physics.world.VxPhysicsWorld;
 
 /**
@@ -41,12 +41,12 @@ public class PlayerLifecycleEvents {
      * @param player the player that joined or respawned
      */
     public static void spawnPlayer(Player player) {
-        VRPlayerData vrPlayerData = VivecraftUtils.getVRPlayerData(player);
+        VRPose vrPlayerData = ProviderRegistry.getVrPlayerDataProvider().getVrPose(player);
         PlayerBodyDataStore.playerData.put(
                 player.getUUID(),
                 vrPlayerData == null ?
                         new PlayerData(null, 1f) :
-                        new PlayerData(vrPlayerData.vrPose(), vrPlayerData.getPlayerScale())
+                        new PlayerData(vrPlayerData, vrPlayerData.getPlayerScale())
         );
 
         VxPhysicsWorld physicsWorld = VxPhysicsWorld.get(player.level().dimension());

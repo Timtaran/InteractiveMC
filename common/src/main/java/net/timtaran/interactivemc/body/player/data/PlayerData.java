@@ -1,6 +1,6 @@
 package net.timtaran.interactivemc.body.player.data;
 
-import org.vivecraft.api.data.VRPose;
+import net.timtaran.interactivemc.util.vr.data.VRPose;
 
 public class PlayerData {
     private VRPose currentVrPose;

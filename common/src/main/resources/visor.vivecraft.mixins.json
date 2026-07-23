@@ -1,0 +1,17 @@
+{
+  "required": true,
+  "package": "net.timtaran.interactivemc.mixin",
+  "plugin": "net.timtaran.interactivemc.bridge.vr.vivecraft.MixinVivecraftPlugin",
+  "compatibilityLevel": "JAVA_21",
+  "minVersion": "0.8",
+  "client": [
+    "bridge.vr.vivecraft.KeyMappingRegisterMixin",
+    "bridge.vr.vivecraft.KeyMappingHandlingMixin",
+    "bridge.vr.vivecraft.VRInputActionMixin",
+    "bridge.vr.vivecraft.VRInputActionAccessor",
+    "bridge.vr.vivecraft.VRInputActionProcessReorderMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

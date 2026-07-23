@@ -2,10 +2,10 @@
  * This file is part of InteractiveMC.
  * Licensed under LGPL 3.0.
  */
-package net.timtaran.interactivemc.mixin.bridge.vivecraft;
+package net.timtaran.interactivemc.mixin.bridge.vr.vivecraft;
 
 import net.minecraft.client.KeyMapping;
-import net.timtaran.interactivemc.init.registry.KeyMapRegistry;
+import net.timtaran.interactivemc.bridge.vr.vivecraft.VivecraftKeyMapRegistry;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -23,7 +23,7 @@ import java.util.Set;
  * so that Vivecraft doesn't interfere with them.
  *
  * @author timtaran
- * @see KeyMapRegistry
+ * @see net.timtaran.interactivemc.bridge.vr.vivecraft.VivecraftKeyMapRegistry
  */
 @Mixin(value = VivecraftVRMod.class, remap = false)
 public class KeyMappingRegisterMixin {
@@ -48,11 +48,11 @@ public class KeyMappingRegisterMixin {
 
     )
     public void interactivemc$registerKeymappings(CallbackInfo ci) {
-        hiddenKeyBindingSet.add(KeyMapRegistry.MAIN_TRIGGER_KEYMAPPING);
-        hiddenKeyBindingSet.add(KeyMapRegistry.MAIN_TRIGGER_TOUCH_KEYMAPPING);
-        hiddenKeyBindingSet.add(KeyMapRegistry.OFF_TRIGGER_KEYMAPPING);
-        hiddenKeyBindingSet.add(KeyMapRegistry.OFF_TRIGGER_TOUCH_KEYMAPPING);
-        hiddenKeyBindingSet.add(KeyMapRegistry.MAIN_GRAB_KEYMAPPING);
-        hiddenKeyBindingSet.add(KeyMapRegistry.OFF_GRAB_KEYMAPPING);
+        hiddenKeyBindingSet.add(VivecraftKeyMapRegistry.MAIN_TRIGGER_KEYMAPPING);
+        hiddenKeyBindingSet.add(VivecraftKeyMapRegistry.MAIN_TRIGGER_TOUCH_KEYMAPPING);
+        hiddenKeyBindingSet.add(VivecraftKeyMapRegistry.OFF_TRIGGER_KEYMAPPING);
+        hiddenKeyBindingSet.add(VivecraftKeyMapRegistry.OFF_TRIGGER_TOUCH_KEYMAPPING);
+        hiddenKeyBindingSet.add(VivecraftKeyMapRegistry.MAIN_GRAB_KEYMAPPING);
+        hiddenKeyBindingSet.add(VivecraftKeyMapRegistry.OFF_GRAB_KEYMAPPING);
     }
 }

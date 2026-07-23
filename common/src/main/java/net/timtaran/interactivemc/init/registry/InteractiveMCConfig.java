@@ -87,12 +87,12 @@ public class InteractiveMCConfig {
         return YetAnotherConfigLib.createBuilder()
                 .title(Component.literal("Disable Elytra Outside The End"))
                 .category(ConfigCategory.createBuilder()
-                        .name(InteractiveMCIdentifier.getTranslation("config", "categories.client"))
+                        .name(InteractiveMCIdentifier.getTranslation("config.categories.client"))
                         .group(OptionGroup.createBuilder()
-                                .name(InteractiveMCIdentifier.getTranslation("config", "group.base"))
+                                .name(InteractiveMCIdentifier.getTranslation("config.groups.base"))
                                 .option(
                                         Option.<String>createBuilder()
-                                                .name(InteractiveMCIdentifier.getTranslation("config", "group.base.testvalue"))
+                                                .name(InteractiveMCIdentifier.getTranslation("config.options.testvalue"))
                                                 .binding(
                                                         DEFAULT_TEST_VALUE,
                                                         () -> this.testValue,

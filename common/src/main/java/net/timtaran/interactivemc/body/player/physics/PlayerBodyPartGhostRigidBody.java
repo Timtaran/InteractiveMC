@@ -18,6 +18,7 @@ import net.timtaran.interactivemc.body.player.store.PlayerBodyDataStore;
 import net.timtaran.interactivemc.init.registry.PhysicsLayerRegistry;
 import net.timtaran.interactivemc.network.sync.DataSerializers;
 import net.timtaran.interactivemc.util.PlayerBodyPartTransforms;
+import net.timtaran.interactivemc.util.vr.data.VRPose;
 import net.xmx.velthoric.core.body.VxBody;
 import net.xmx.velthoric.core.body.VxBodyType;
 import net.xmx.velthoric.core.body.client.VxClientBodyManager;
@@ -31,8 +32,7 @@ import net.xmx.velthoric.core.physics.VxJoltBridge;
 import net.xmx.velthoric.core.physics.world.VxPhysicsWorld;
 import net.xmx.velthoric.math.VxConversions;
 import org.joml.Quaternionf;
-import org.vivecraft.api.data.VRBodyPartData;
-import org.vivecraft.api.data.VRPose;
+import net.timtaran.interactivemc.util.vr.data.VRBodyPartData;
 
 import java.util.UUID;
 
@@ -126,7 +126,7 @@ public class PlayerBodyPartGhostRigidBody extends VxBody {
 
         PlayerBodyPart bodyPart = get(DATA_BODY_PART);
 
-        VRBodyPartData bodyPartData = pose.getBodyPartData(bodyPart.toVRBodyPart());
+        VRBodyPartData bodyPartData = pose.getBodyPartData(bodyPart);
         if (bodyPartData == null) return;
 
         Quat rotation = VxConversions.toJolt(new Quaternionf(bodyPartData.getRotation()));

@@ -1,14 +1,13 @@
-package net.timtaran.interactivemc.mixin.bridge.vivecraft;
+package net.timtaran.interactivemc.mixin.bridge.vr.vivecraft;
 
 import net.timtaran.interactivemc.body.player.store.ClientPlayerBodyDataStore;
-import net.timtaran.interactivemc.bridge.vivecraft.VRInputActionExtension;
+import net.timtaran.interactivemc.bridge.vr.vivecraft.VRInputActionExtension;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.vivecraft.client_vr.provider.openvr_lwjgl.MCOpenVR;
 import org.vivecraft.client_vr.provider.openvr_lwjgl.VRInputAction;
 
-import javax.swing.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;

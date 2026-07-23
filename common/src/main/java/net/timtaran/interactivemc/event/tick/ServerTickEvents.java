@@ -10,9 +10,9 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.timtaran.interactivemc.body.player.PlayerBodyManager;
 import net.timtaran.interactivemc.body.player.store.PlayerBodyDataStore;
-import net.timtaran.interactivemc.event.player.PlayerLifecycleEvents;
-import net.timtaran.interactivemc.util.vivecraft.VRPlayerData;
-import net.timtaran.interactivemc.util.vivecraft.VivecraftUtils;
+import net.timtaran.interactivemc.init.registry.ProviderRegistry;
+import net.timtaran.interactivemc.util.vr.VRPoseHistoryImpl;
+import net.timtaran.interactivemc.util.vr.data.VRPose;
 import net.xmx.velthoric.core.physics.world.VxPhysicsWorld;
 
 public class ServerTickEvents {
@@ -23,8 +23,17 @@ public class ServerTickEvents {
      * Initializes and registers all server tick event listeners.
      */
     public static void init() {
+        TickEvent.Server.SERVER_LEVEL_POST.register(ServerTickEvents::vrPoseHistorian);
         TickEvent.Server.SERVER_LEVEL_POST.register(ServerTickEvents::bodyPullHandler);
         TickEvent.Server.SERVER_LEVEL_POST.register(ServerTickEvents::playerScaleHandler);
+    }
+
+    private static void vrPoseHistorian(ServerLevel level) {
+        for (ServerPlayer player : level.players()) {
+            VRPoseHistoryImpl poseHistory = (VRPoseHistoryImpl) ProviderRegistry.getVrPlayerDataProvider().getPoseHistory(player);
+
+            poseHistory.addPose(ProviderRegistry.getVrPlayerDataProvider().getVrPose(player), player.position());
+        }
     }
 
     /**
@@ -52,7 +61,7 @@ public class ServerTickEvents {
      */
     private static void playerScaleHandler(ServerLevel level) {
         for (ServerPlayer player : level.players()) {
-            VRPlayerData vrPlayerData = VivecraftUtils.getVRPlayerData(player);
+            VRPose vrPlayerData = ProviderRegistry.getVrPlayerDataProvider().getVrPose(player);
 
             if (vrPlayerData == null) return;
 

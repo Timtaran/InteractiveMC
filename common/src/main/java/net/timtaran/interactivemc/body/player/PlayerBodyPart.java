@@ -11,7 +11,6 @@ import net.timtaran.interactivemc.body.player.physics.PlayerBodyPartGhostRigidBo
 import net.timtaran.interactivemc.body.player.physics.PlayerBodyPartRigidBody;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
-import org.vivecraft.api.data.VRBodyPart;
 
 /**
  * Enumeration of player body parts that can be controlled and interacted with in VR.
@@ -160,18 +159,5 @@ public enum PlayerBodyPart {
             case OFF_HAND -> InteractionHand.OFF_HAND;
             default -> null;
         };
-    }
-
-    /**
-     * Converts this {@link PlayerBodyPart} to its corresponding {@link VRBodyPart}.
-     * <p>
-     * This is used for integration with the ViveCraft API to get VR-specific data
-     * for this body part, such as VR pose information.
-     * </p>
-     *
-     * @return the corresponding VR body part from the ViveCraft API
-     */
-    public VRBodyPart toVRBodyPart() {
-        return VRBodyPart.valueOf(name());
     }
 }
