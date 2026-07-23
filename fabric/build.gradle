@@ -111,6 +111,11 @@ tasks.named("sourcesJar") {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
+tasks.named("javadoc") {
+    source += project(":common").sourceSets.main.allJava
+    classpath += project(":common").sourceSets.main.compileClasspath
+}
+
 publishing {
     publications {
         maven(MavenPublication) {
