@@ -43,10 +43,10 @@ dependencies {
 
     // VR
     def vivecraftDep = "maven.modrinth:vivecraft:${rootProject.vivecraft_version}-fabric"
-    //def visorDep = "com.github.VisorModStudio.Visor:fabric:${rootProject.visor_version}"
+    def visorDep = "com.github.Timtaran.Visor-1-21-1:fabric:${rootProject.visor_version}"
 
     modCompileOnly vivecraftDep
-    //modCompileOnly visorDep
+    modCompileOnly visorDep
 
     switch (rootProject.current_vr_mod) {
         case "vivecraft":
@@ -90,8 +90,10 @@ processResources {
                 fabric_api_version: rootProject.fabric_api_version,
                 fabric_loader_version: rootProject.fabric_loader_version,
                 yacl_version: rootProject.yacl_version,
+                velthoric_version: rootProject.velthoric_version,
                 vivecraft_version: rootProject.vivecraft_version,
-                velthoric_version: rootProject.velthoric_version
+                visor_version: rootProject.visor_version,
+
         )
     }
 }
