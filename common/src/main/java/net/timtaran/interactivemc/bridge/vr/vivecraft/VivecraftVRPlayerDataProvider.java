@@ -68,9 +68,10 @@ public class VivecraftVRPlayerDataProvider implements VRPlayerDataProvider {
             } else {
                 ClientVRPlayers.RotInfo clientRotations = ClientVRPlayers.getInstance().getRotationsForPlayer(player.getUUID());
 
-
-                vrPose = clientRotations.asVRPose(player.position());
-                playerScale = clientRotations.heightScale * clientRotations.worldScale;
+                if (clientRotations != null) {
+                    vrPose = clientRotations.asVRPose(player.position());
+                    playerScale = clientRotations.heightScale * clientRotations.worldScale;
+                }
             }
         }
 

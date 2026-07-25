@@ -14,7 +14,6 @@ import com.github.stephengold.joltjni.readonly.QuatArg;
 import com.github.stephengold.joltjni.readonly.RVec3Arg;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.timtaran.interactivemc.body.player.PlayerBodyManager;
 import net.timtaran.interactivemc.body.player.PlayerBodyPart;
@@ -297,8 +296,6 @@ public class GrabInteraction {
         }) {
             VRBodyPartData bodyPartData = PlayerBodyDataStore.playerData.get(player.getUUID()).getCurrentVrPose().getBodyPartData(playerBodyPart);
             Vec3 direction = VxConversions.toJolt(bodyPartData.getDir()).toVec3().normalized();
-            Quat bodyRotation = grabberBody.getTransform().getRotation().normalized(); // todo: remove
-            System.out.println("VR Pose direction " + direction + "; Direction based on rotation: " + quatToForward(bodyRotation.getX(), bodyRotation.getY(), bodyRotation.getZ(), bodyRotation.getW()));
             List<VxHitResult> raycastResult = VxRaycaster.raycastAll(world, worldGrabPoint, direction, REMOTE_GRAB_DISTANCE, olFilter);
 
             System.out.println(worldGrabPoint + " " + direction); // todo remove and replace with visual indication
@@ -428,7 +425,7 @@ public class GrabInteraction {
                 double distance = toTarget.length();
 
                 if (distance > REMOTE_GRAB_MAX_DISTANCE) {
-                    playerBodyManager.release(player, playerBodyPart.toInteractionHand());
+                    playerBodyManager.release(player, playerBodyPart);
                     return;
                 }
 
@@ -540,13 +537,13 @@ public class GrabInteraction {
      * @return is any body around player can be grabbed.
      */
     @Environment(EnvType.CLIENT)
-    public static boolean canGrabClient(InteractionHand interactionHand) {
+    public static boolean canGrabClient(PlayerBodyPart playerBodyPart) {
         // todo: rework using approximate body shapes instead center distance
         if (ClientPlayerBodyDataStore.currentPose == null)
             return false;
 
-        Vector3fc localGrabOffset = PlayerBodyPart.fromInteractionHand(interactionHand).getGrabPointVec3f();
-        VRBodyPartData bodyPartData = ClientPlayerBodyDataStore.currentPose.getBodyPartData(PlayerBodyPart.fromInteractionHand(interactionHand));
+        Vector3fc localGrabOffset = playerBodyPart.getGrabPointVec3f();
+        VRBodyPartData bodyPartData = ClientPlayerBodyDataStore.currentPose.getBodyPartData(playerBodyPart);
         if (bodyPartData != null) {
             Quaternionf targetRot = new Quaternionf(bodyPartData.getRotation());
 
@@ -587,18 +584,5 @@ public class GrabInteraction {
 
     private RVec3 getBodyPartGrabPointWorld(ConstBody body, PlayerBodyPart playerBodyPart, float scale) {
         return PlayerBodyPartTransforms.getGrabPointRotatedWorld(body.getPosition(), body.getRotation(), playerBodyPart, scale);
-    }
-
-
-    private static Vec3 quatToForward(float x, float y, float z, float w) {
-        // todo put in separate class
-        // forward vector (0, 0, 1) rotated by quaternion
-        float dx = 2 * (x * z + w * y);
-        float dy = 2 * (y * z - w * x);
-        float dz = 1 - 2 * (x * x + y * y);
-
-        // normalize to be safe
-        float len = (float) Math.sqrt(dx * dx + dy * dy + dz * dz);
-        return new Vec3(dx / len, dy / len, dz / len);
     }
 }

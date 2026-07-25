@@ -14,7 +14,6 @@ import com.github.stephengold.joltjni.readonly.Vec3Arg;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.timtaran.interactivemc.body.player.interaction.GrabInteraction;
@@ -270,20 +269,16 @@ public class PlayerBodyManager {
     }
 
     /**
-     * Attempts to grab an object using the specified player's hand.
+     * Attempts to grab an object using the specified player's body part.
      *
      * @param player          the player attempting to grab
-     * @param interactionHand the hand to use for grabbing (main or off-hand)
+     * @param playerBodyPart  the body part to use for grabbing
      * @param isRemoteAllowed whether remote grabbing (raycast-based) is allowed if no bodies are within grab radius
      * @return the body that was grabbed, or null if no body was grabbed
      * @see GrabInteraction#grab(Player, VxBody, PlayerBodyPart, boolean)
      */
     @Nullable
-    public VxBody grab(Player player, InteractionHand interactionHand, boolean isRemoteAllowed) {
-        PlayerBodyPart playerBodyPart = PlayerBodyPart.fromInteractionHand(interactionHand);
-        if (playerBodyPart == null)
-            return null;
-
+    public VxBody grab(Player player, PlayerBodyPart playerBodyPart, boolean isRemoteAllowed) {
         EnumMap<PlayerBodyPart, PlayerBodyPartData> playerBodies = PlayerBodyDataStore.playersBodies.get(player.getUUID());
         if (playerBodies == null)
             return null;
@@ -319,13 +314,10 @@ public class PlayerBodyManager {
      * Updates pull behavior for a grabbed body part.
      *
      * @param player the player attempting to pull
+     * @param playerBodyPart the body part performing the pull
      */
-    public void updatePullState(Player player, InteractionHand interactionHand) {
+    public void updatePullState(Player player, PlayerBodyPart playerBodyPart) {
         try {
-            PlayerBodyPart playerBodyPart = PlayerBodyPart.fromInteractionHand(interactionHand);
-            if (playerBodyPart == null)
-                return;
-
             EnumMap<PlayerBodyPart, PlayerBodyPartData> playerBodies = PlayerBodyDataStore.playersBodies.get(player.getUUID());
             if (playerBodies == null)
                 return;
@@ -361,17 +353,14 @@ public class PlayerBodyManager {
     }
 
     /**
-     * Releases any object being grabbed by the specified player's hand.
+     * Releases any object being grabbed by the specified player's body part.
      *
      * @param player          the player releasing the grab
-     * @param interactionHand the hand to release (main or off-hand)
+     * @param playerBodyPart  the body part to release
      * @see GrabInteraction#release(Player, VxBody, VxBody, PlayerBodyPart, PlayerBodyPartData)
      */
-    public void release(Player player, InteractionHand interactionHand) {
-        PlayerBodyPart playerBodyPart = PlayerBodyPart.fromInteractionHand(interactionHand);
+    public void release(Player player, PlayerBodyPart playerBodyPart) {
         System.out.println("release playerbodypart: " + playerBodyPart);
-        if (playerBodyPart == null)
-            return;
 
         EnumMap<PlayerBodyPart, PlayerBodyPartData> playerBodies = PlayerBodyDataStore.playersBodies.get(player.getUUID());
         System.out.println("release playerbodies: " + playerBodies);
@@ -412,7 +401,7 @@ public class PlayerBodyManager {
                     Networking.sendToPlayer(
                             serverPlayer,
                             new S2CGrabResultPacket(
-                                    interactionHand,
+                                    playerBodyPart,
                                     null,
                                     isGrabConstraint
                             )
@@ -421,10 +410,7 @@ public class PlayerBodyManager {
         }
     }
 
-    public void updateTriggerState(Player player, InteractionHand interactionHand, TriggerState triggerState) {
-        PlayerBodyPart playerBodyPart = PlayerBodyPart.fromInteractionHand(interactionHand);
-        if (playerBodyPart == null) return;
-
+    public void updateTriggerState(Player player, PlayerBodyPart playerBodyPart, TriggerState triggerState) {
         EnumMap<PlayerBodyPart, PlayerBodyPartData> playerBodies = PlayerBodyDataStore.playersBodies.get(player.getUUID());
         if (playerBodies == null) return;
 
@@ -472,16 +458,12 @@ public class PlayerBodyManager {
             PlayerBodyDataStore.grabbedBodies.add(grabResult.grabbedBody().getBodyId());
         }
 
-        InteractionHand interactionHand = playerBodyPart.toInteractionHand();
-        if (interactionHand == null)
-            return;
-
         if (player instanceof ServerPlayer serverPlayer) {
             player.getServer().execute(() ->
                     Networking.sendToPlayer(
                             serverPlayer,
                             new S2CGrabResultPacket(
-                                    interactionHand,
+                                    playerBodyPart,
                                     grabbedBodyId,
                                     constraintId != null
                             )

@@ -5,10 +5,10 @@
 package net.timtaran.interactivemc.body.player.packet;
 
 import dev.architectury.networking.NetworkManager;
-import net.minecraft.world.InteractionHand;
+import net.minecraft.network.FriendlyByteBuf;
 import net.timtaran.interactivemc.body.player.PlayerBodyManager;
+import net.timtaran.interactivemc.body.player.PlayerBodyPart;
 import net.xmx.velthoric.core.physics.world.VxPhysicsWorld;
-import net.xmx.velthoric.network.VxByteBuf;
 
 /**
  * Client-to-Server packet requesting a release action.
@@ -22,10 +22,10 @@ public class C2SReleasePacket extends HandInteractionPacket {
     /**
      * Constructs a new release request packet.
      *
-     * @param interactionHand the hand releasing the grab
+     * @param playerBodyPart the body part releasing the grab
      */
-    public C2SReleasePacket(InteractionHand interactionHand) {
-        super(interactionHand);
+    public C2SReleasePacket(PlayerBodyPart playerBodyPart) {
+        super(playerBodyPart);
     }
 
     /**
@@ -34,8 +34,8 @@ public class C2SReleasePacket extends HandInteractionPacket {
      * @param buf the buffer to read from
      * @return a new instance of the release packet
      */
-    public static C2SReleasePacket decode(VxByteBuf buf) {
-        return new C2SReleasePacket(buf.readEnum(InteractionHand.class));
+    public static C2SReleasePacket decode(FriendlyByteBuf buf) {
+        return new C2SReleasePacket(buf.readEnum(PlayerBodyPart.class));
     }
 
     /**
@@ -51,6 +51,6 @@ public class C2SReleasePacket extends HandInteractionPacket {
     public void handle(NetworkManager.PacketContext context) {
         VxPhysicsWorld physicsWorld = VxPhysicsWorld.get(context.getPlayer().level().dimension());
         if (physicsWorld != null)
-            physicsWorld.execute(() -> PlayerBodyManager.get(physicsWorld).release(context.getPlayer(), getInteractionHand()));
+            physicsWorld.execute(() -> PlayerBodyManager.get(physicsWorld).release(context.getPlayer(), getPlayerBodyPart()));
     }
 }

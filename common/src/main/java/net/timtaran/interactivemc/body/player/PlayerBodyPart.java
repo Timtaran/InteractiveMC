@@ -6,7 +6,6 @@ package net.timtaran.interactivemc.body.player;
 
 import com.github.stephengold.joltjni.Vec3;
 import com.github.stephengold.joltjni.readonly.Vec3Arg;
-import net.minecraft.world.InteractionHand;
 import net.timtaran.interactivemc.body.player.physics.PlayerBodyPartGhostRigidBody;
 import net.timtaran.interactivemc.body.player.physics.PlayerBodyPartRigidBody;
 import org.joml.Vector3f;
@@ -94,23 +93,6 @@ public enum PlayerBodyPart {
     }
 
     /**
-     * Converts an {@link InteractionHand} to its corresponding {@link PlayerBodyPart}.
-     * <p>
-     * This is a convenience method to map the standard Minecraft hand types to
-     * the appropriate player body parts. The head body part has no corresponding hand.
-     * </p>
-     *
-     * @param interactionHand the interaction hand (main or off-hand)
-     * @return the corresponding player body part
-     */
-    public static PlayerBodyPart fromInteractionHand(InteractionHand interactionHand) {
-        return switch (interactionHand) {
-            case MAIN_HAND -> MAIN_HAND;
-            case OFF_HAND -> OFF_HAND;
-        };
-    }
-
-    /**
      * Gets the full size of this body part.
      * <p>
      * The size represents the dimensions of the physics shape (width x height x depth).
@@ -151,13 +133,5 @@ public enum PlayerBodyPart {
 
     public Vec3Arg getTrackingOffset() {
         return trackingOffset;
-    }
-
-    public InteractionHand toInteractionHand() {
-        return switch (this) {
-            case MAIN_HAND -> InteractionHand.MAIN_HAND;
-            case OFF_HAND -> InteractionHand.OFF_HAND;
-            default -> null;
-        };
     }
 }

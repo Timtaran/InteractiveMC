@@ -6,8 +6,8 @@ package net.timtaran.interactivemc.body.player.packet;
 
 import dev.architectury.networking.NetworkManager;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.world.InteractionHand;
 import net.timtaran.interactivemc.body.player.PlayerBodyManager;
+import net.timtaran.interactivemc.body.player.PlayerBodyPart;
 import net.xmx.velthoric.core.physics.world.VxPhysicsWorld;
 
 /**
@@ -23,10 +23,10 @@ public class C2SGrabPacket extends HandInteractionPacket {
     /**
      * Constructs a new grab request packet.
      *
-     * @param interactionHand the hand attempting to grab
+     * @param playerBodyPart the body part attempting to grab
      */
-    public C2SGrabPacket(InteractionHand interactionHand) {
-        super(interactionHand);
+    public C2SGrabPacket(PlayerBodyPart playerBodyPart) {
+        super(playerBodyPart);
     }
 
     /**
@@ -36,7 +36,7 @@ public class C2SGrabPacket extends HandInteractionPacket {
      * @return a new instance of the grab packet
      */
     public static C2SGrabPacket decode(FriendlyByteBuf buf) {
-        return new C2SGrabPacket(buf.readEnum(InteractionHand.class));
+        return new C2SGrabPacket(buf.readEnum(PlayerBodyPart.class));
     }
 
     /**
@@ -53,7 +53,7 @@ public class C2SGrabPacket extends HandInteractionPacket {
         VxPhysicsWorld physicsWorld = VxPhysicsWorld.get(context.getPlayer().level().dimension());
         if (physicsWorld != null)
             physicsWorld.execute(() ->
-                    PlayerBodyManager.get(physicsWorld).grab(context.getPlayer(), getInteractionHand(), true)
+                    PlayerBodyManager.get(physicsWorld).grab(context.getPlayer(), getPlayerBodyPart(), true)
 
             );
     }

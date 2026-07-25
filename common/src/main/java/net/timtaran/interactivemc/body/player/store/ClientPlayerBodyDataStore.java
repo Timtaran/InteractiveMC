@@ -5,7 +5,7 @@
 package net.timtaran.interactivemc.body.player.store;
 
 import it.unimi.dsi.fastutil.ints.IntArrayList;
-import net.minecraft.world.InteractionHand;
+import net.timtaran.interactivemc.body.player.PlayerBodyPart;
 import net.timtaran.interactivemc.body.player.interaction.TriggerState;
 import net.timtaran.interactivemc.bridge.vr.vivecraft.PlayerBodyTracker;
 import net.timtaran.interactivemc.mixin.bridge.vr.vivecraft.VRInputActionMixin;
@@ -24,20 +24,21 @@ import java.util.*;
  */
 public final class ClientPlayerBodyDataStore {
     /**
-     * Maps from {@link InteractionHand} to the UUID of the grabbed body.
+     * Maps from {@link PlayerBodyPart} to the UUID of the grabbed body.
      */
-    public static EnumMap<InteractionHand, UUID> grabbedBodies = new EnumMap<>(InteractionHand.class);
+    public static EnumMap<PlayerBodyPart, UUID> grabbedBodies = new EnumMap<>(PlayerBodyPart.class);
 
-    public static EnumMap<InteractionHand, TriggerState> triggerStates = new EnumMap<>(Map.of(
-            InteractionHand.MAIN_HAND, TriggerState.RELEASE,
-            InteractionHand.OFF_HAND, TriggerState.RELEASE
+    public static EnumMap<PlayerBodyPart, TriggerState> triggerStates = new EnumMap<>(Map.of(
+            PlayerBodyPart.HEAD, TriggerState.RELEASE,
+            PlayerBodyPart.MAIN_HAND, TriggerState.RELEASE,
+            PlayerBodyPart.OFF_HAND, TriggerState.RELEASE
     ));
 
     /**
      * List containing indices of all bodies controlled by the player.
      * Stores the Jolt physics body IDs associated with each player.
      * <p>
-     * Used for fast lookups in {@link net.timtaran.interactivemc.body.player.interaction.GrabInteraction#canGrabClient(InteractionHand)}
+     * Used for fast lookups in {@link net.timtaran.interactivemc.body.player.interaction.GrabInteraction#canGrabClient(PlayerBodyPart)}
      */
     public static List<Integer> playerControlledBodies = new IntArrayList();
 
@@ -54,8 +55,8 @@ public final class ClientPlayerBodyDataStore {
      */
     public static final Set<Long> cancelOrigins = new HashSet<>();
 
-    public static boolean isGrabbing(InteractionHand hand) {
-        return ClientPlayerBodyDataStore.grabbedBodies.get(hand) != null;
+    public static boolean isGrabbing(PlayerBodyPart bodyPart) {
+        return ClientPlayerBodyDataStore.grabbedBodies.get(bodyPart) != null;
     }
 
     private ClientPlayerBodyDataStore() {

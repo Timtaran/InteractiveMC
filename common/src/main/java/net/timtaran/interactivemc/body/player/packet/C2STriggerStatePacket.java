@@ -7,8 +7,8 @@ package net.timtaran.interactivemc.body.player.packet;
 
 import dev.architectury.networking.NetworkManager;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.world.InteractionHand;
 import net.timtaran.interactivemc.body.player.PlayerBodyManager;
+import net.timtaran.interactivemc.body.player.PlayerBodyPart;
 import net.timtaran.interactivemc.body.player.interaction.TriggerState;
 import net.xmx.velthoric.core.physics.world.VxPhysicsWorld;
 import net.xmx.velthoric.network.VxByteBuf;
@@ -27,11 +27,11 @@ public class C2STriggerStatePacket extends HandInteractionPacket {
     /**
      * Constructs a new grab request packet.
      *
-     * @param interactionHand the hand attempting to grab
-     * @param triggerState    the trigger state to set
+     * @param playerBodyPart the body part performing the trigger action
+     * @param triggerState   the trigger state to set
      */
-    public C2STriggerStatePacket(InteractionHand interactionHand, TriggerState triggerState) {
-        super(interactionHand);
+    public C2STriggerStatePacket(PlayerBodyPart playerBodyPart, TriggerState triggerState) {
+        super(playerBodyPart);
         this.triggerState = triggerState;
     }
 
@@ -47,7 +47,7 @@ public class C2STriggerStatePacket extends HandInteractionPacket {
      * @return a new instance of the grab packet
      */
     public static C2STriggerStatePacket decode(FriendlyByteBuf buf) {
-        return new C2STriggerStatePacket(buf.readEnum(InteractionHand.class), buf.readEnum(TriggerState.class));
+        return new C2STriggerStatePacket(buf.readEnum(PlayerBodyPart.class), buf.readEnum(TriggerState.class));
     }
 
     /**
@@ -62,7 +62,7 @@ public class C2STriggerStatePacket extends HandInteractionPacket {
     public void handle(NetworkManager.PacketContext context) {
         VxPhysicsWorld physicsWorld = VxPhysicsWorld.get(context.getPlayer().level().dimension());
         if (physicsWorld != null)
-            physicsWorld.execute(() -> PlayerBodyManager.get(physicsWorld).updateTriggerState(context.getPlayer(), getInteractionHand(), triggerState));
+            physicsWorld.execute(() -> PlayerBodyManager.get(physicsWorld).updateTriggerState(context.getPlayer(), getPlayerBodyPart(), triggerState));
 
     }
 }

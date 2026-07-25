@@ -7,8 +7,8 @@ package net.timtaran.interactivemc.event.tick;
 import dev.architectury.event.events.common.TickEvent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.InteractionHand;
 import net.timtaran.interactivemc.body.player.PlayerBodyManager;
+import net.timtaran.interactivemc.body.player.PlayerBodyPart;
 import net.timtaran.interactivemc.body.player.store.PlayerBodyDataStore;
 import net.timtaran.interactivemc.init.registry.ProviderRegistry;
 import net.timtaran.interactivemc.util.vr.VRPoseHistoryImpl;
@@ -52,8 +52,8 @@ public class ServerTickEvents {
 
         physicsWorld.execute(() -> {
             for (ServerPlayer player : level.players()) {
-                for (InteractionHand interactionHand : InteractionHand.values()) {
-                    PlayerBodyManager.get(physicsWorld).updatePullState(player, interactionHand);
+                for (PlayerBodyPart bodyPart : PlayerBodyPart.values()) {
+                    PlayerBodyManager.get(physicsWorld).updatePullState(player, bodyPart);
                 }
             }
         });

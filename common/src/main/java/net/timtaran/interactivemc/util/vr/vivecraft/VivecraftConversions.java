@@ -2,7 +2,7 @@ package net.timtaran.interactivemc.util.vr.vivecraft;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.world.InteractionHand;
+import net.timtaran.interactivemc.body.player.PlayerBodyPart;
 import net.timtaran.interactivemc.util.vr.data.VRBodyPartDataImpl;
 import net.timtaran.interactivemc.util.vr.data.VRPoseImpl;
 import org.vivecraft.api.client.VRClientAPI;
@@ -14,10 +14,10 @@ public class VivecraftConversions {
     private VivecraftConversions() {}
 
     @Environment(EnvType.CLIENT)
-    public static InteractionHand controllerTypeToInteractionHand(ControllerType hand) {
+    public static PlayerBodyPart controllerTypeToPlayerBodyPart(ControllerType hand) {
         return switch (hand) {
-            case RIGHT -> VRClientAPI.instance().isLeftHanded() ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND;
-            case LEFT -> VRClientAPI.instance().isLeftHanded() ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND;
+            case RIGHT -> VRClientAPI.instance().isLeftHanded() ? PlayerBodyPart.OFF_HAND : PlayerBodyPart.MAIN_HAND;
+            case LEFT -> VRClientAPI.instance().isLeftHanded() ? PlayerBodyPart.MAIN_HAND : PlayerBodyPart.OFF_HAND;
         };
     }
 

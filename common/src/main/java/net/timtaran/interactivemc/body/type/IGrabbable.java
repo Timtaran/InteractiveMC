@@ -8,7 +8,6 @@ import com.github.stephengold.joltjni.readonly.QuatArg;
 import com.github.stephengold.joltjni.readonly.RVec3Arg;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.timtaran.interactivemc.body.player.PlayerBodyPart;
 import net.timtaran.interactivemc.body.player.interaction.TriggerState;
@@ -83,21 +82,23 @@ public interface IGrabbable { // todo: separate into IGrabbable for getGrabPoint
      * <p>
      * If {@code isAttached} is {@code false}, the body is marked to pulled.
      *
-     * @param player          the player grabbing the body
-     * @param interactionHand interaction hand grabbing the body
+     * @param player       the player grabbing the body
+     * @param bodyPart     player body part grabbing the body
+     * @param isAttached   {@code true} if the body is attached, {@code false} if being pulled
      */
     @Environment(EnvType.CLIENT)
-    default void onGrabClient(Player player, InteractionHand interactionHand, boolean isAttached) {
+    default void onGrabClient(Player player, PlayerBodyPart bodyPart, boolean isAttached) {
     }
 
     /**
      * Method called when the client receives unsuccessful grab result from the server.
      *
-     * @param player          the player grabbing the body
-     * @param interactionHand interaction hand releasing the body
+     * @param player     the player that was grabbing the body
+     * @param bodyPart   player body part that was grabbing the body
+     * @param isAttached {@code true} if the body was attached, {@code false} if it was being pulled
      */
     @Environment(EnvType.CLIENT)
-    default void onReleaseClient(Player player, InteractionHand interactionHand, boolean isAttached) {
+    default void onReleaseClient(Player player, PlayerBodyPart bodyPart, boolean isAttached) {
     }
 
     /**

@@ -10,7 +10,6 @@ import com.github.stephengold.joltjni.readonly.QuatArg;
 import com.github.stephengold.joltjni.readonly.RVec3Arg;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.timtaran.interactivemc.body.player.PlayerBodyPart;
 import net.timtaran.interactivemc.body.player.interaction.TriggerState;
@@ -100,12 +99,12 @@ public class TestDuckRigidBody extends VxBody implements IGrabbable {
     }
 
     @Override
-    public void onGrabClient(Player player, InteractionHand interactionHand, boolean isAttached) {
+    public void onGrabClient(Player player, PlayerBodyPart bodyPart, boolean isAttached) {
         System.out.println("on grab client");
     }
 
     @Override
-    public void onReleaseClient(Player player, InteractionHand interactionHand, boolean isAttached) {
+    public void onReleaseClient(Player player, PlayerBodyPart bodyPart, boolean isAttached) {
         System.out.println("on release client");
     }
 }

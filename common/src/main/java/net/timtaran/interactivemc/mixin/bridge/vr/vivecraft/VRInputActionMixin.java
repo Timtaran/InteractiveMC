@@ -1,7 +1,7 @@
 package net.timtaran.interactivemc.mixin.bridge.vr.vivecraft;
 
 import net.minecraft.client.KeyMapping;
-import net.minecraft.world.InteractionHand;
+import net.timtaran.interactivemc.body.player.PlayerBodyPart;
 import net.timtaran.interactivemc.body.player.interaction.GrabInteraction;
 import net.timtaran.interactivemc.body.player.store.ClientPlayerBodyDataStore;
 import net.timtaran.interactivemc.bridge.vr.vivecraft.VRInputActionExtension;
@@ -67,11 +67,10 @@ public abstract class VRInputActionMixin implements VRInputActionExtension {
         if (interactivemc$interactivemcBinding) {
             KeyMapping keyMapping = ((VRInputActionAccessor) this).getKeyBinding();
 
-            InteractionHand interactionHand = VivecraftConversions.controllerTypeToInteractionHand(hand);
-            System.out.println(((VRInputAction) (Object) this).name + interactionHand + hand);
+            PlayerBodyPart playerBodyPart = VivecraftConversions.controllerTypeToPlayerBodyPart(hand);
 
-            boolean isGrabbing = ClientPlayerBodyDataStore.isGrabbing(interactionHand);
-            boolean canGrab = GrabInteraction.canGrabClient(interactionHand);
+            boolean isGrabbing = ClientPlayerBodyDataStore.isGrabbing(playerBodyPart);
+            boolean canGrab = GrabInteraction.canGrabClient(playerBodyPart);
 
             boolean isGrabKey =
                     keyMapping == VivecraftKeyMapRegistry.MAIN_GRAB_KEYMAPPING

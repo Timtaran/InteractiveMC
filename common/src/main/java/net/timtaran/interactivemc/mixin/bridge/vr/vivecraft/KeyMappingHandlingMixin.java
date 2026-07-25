@@ -7,7 +7,7 @@ package net.timtaran.interactivemc.mixin.bridge.vr.vivecraft;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.client.KeyMapping;
-import net.minecraft.world.InteractionHand;
+import net.timtaran.interactivemc.body.player.PlayerBodyPart;
 import net.timtaran.interactivemc.body.player.interaction.TriggerState;
 import net.timtaran.interactivemc.body.player.packet.C2SGrabPacket;
 import net.timtaran.interactivemc.body.player.packet.C2SReleasePacket;
@@ -53,53 +53,53 @@ public abstract class KeyMappingHandlingMixin {
             at = @At("HEAD")
     )
     private void interactivemc$processKeymappings(CallbackInfo ci) {
-        interactivemc$updateGrabState(InteractionHand.MAIN_HAND, VivecraftKeyMapRegistry.MAIN_GRAB_KEYMAPPING);
-        interactivemc$updateGrabState(InteractionHand.OFF_HAND, VivecraftKeyMapRegistry.OFF_GRAB_KEYMAPPING);
-        interactivemc$updateTriggerState(InteractionHand.MAIN_HAND, VivecraftKeyMapRegistry.MAIN_TRIGGER_TOUCH_KEYMAPPING, VivecraftKeyMapRegistry.MAIN_TRIGGER_KEYMAPPING);
-        interactivemc$updateTriggerState(InteractionHand.OFF_HAND, VivecraftKeyMapRegistry.OFF_TRIGGER_TOUCH_KEYMAPPING, VivecraftKeyMapRegistry.OFF_TRIGGER_KEYMAPPING);
+        interactivemc$updateGrabState(PlayerBodyPart.MAIN_HAND, VivecraftKeyMapRegistry.MAIN_GRAB_KEYMAPPING);
+        interactivemc$updateGrabState(PlayerBodyPart.OFF_HAND, VivecraftKeyMapRegistry.OFF_GRAB_KEYMAPPING);
+        interactivemc$updateTriggerState(PlayerBodyPart.MAIN_HAND, VivecraftKeyMapRegistry.MAIN_TRIGGER_TOUCH_KEYMAPPING, VivecraftKeyMapRegistry.MAIN_TRIGGER_KEYMAPPING);
+        interactivemc$updateTriggerState(PlayerBodyPart.OFF_HAND, VivecraftKeyMapRegistry.OFF_TRIGGER_TOUCH_KEYMAPPING, VivecraftKeyMapRegistry.OFF_TRIGGER_KEYMAPPING);
     }
 
     /**
-     * Updates the grab/release state for a single hand based on key state.
+     * Updates the grab/release state for a single playerBodyPart based on key state.
      * <p>
      * If the grab key is pressed, attempts to grab an object. If the key is released
      * and an object was being held, releases it.
      * </p>
      *
-     * @param hand       the interaction hand (main or off-hand)
-     * @param keyMapping the key mapping to check
+     * @param playerBodyPart playerBodyPart
+     * @param keyMapping     the key mapping to check
      */
     @Unique
-    private void interactivemc$updateGrabState(InteractionHand hand, KeyMapping keyMapping) {
+    private void interactivemc$updateGrabState(PlayerBodyPart playerBodyPart, KeyMapping keyMapping) {
         if (keyMapping.consumeClick()) {
-            interactivemc$grab(hand);
-        } else if (!keyMapping.isDown() && ClientPlayerBodyDataStore.isGrabbing(hand)) {
-            interactivemc$release(hand);
+            interactivemc$grab(playerBodyPart);
+        } else if (!keyMapping.isDown() && ClientPlayerBodyDataStore.isGrabbing(playerBodyPart)) {
+            interactivemc$release(playerBodyPart);
         }
     }
 
     /**
-     * Sends packet to the server to grab an object using the specified hand.
+     * Sends packet to the server to grab an object using the specified playerBodyPart.
      *
-     * @param interactionHand the hand attempting to grab (main or off-hand)
+     * @param playerBodyPart the playerBodyPart attempting to grab
      */
     @Unique
-    private static void interactivemc$grab(InteractionHand interactionHand) {
-        Networking.sendToServer(new C2SGrabPacket(interactionHand));
+    private static void interactivemc$grab(PlayerBodyPart playerBodyPart) {
+        Networking.sendToServer(new C2SGrabPacket(playerBodyPart));
     }
 
     /**
      * Sends a release packet to the server to remove the grab constraint.
      *
-     * @param interactionHand the hand to release (main or off-hand)
+     * @param playerBodyPart the playerBodyPart to release
      */
     @Unique
-    private static void interactivemc$release(InteractionHand interactionHand) {
-        Networking.sendToServer(new C2SReleasePacket(interactionHand));
+    private static void interactivemc$release(PlayerBodyPart playerBodyPart) {
+        Networking.sendToServer(new C2SReleasePacket(playerBodyPart));
     }
 
     @Unique
-    private void interactivemc$updateTriggerState(InteractionHand hand, KeyMapping touchKeyMapping, KeyMapping pressKeyMapping) {
+    private void interactivemc$updateTriggerState(PlayerBodyPart playerBodyPart, KeyMapping touchKeyMapping, KeyMapping pressKeyMapping) {
         TriggerState triggerState;
 
         if (pressKeyMapping.consumeClick() || pressKeyMapping.isDown()) {
@@ -110,10 +110,10 @@ public abstract class KeyMappingHandlingMixin {
             triggerState = TriggerState.RELEASE;
         }
 
-        TriggerState previousTriggerState = ClientPlayerBodyDataStore.triggerStates.put(hand, triggerState);
+        TriggerState previousTriggerState = ClientPlayerBodyDataStore.triggerStates.put(playerBodyPart, triggerState);
 
         if (!triggerState.equals(previousTriggerState)) {
-            Networking.sendToServer(new C2STriggerStatePacket(hand, triggerState));
+            Networking.sendToServer(new C2STriggerStatePacket(playerBodyPart, triggerState));
         }
     }
 

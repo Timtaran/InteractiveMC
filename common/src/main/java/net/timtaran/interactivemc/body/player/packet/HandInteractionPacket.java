@@ -4,31 +4,31 @@
  */
 package net.timtaran.interactivemc.body.player.packet;
 
-import net.minecraft.world.InteractionHand;
+import net.timtaran.interactivemc.body.player.PlayerBodyPart;
 import net.xmx.velthoric.network.IVxNetPacket;
 import net.xmx.velthoric.network.VxByteBuf;
 
 /**
- * Base class for packets that involve hand interactions.
+ * Base class for packets that involve player body parts interactions.
  * <p>
  * This abstract class provides common functionality for packets that need to
- * specify which hand (main or off-hand) is performing the action.
+ * specify which body part is performing the action.
  *
  * @author timtaran
  */
 public abstract class HandInteractionPacket implements IVxNetPacket {
     /**
-     * The hand that is performing this interaction.
+     * The body part that is performing this interaction.
      */
-    private final InteractionHand interactionHand; // todo replace with player body part
+    private final PlayerBodyPart playerBodyPart;
 
     /**
      * Constructs a new hand interaction packet.
      *
-     * @param interactionHand the hand performing the interaction
+     * @param playerBodyPart the body part performing the interaction
      */
-    protected HandInteractionPacket(InteractionHand interactionHand) {
-        this.interactionHand = interactionHand;
+    protected HandInteractionPacket(PlayerBodyPart playerBodyPart) {
+        this.playerBodyPart = playerBodyPart;
     }
 
     /**
@@ -38,15 +38,15 @@ public abstract class HandInteractionPacket implements IVxNetPacket {
      */
     @Override
     public void encode(VxByteBuf buf) {
-        buf.writeEnum(interactionHand);
+        buf.writeEnum(playerBodyPart);
     }
 
     /**
-     * Gets the interaction hand for this packet.
+     * Gets the player body part for this packet.
      *
-     * @return the interaction hand (main or off-hand)
+     * @return the player body part
      */
-    public InteractionHand getInteractionHand() {
-        return interactionHand;
+    public PlayerBodyPart getPlayerBodyPart() {
+        return playerBodyPart;
     }
 }
