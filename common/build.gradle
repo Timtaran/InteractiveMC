@@ -19,7 +19,7 @@ dependencies {
 
     // VR
     def vivecraftDep = "maven.modrinth:vivecraft:${rootProject.vivecraft_version}-fabric"
-    def visorDep = "com.github.Timtaran.Visor-1-21-1:fabric:${rootProject.visor_version}"
+    def visorDep = "com.github.Timtaran.Visor-1-21-1:visor-fabric:${rootProject.visor_version}"
 
     modCompileOnly vivecraftDep
     modCompileOnly visorDep

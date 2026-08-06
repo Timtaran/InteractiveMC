@@ -23,7 +23,8 @@
     ]
   },
   "mixins": [
-    "interactivemc.mixins.json"
+    "interactivemc.mixins.json",
+    "interactivemc.vivecraft.mixins.json"
   ],
   "depends": {
     "fabricloader": ">=${fabric_loader_version}",

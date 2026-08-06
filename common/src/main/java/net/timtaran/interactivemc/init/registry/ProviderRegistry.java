@@ -6,6 +6,7 @@ package net.timtaran.interactivemc.init.registry;
 
 import dev.architectury.platform.Platform;
 import net.timtaran.interactivemc.bridge.vr.VRPlayerDataProvider;
+import net.timtaran.interactivemc.bridge.vr.visor.VisorVRPlayerDataProvider;
 import net.timtaran.interactivemc.bridge.vr.vivecraft.VivecraftVRPlayerDataProvider;
 
 public class ProviderRegistry {
@@ -19,7 +20,8 @@ public class ProviderRegistry {
 
     public static void loadVRProviders() {
         if (Platform.isModLoaded("visor")) {
-            // todo: add visor support
+            vrPlayerDataProvider = new VisorVRPlayerDataProvider();
+            return;
         }
 
         if (Platform.isModLoaded("vivecraft")) {

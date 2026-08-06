@@ -15,6 +15,7 @@ import net.timtaran.interactivemc.body.player.packet.C2STriggerStatePacket;
 import net.timtaran.interactivemc.body.player.store.ClientPlayerBodyDataStore;
 import net.timtaran.interactivemc.bridge.vr.vivecraft.VivecraftKeyMapRegistry;
 import net.timtaran.interactivemc.network.Networking;
+import net.timtaran.interactivemc.util.input.InputHandler;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -78,24 +79,14 @@ public abstract class KeyMappingHandlingMixin {
         }
     }
 
-    /**
-     * Sends packet to the server to grab an object using the specified playerBodyPart.
-     *
-     * @param playerBodyPart the playerBodyPart attempting to grab
-     */
     @Unique
     private static void interactivemc$grab(PlayerBodyPart playerBodyPart) {
-        Networking.sendToServer(new C2SGrabPacket(playerBodyPart));
+        InputHandler.attemptGrab(playerBodyPart);
     }
 
-    /**
-     * Sends a release packet to the server to remove the grab constraint.
-     *
-     * @param playerBodyPart the playerBodyPart to release
-     */
     @Unique
     private static void interactivemc$release(PlayerBodyPart playerBodyPart) {
-        Networking.sendToServer(new C2SReleasePacket(playerBodyPart));
+        InputHandler.attemptRelease(playerBodyPart);
     }
 
     @Unique
@@ -110,11 +101,7 @@ public abstract class KeyMappingHandlingMixin {
             triggerState = TriggerState.RELEASE;
         }
 
-        TriggerState previousTriggerState = ClientPlayerBodyDataStore.triggerStates.put(playerBodyPart, triggerState);
-
-        if (!triggerState.equals(previousTriggerState)) {
-            Networking.sendToServer(new C2STriggerStatePacket(playerBodyPart, triggerState));
-        }
+        InputHandler.updateTriggerState(playerBodyPart, triggerState);
     }
 
     /**
