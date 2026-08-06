@@ -9,6 +9,7 @@ import net.timtaran.interactivemc.mixin.bridge.vr.vivecraft.KeyMappingHandlingMi
 import net.timtaran.interactivemc.mixin.bridge.vr.vivecraft.KeyMappingRegisterMixin;
 import net.timtaran.interactivemc.mixin.bridge.vr.vivecraft.VRInputActionMixin;
 import net.timtaran.interactivemc.util.InteractiveMCIdentifier;
+import org.vivecraft.client_vr.provider.HandedKeyBinding;
 
 /**
  * Class containing all mod keymappings.
@@ -22,13 +23,13 @@ public class VivecraftKeyMapRegistry {
     /**
      * Main-Hand Trigger
      */
-    public static final KeyMapping MAIN_TRIGGER_KEYMAPPING = new KeyMapping(
+    public static final HandedKeyBinding MAIN_TRIGGER_KEYMAPPING = new HandedKeyBinding(
             InteractiveMCIdentifier.getTranslationKey("key.mtrigger"),
             -1,
             KeyMapping.CATEGORY_GAMEPLAY
     );
 
-    public static final KeyMapping MAIN_TRIGGER_TOUCH_KEYMAPPING = new KeyMapping(
+    public static final HandedKeyBinding MAIN_TRIGGER_TOUCH_KEYMAPPING = new HandedKeyBinding(
             InteractiveMCIdentifier.getTranslationKey("key.mtouch"),
             -1,
             KeyMapping.CATEGORY_GAMEPLAY
@@ -37,7 +38,7 @@ public class VivecraftKeyMapRegistry {
     /**
      * Main-Hand Grab
      */
-    public static final KeyMapping MAIN_GRAB_KEYMAPPING = new KeyMapping(
+    public static final HandedKeyBinding MAIN_GRAB_KEYMAPPING = new HandedKeyBinding(
             InteractiveMCIdentifier.getTranslationKey("key.mgrab"),
             -1,
             KeyMapping.CATEGORY_GAMEPLAY
@@ -46,13 +47,13 @@ public class VivecraftKeyMapRegistry {
     /**
      * Off-Hand Trigger
      */
-    public static final KeyMapping OFF_TRIGGER_KEYMAPPING = new KeyMapping(
+    public static final HandedKeyBinding OFF_TRIGGER_KEYMAPPING = new HandedKeyBinding(
             InteractiveMCIdentifier.getTranslationKey("key.otrigger"),
             -1,
             KeyMapping.CATEGORY_GAMEPLAY
     );
 
-    public static final KeyMapping OFF_TRIGGER_TOUCH_KEYMAPPING = new KeyMapping(
+    public static final HandedKeyBinding OFF_TRIGGER_TOUCH_KEYMAPPING = new HandedKeyBinding(
             InteractiveMCIdentifier.getTranslationKey("key.otouch"),
             -1,
             KeyMapping.CATEGORY_GAMEPLAY
@@ -61,7 +62,7 @@ public class VivecraftKeyMapRegistry {
     /**
      * Off-Hand Grab
      */
-    public static final KeyMapping OFF_GRAB_KEYMAPPING = new KeyMapping(
+    public static final HandedKeyBinding OFF_GRAB_KEYMAPPING = new HandedKeyBinding(
             InteractiveMCIdentifier.getTranslationKey("key.ograb"),
             -1,
             KeyMapping.CATEGORY_GAMEPLAY

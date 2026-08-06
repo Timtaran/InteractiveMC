@@ -48,17 +48,6 @@ public abstract class VRInputActionMixin implements VRInputActionExtension {
     }
 
     @Inject(
-            method = "isHanded",
-            at = @At("HEAD"),
-            cancellable = true
-    )
-    public void interactivemc$isHanded(CallbackInfoReturnable<Boolean> cir) {
-        if (interactivemc$interactivemcBinding) {
-            cir.setReturnValue(true);
-        }
-    }
-
-    @Inject(
             method = "pressBinding",
             at = @At("HEAD"),
             cancellable = true
