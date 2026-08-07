@@ -4,7 +4,7 @@
  */
 package net.timtaran.interactivemc.bridge;
 
-import dev.architectury.platform.Platform;
+import net.timtaran.interactivemc.util.Platform;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
@@ -29,13 +29,9 @@ public abstract class MixinCompatPlugin implements IMixinConfigPlugin {
 
     public abstract String getModId();
 
-    public boolean isModLoaded() {
-        return Platform.isModLoaded(getModId());
-    }
-
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-        return isModLoaded();
+        return Platform.isModLoaded(getModId());
     }
 
     @Override
